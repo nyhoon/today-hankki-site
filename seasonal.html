@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="농식품정보누리와 해양수산부의 월별 제철 식재료를 찾아보세요.">
+  <meta name="theme-color" content="#f8f6ef">
+  <title>제철 식재료 · 오늘한끼</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="seasonal.js" defer></script>
+</head>
+<body class="seasonal-body">
+  <header>
+    <a class="brand" href="./">오늘한끼<span>●</span></a>
+    <nav aria-label="주 메뉴">
+      <a href="./#about">서비스</a>
+      <a href="seasonal.html" aria-current="page">제철 식재료</a>
+      <a href="privacy.html">개인정보 안내</a>
+      <a href="terms.html">이용 안내</a>
+    </nav>
+  </header>
+
+  <main class="seasonal-page">
+    <a class="seasonal-back" href="./">오늘한끼 홈 <span aria-hidden="true">/</span> 제철 식재료</a>
+
+    <section class="seasonal-hero" aria-labelledby="seasonal-title">
+      <div class="seasonal-hero-copy">
+        <p class="seasonal-eyebrow">SEASONAL INGREDIENTS <span id="seasonal-year"></span></p>
+        <h1 id="seasonal-title">지금 제철인 재료로<br><em>오늘의 한 끼를 생각해요.</em></h1>
+        <p class="seasonal-intro">달마다 달라지는 농산물과 수산물을 살펴보고,<br class="desktop-break"> 다음 식탁에 쓸 재료를 골라보세요.</p>
+      </div>
+      <div class="seasonal-hero-month" aria-hidden="true">
+        <span id="seasonal-season">가을</span>
+        <strong id="seasonal-month-number">10</strong>
+        <span>MONTH / 12</span>
+      </div>
+    </section>
+
+    <section class="seasonal-browser" aria-labelledby="seasonal-heading">
+      <div class="seasonal-section-heading">
+        <div>
+          <p class="seasonal-eyebrow">MONTHLY PICKS</p>
+          <h2 id="seasonal-heading">제철 재료 둘러보기</h2>
+        </div>
+        <p class="seasonal-count" id="seasonal-count" aria-live="polite"></p>
+      </div>
+
+      <div class="seasonal-month-control">
+        <button class="seasonal-arrow" id="previous-month" type="button" aria-label="이전 달">←</button>
+        <nav class="seasonal-months" id="seasonal-months" aria-label="월 선택"></nav>
+        <button class="seasonal-arrow" id="next-month" type="button" aria-label="다음 달">→</button>
+      </div>
+
+      <div class="seasonal-month-summary">
+        <p class="seasonal-month-label" id="seasonal-month-label"></p>
+        <h3 id="seasonal-month-title"></h3>
+        <p id="seasonal-month-lead"></p>
+      </div>
+
+      <div class="seasonal-tools">
+        <div class="seasonal-filters" role="group" aria-label="재료 종류">
+          <button type="button" data-category="all" aria-pressed="true">전체</button>
+          <button type="button" data-category="produce" aria-pressed="false">농산물</button>
+          <button type="button" data-category="seafood" aria-pressed="false">수산물</button>
+        </div>
+        <label class="seasonal-search">
+          <span class="sr-only">재료 이름 검색</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+          <input id="seasonal-search" type="search" placeholder="재료 이름 검색" autocomplete="off" enterkeyhint="search">
+        </label>
+      </div>
+
+      <div class="seasonal-card-grid" id="seasonal-cards" aria-live="polite" aria-busy="true">
+        <p class="seasonal-status">월별 재료를 불러오고 있어요.</p>
+      </div>
+      <p class="seasonal-status seasonal-error" id="seasonal-error" hidden>자료를 불러오지 못했어요. 잠시 후 다시 확인해주세요.</p>
+    </section>
+
+    <section class="seasonal-sources" aria-labelledby="sources-heading">
+      <div>
+        <p class="seasonal-eyebrow">REFERENCE</p>
+        <h2 id="sources-heading">자료 출처</h2>
+        <p>월별로 선정된 대표 품목을 간단히 정리했어요. 해마다 출하 시기와 선정 품목은 달라질 수 있습니다.</p>
+      </div>
+      <ul id="seasonal-sources-list"></ul>
+    </section>
+
+    <p class="seasonal-disclaimer">제철 정보는 재료 선택을 돕는 참고 정보입니다. 개별 재료의 신선도·보관 상태·안전 여부를 보증하지 않으니 포장 표시와 재료 상태를 함께 확인해주세요.</p>
+  </main>
+
+  <footer>
+    <p>운영: 뉴럴에이전트 · 문의: <a href="mailto:neuralagent.dev@gmail.com">neuralagent.dev@gmail.com</a></p>
+    <p><a href="privacy.html">개인정보 안내</a> · <a href="terms.html">이용 안내</a></p>
+  </footer>
+</body>
+</html>
