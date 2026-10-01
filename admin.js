@@ -1,7 +1,5 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.117.2';
-
-const supabase = createClient(
-  'https://vnauldcdzgbhwdhsnyub.supabase.co',
+const db = window.supabase.createClient(
+  'https://vnauldcdzgbhwdhsnyub.db.co',
   'sb_publishable_2Vn37T_maDEEx2aODezSfA_YxLZQm1z',
   { auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true } },
 );
@@ -14,7 +12,7 @@ const status = (message) => { byId('status').textContent = message; };
 
 async function login() {
   status('Google 로그인으로 이동 중이에요…');
-  const { error } = await supabase.auth.signInWithOAuth({
+  const { error } = await db.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: new URL('admin.html', location.href).href },
   });
@@ -25,7 +23,7 @@ async function moderate(id, decision) {
   const note = decision === 'rejected' ? prompt('반려 사유를 입력해주세요.') : '';
   if (decision === 'rejected' && (!note || note.trim().length < 5)) return;
   status('처리 중이에요…');
-  const { error } = await supabase.rpc('moderate_community_recipe', {
+  const { error } = await db.rpc('moderate_community_recipe', {
     target: id,
     decision,
     note: note?.trim() || null,
@@ -36,7 +34,7 @@ async function moderate(id, decision) {
 }
 
 async function resolveReport(id, hide) {
-  const { error } = await supabase.rpc('moderate_community_report', {
+  const { error } = await db.rpc('moderate_community_report', {
     target: id,
     hide_content: hide,
     note: null,
@@ -62,9 +60,9 @@ function reportCard(report) {
 async function loadDashboard() {
   status('운영 데이터를 불러오는 중이에요…');
   const [recipesResult, reportsResult, authorsResult] = await Promise.all([
-    supabase.from('community_recipes').select('id,author_id,status,title,summary,minutes,servings,submitted_at').order('submitted_at', { ascending: true }),
-    supabase.from('community_reports').select('id,recipe_id,review_id,reason,status,created_at').eq('status', 'open').order('created_at', { ascending: true }),
-    supabase.from('community_authors').select('id,nickname'),
+    db.from('community_recipes').select('id,author_id,status,title,summary,minutes,servings,submitted_at').order('submitted_at', { ascending: true }),
+    db.from('community_reports').select('id,recipe_id,review_id,reason,status,created_at').eq('status', 'open').order('created_at', { ascending: true }),
+    db.from('community_authors').select('id,nickname'),
   ]);
   const error = recipesResult.error || reportsResult.error || authorsResult.error;
   if (error) return status(`데이터를 불러오지 못했어요: ${error.message}`);
@@ -86,11 +84,11 @@ async function loadDashboard() {
 }
 
 async function boot() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await db.auth.getSession();
   byId('login').hidden = Boolean(session);
   byId('logout').hidden = !session;
   if (!session) return;
-  const { data: moderator, error } = await supabase.rpc('community_moderator_status');
+  const { data: moderator, error } = await db.rpc('community_moderator_status');
   if (error || moderator !== true) {
     byId('denied').hidden = false;
     byId('denied-email').textContent = `${session.user.email ?? '현재 계정'}에는 운영 권한이 없습니다.`;
@@ -102,5 +100,5 @@ async function boot() {
 
 byId('google-login').addEventListener('click', login);
 byId('refresh').addEventListener('click', loadDashboard);
-byId('logout').addEventListener('click', async () => { await supabase.auth.signOut(); location.reload(); });
+byId('logout').addEventListener('click', async () => { await db.auth.signOut(); location.reload(); });
 boot().catch((error) => status(`운영 화면을 열지 못했어요: ${error.message}`));
