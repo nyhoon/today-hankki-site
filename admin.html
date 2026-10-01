@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>운영 대시보드 · 오늘한끼</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <a class="brand" href="./">오늘한끼<span>●</span></a>
+    <div><strong>운영 대시보드</strong><button class="text-button" id="logout" hidden>로그아웃</button></div>
+  </header>
+  <main class="admin-shell">
+    <section class="admin-login" id="login">
+      <p class="eyebrow">OPERATOR ACCESS</p>
+      <h1>운영자 계정으로 로그인하세요.</h1>
+      <p>등록된 Google 운영자 계정만 게시 검토와 신고 처리를 할 수 있습니다.</p>
+      <button class="button" id="google-login">Google로 로그인</button>
+    </section>
+
+    <section id="denied" class="admin-login" hidden>
+      <p class="eyebrow">ACCESS DENIED</p>
+      <h1>운영 권한이 없는 계정입니다.</h1>
+      <p id="denied-email"></p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <div class="admin-title">
+        <div><p class="eyebrow">TODAY HANKKI OPS</p><h1>콘텐츠 검토</h1></div>
+        <button class="secondary-button" id="refresh">새로고침</button>
+      </div>
+      <div class="admin-stats">
+        <article><span>게시 검토</span><strong id="pending-count">0</strong></article>
+        <article><span>신고 대기</span><strong id="report-count">0</strong></article>
+        <article><span>공개 레시피</span><strong id="published-count">0</strong></article>
+      </div>
+      <div class="admin-grid">
+        <section class="admin-panel"><div class="panel-title"><h2>게시 검토 요청</h2><span id="pending-label">0건</span></div><div id="pending-list"></div></section>
+        <section class="admin-panel"><div class="panel-title"><h2>신고 처리</h2><span id="report-label">0건</span></div><div id="report-list"></div></section>
+      </div>
+    </section>
+    <p class="admin-status" id="status" role="status" aria-live="polite"></p>
+  </main>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
