@@ -1,5 +1,5 @@
 const db = window.supabase.createClient(
-  'https://vnauldcdzgbhwdhsnyub.db.co',
+  'https://vnauldcdzgbhwdhsnyub.supabase.co',
   'sb_publishable_2Vn37T_maDEEx2aODezSfA_YxLZQm1z',
   { auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true } },
 );
