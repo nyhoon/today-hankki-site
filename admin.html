@@ -28,7 +28,7 @@
 
     <section id="dashboard" hidden>
       <div class="admin-title">
-        <div><p class="eyebrow">TODAY HANKKI OPS</p><h1>콘텐츠 검토</h1></div>
+        <div><p class="eyebrow">TODAY HANKKI OPS</p><h1>서비스 운영</h1></div>
         <button class="secondary-button" id="refresh">새로고침</button>
       </div>
       <div class="admin-stats">
@@ -40,10 +40,20 @@
         <section class="admin-panel"><div class="panel-title"><h2>게시 검토 요청</h2><span id="pending-label">0건</span></div><div id="pending-list"></div></section>
         <section class="admin-panel"><div class="panel-title"><h2>신고 처리</h2><span id="report-label">0건</span></div><div id="report-list"></div></section>
       </div>
+      <div class="ops-grid">
+        <section class="admin-panel ops-wide"><div class="panel-title"><h2>사용자·제재 확인</h2><span id="user-label">0명</span></div><div class="table-wrap"><table><thead><tr><th>계정</th><th>로그인</th><th>닉네임</th><th>키친</th><th>공개 레시피</th><th>신고</th><th>최근 로그인</th></tr></thead><tbody id="user-list"></tbody></table></div></section>
+        <section class="admin-panel"><div class="panel-title"><h2>커뮤니티</h2></div><div class="metric-list" id="community-summary"></div></section>
+        <section class="admin-panel"><div class="panel-title"><h2>키친·초대</h2></div><div class="metric-list" id="kitchen-summary"></div></section>
+        <section class="admin-panel"><div class="panel-title"><h2>푸시 운영</h2></div><div class="metric-list" id="push-summary"></div></section>
+        <section class="admin-panel"><div class="panel-title"><h2>재료·레시피 품질</h2></div><div class="metric-list" id="ingredient-summary"></div></section>
+        <section class="admin-panel"><div class="panel-title"><h2>정책 버전</h2></div><div id="policy-list"></div></section>
+        <section class="admin-panel"><div class="panel-title"><h2>운영자</h2></div><div id="moderator-list"></div></section>
+        <section class="admin-panel ops-wide"><div class="panel-title"><h2>운영 감사 로그</h2><span>최근 100건</span></div><div id="moderation-log"></div></section>
+      </div>
     </section>
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin.js?v=2"></script>
+  <script defer src="admin-v3.js"></script>
 </body>
 </html>
