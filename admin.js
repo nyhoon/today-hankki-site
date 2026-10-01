@@ -13,10 +13,12 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => 
 const status = (message) => { byId('status').textContent = message; };
 
 async function login() {
-  await supabase.auth.signInWithOAuth({
+  status('Google 로그인으로 이동 중이에요…');
+  const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: new URL('admin.html', location.href).href },
   });
+  if (error) status(`로그인을 시작하지 못했어요: ${error.message}`);
 }
 
 async function moderate(id, decision) {
@@ -101,4 +103,4 @@ async function boot() {
 byId('google-login').addEventListener('click', login);
 byId('refresh').addEventListener('click', loadDashboard);
 byId('logout').addEventListener('click', async () => { await supabase.auth.signOut(); location.reload(); });
-boot();
+boot().catch((error) => status(`운영 화면을 열지 못했어요: ${error.message}`));
