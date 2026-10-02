@@ -9,7 +9,7 @@
 </head>
 <body>
   <header><a class="brand" href="./">오늘한끼<span>●</span></a><nav><a href="./">서비스</a><a href="privacy.html">개인정보 안내</a><a href="terms.html">이용 안내</a></nav></header>
-  <main class="push-page" id="push"><p class="eyebrow" id="push-eyebrow">알림 안내</p><h1 id="push-title">새로운 안내가 도착했어요.</h1><p id="push-body">오늘한끼에서 확인하고 필요한 내용을 살펴보세요.</p><a class="button" href="todayhankki://">오늘한끼 앱 열기</a></main>
+  <main class="push-page" id="push"><p class="eyebrow" id="push-eyebrow">알림 안내</p><h1 id="push-title">새로운 안내가 도착했어요.</h1><p id="push-body">오늘한끼에서 확인하고 필요한 내용을 살펴보세요.</p><a class="button" id="push-app-link" href="todayhankki://notice?category=operator">오늘한끼 앱 열기</a></main>
   <footer><p>운영: 뉴럴에이전트 · 문의: <a href="mailto:neuralagent.dev@gmail.com">neuralagent.dev@gmail.com</a></p></footer>
   <script>
     const copy = {
@@ -19,12 +19,14 @@
       kitchen: ['오늘의 키친 소식', '키친에 새 소식이 있어요.', '함께 쓰는 키친의 변경 내용을 확인해보세요.'],
       operator: ['오늘의 알림', '새로운 안내가 도착했어요.', '오늘한끼에서 확인하고 필요한 내용을 살펴보세요.'],
     };
-    const key = new URLSearchParams(location.search).get('category');
+    const requestedCategory = new URLSearchParams(location.search).get('category');
+    const key = Object.prototype.hasOwnProperty.call(copy, requestedCategory) ? requestedCategory : 'operator';
     const defaultCopy = copy.operator;
     const [eyebrow, title, body] = copy[key] ?? defaultCopy;
     document.getElementById('push-eyebrow').textContent = eyebrow;
     document.getElementById('push-title').textContent = title;
     document.getElementById('push-body').textContent = body;
+    document.getElementById('push-app-link').href = `todayhankki://notice?category=${encodeURIComponent(key)}`;
     document.title = `${eyebrow} · 오늘한끼`;
   </script>
 </body>

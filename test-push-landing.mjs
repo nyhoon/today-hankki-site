@@ -11,12 +11,13 @@ test('push landing page provides guidance for every supported category', () => {
   assert.match(page, /const defaultCopy = copy\.operator/);
 });
 
-test('push landing page uses safe text rendering and keeps the app link fixed', () => {
+test('push landing page safely renders copy and deep-links to the matching app section', () => {
   assert.match(page, /getElementById\('push-eyebrow'\)\.textContent/);
   assert.match(page, /getElementById\('push-title'\)\.textContent/);
   assert.match(page, /getElementById\('push-body'\)\.textContent/);
   assert.doesNotMatch(page, /\.innerHTML/);
-  assert.match(page, /href="todayhankki:\/\/"/);
+  assert.match(page, /id="push-app-link"/);
+  assert.match(page, /todayhankki:\/\/notice\?category=/);
   assert.match(page, /new URLSearchParams\(location\.search\)\.get\('category'\)/);
   assert.doesNotMatch(page, /get\('(title|body|user|recipient)'\)/);
 });
