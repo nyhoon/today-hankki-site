@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>운영 대시보드 · 오늘한끼</title>
-  <link rel="stylesheet" href="styles.css?v=20261002-crud">
+  <link rel="stylesheet" href="styles.css?v=20261002-detail">
 </head>
 <body class="admin-body">
   <header class="admin-header">
@@ -53,10 +53,10 @@
               <button class="secondary-button" id="refresh" type="button">새로고침</button>
             </div>
             <div class="admin-stats">
-              <article><span>게시 검토</span><strong id="pending-count">–</strong></article>
-              <article><span>신고 대기</span><strong id="report-count">–</strong></article>
-              <article><span>가입 사용자</span><strong id="total-user-count">–</strong></article>
-              <article><span>공개 레시피</span><strong id="published-count">–</strong></article>
+              <button class="admin-stat-card" type="button" data-dashboard-target="community:recipe:pending"><span>게시 검토</span><strong id="pending-count">–</strong><small>대기 레시피 보기</small></button>
+              <button class="admin-stat-card" type="button" data-dashboard-target="community:report:open"><span>신고 대기</span><strong id="report-count">–</strong><small>미처리 신고 보기</small></button>
+              <button class="admin-stat-card" type="button" data-dashboard-target="users:all"><span>가입 사용자</span><strong id="total-user-count">–</strong><small>계정 목록 보기</small></button>
+              <button class="admin-stat-card" type="button" data-dashboard-target="community:recipe:published"><span>공개 레시피</span><strong id="published-count">–</strong><small>공개 레시피 보기</small></button>
             </div>
             <section class="admin-panel admin-trend-panel">
               <div class="panel-title"><div><p class="eyebrow">ACTIVITY</p><h2>서비스 추이</h2></div>
@@ -79,14 +79,14 @@
 
           <section class="admin-page" id="page-community" data-page-panel="community" hidden>
             <div class="admin-title"><div><p class="eyebrow">COMMUNITY</p><h1>커뮤니티 관리</h1></div><button class="secondary-button" data-page-refresh type="button">새로고침</button></div>
-            <div class="module-toolbar"><label>종류 <select id="community-kind"><option value="recipe">레시피</option><option value="review">후기</option><option value="report">신고</option></select></label><label>상태 <select id="community-status"><option value="pending">검토 대기</option><option value="published">공개</option><option value="hidden">숨김</option><option value="rejected">반려</option><option value="open">미처리 신고</option></select></label><label class="search-field">검색 <input id="community-search" type="search" placeholder="제목·작성자·신고 내용"></label><button class="secondary-button" id="community-search-button" type="button">검색</button></div>
+            <div class="module-toolbar"><label>종류 <select id="community-kind"><option value="recipe">레시피</option><option value="review">후기</option><option value="report">신고</option></select></label><label>상태 <select id="community-status"><option value="pending">검토 대기</option><option value="published">공개</option><option value="hidden">숨김</option><option value="rejected">반려</option><option value="open">미처리 신고</option></select></label><label class="search-field">제목·작성자·내용 <input id="community-search" type="search" placeholder="검색어 입력"></label><button class="secondary-button" id="community-search-button" type="button">검색</button></div>
             <div class="admin-panel"><div class="panel-title"><h2>검토·신고 목록</h2><span id="community-total">-</span></div><div id="community-list" class="admin-record-list"><p class="empty-admin">목록을 불러오려면 검색하세요.</p></div><div class="admin-pagination" id="community-pagination"></div></div>
             <aside class="admin-detail" id="community-detail" aria-label="선택한 콘텐츠 상세" hidden></aside>
           </section>
 
           <section class="admin-page" id="page-users" data-page-panel="users" hidden>
             <div class="admin-title"><div><p class="eyebrow">ACCOUNTS</p><h1>사용자</h1></div></div>
-            <div class="module-toolbar"><label class="search-field">이메일·닉네임 <input id="users-search" type="search" autocomplete="off"></label><button class="secondary-button" id="users-search-button" type="button">검색</button></div>
+            <div class="module-toolbar"><label>로그인 방식 <select id="users-provider"><option value="all">전체</option><option value="google">Google</option><option value="kakao">카카오</option><option value="email">이메일</option></select></label><label class="search-field">이메일·닉네임 <input id="users-search" type="search" autocomplete="off"></label><button class="secondary-button" id="users-search-button" type="button">검색</button></div>
             <div class="admin-panel"><div class="panel-title"><h2>계정 목록</h2><span id="users-total">-</span></div><div class="table-wrap admin-table-cards"><table><thead><tr><th scope="col">계정</th><th scope="col">로그인</th><th scope="col">닉네임</th><th scope="col">키친</th><th scope="col">최근 로그인</th><th scope="col">가입일</th><th scope="col">상세</th></tr></thead><tbody id="user-list"></tbody></table></div><div class="admin-pagination" id="users-pagination"></div></div>
             <aside class="admin-detail" id="users-detail" aria-label="선택한 사용자 상세" hidden></aside>
           </section>
@@ -100,8 +100,8 @@
 
           <section class="admin-page" id="page-catalog" data-page-panel="catalog" hidden>
             <div class="admin-title"><div><p class="eyebrow">INGREDIENTS & RECIPES</p><h1>식재료·레시피</h1></div></div>
-            <div class="module-toolbar"><label>데이터 <select id="catalog-kind"><option value="ingredient">표준 식재료</option><option value="source">식약처 재료명</option><option value="product">상품 바코드</option><option value="recipe">공식 레시피</option></select></label><label class="search-field">검색 <input id="catalog-search" type="search"></label><button class="secondary-button" id="catalog-search-button" type="button">검색</button><button class="button" id="catalog-create" type="button">새 항목</button></div>
-            <div class="admin-panel"><div class="panel-title"><h2>데이터 목록</h2><span id="catalog-total">-</span></div><div id="catalog-list" class="admin-record-list"></div><div class="admin-pagination" id="catalog-pagination"></div></div>
+            <div class="module-toolbar"><label>데이터 <select id="catalog-kind"><option value="ingredient">표준 식재료</option><option value="source">식약처 재료명</option><option value="product">상품 바코드</option><option value="recipe">공식 레시피</option></select></label><label class="search-field">이름·별칭·코드 검색 <input id="catalog-search" type="search"></label><label>한 페이지 <select id="catalog-page-size"><option value="25">25개</option><option value="50">50개</option><option value="100">100개</option></select></label><button class="secondary-button" id="catalog-search-button" type="button">검색</button><button class="button" id="catalog-create" type="button">새 항목</button></div>
+            <div class="admin-panel"><div class="panel-title"><h2>전체 데이터 목록</h2><span id="catalog-total">-</span></div><p class="catalog-range" id="catalog-range" aria-live="polite"></p><div id="catalog-list" class="admin-record-list"></div><div class="admin-pagination" id="catalog-pagination"></div></div>
             <aside class="admin-detail" id="catalog-detail" aria-label="식재료 또는 레시피 상세" hidden></aside>
           </section>
 
@@ -109,7 +109,7 @@
             <div class="admin-title"><div><p class="eyebrow">MESSAGING</p><h1>알림 운영</h1></div><button class="secondary-button" id="push-refresh" type="button">새로고침</button></div>
             <div class="admin-grid"><div class="admin-panel"><div class="panel-title"><h2>알림 문구</h2><span>기기 토큰은 화면에 표시하지 않아요</span></div><div id="push-templates" class="admin-record-list"></div></div>
               <div class="admin-panel"><div class="panel-title"><h2>문구 편집</h2><span>요약 변수는 중괄호로 넣어요</span></div><form id="push-template-form" class="catalog-edit-form"><label>종류 <select id="push-template-category"><option value="digest">오늘의 키친 소식</option><option value="kitchen">키친 소식</option></select></label><label>제목 <input id="push-template-title" maxlength="80" required></label><label>내용 <textarea id="push-template-body" rows="4" maxlength="180" required></textarea></label><label class="catalog-check"><input id="push-template-enabled" type="checkbox">발송 사용</label><p>요약 변수: <code>{summary}</code>, <code>{expiry_items}</code>, <code>{recipe_titles}</code>, <code>{shopping_items}</code>. 키친 소식 변수: <code>{event_count}</code></p><button class="button" type="submit">문구 저장</button></form></div></div>
-            <section class="admin-panel"><div class="panel-title"><h2>개별 예약 발송</h2><span>전체 발송은 지원하지 않으며, 수신 설정을 켠 사용자 한 명에게만 보냅니다.</span></div><div class="module-toolbar"><label class="search-field">수신자 찾기 <input id="push-recipient-search" type="search" placeholder="이메일 또는 닉네임"></label><button class="secondary-button" id="push-recipient-search-button" type="button">찾기</button><label>수신자 <select id="push-recipient"><option value="">수신자를 먼저 검색하세요</option></select></label><button class="secondary-button" id="push-preview" type="button">수신 가능 확인</button></div><p id="push-preview-result" class="empty-admin" aria-live="polite">수신자는 푸시 동의와 활성 기기가 있을 때만 선택할 수 있어요.</p><div class="module-toolbar"><label>제목 <input id="push-campaign-title" maxlength="80"></label><label>내용 <input id="push-campaign-body" maxlength="500"></label><label>예약 시각 <input id="push-scheduled-at" type="datetime-local"></label><button class="button" id="push-schedule" type="button">예약 등록</button><button class="secondary-button" id="push-test" type="button">내 기기에 테스트</button></div></section>
+            <section class="admin-panel"><div class="panel-title"><h2>푸시 예약 발송</h2><span>수신 동의와 활성 기기가 있는 사용자만 대상이 됩니다.</span></div><fieldset class="push-audience"><legend>받는 사람</legend><label><input type="radio" name="push-target-mode" id="target-mode-selected" value="selected" checked>선택한 사용자</label><label><input type="radio" name="push-target-mode" id="target-mode-all" value="all">전체 수신 동의 사용자</label></fieldset><div class="module-toolbar"><label class="search-field">사용자 찾기 <input id="push-recipient-search" type="search" placeholder="이메일 또는 닉네임"></label><button class="secondary-button" id="push-recipient-search-button" type="button">검색</button><button class="secondary-button" id="push-recipient-select-page" type="button">현재 페이지 선택</button><button class="text-button" id="push-recipient-clear" type="button">선택 해제</button></div><p id="push-recipient-count" class="empty-admin" aria-live="polite">선택한 사용자 0명</p><div id="push-recipient-results" class="push-recipient-list"></div><div class="admin-pagination" id="push-recipient-pagination"></div><div class="push-selected-list" id="push-selected-list"></div><button class="secondary-button" id="push-preview" type="button">대상·기기 수 확인</button><p id="push-preview-result" class="empty-admin" aria-live="polite">미리보기 후 예약할 수 있어요.</p><div class="module-toolbar"><label>제목 <input id="push-campaign-title" maxlength="80"></label><label>내용 <input id="push-campaign-body" maxlength="500"></label><label>예약 시각 <input id="push-scheduled-at" type="datetime-local"></label><button class="button" id="push-schedule" type="button">예약 등록</button><button class="secondary-button" id="push-test" type="button">내 기기에 테스트</button></div></section>
             <section class="admin-panel"><div class="panel-title"><h2>예약·발송 이력</h2><span id="push-total">-</span></div><div class="module-toolbar"><label class="search-field">이력 검색 <input id="push-history-search" type="search"></label><button class="secondary-button" id="push-history-search-button" type="button">검색</button></div><div id="push-operations" class="admin-record-list"></div><div class="admin-pagination" id="push-pagination"></div></section>
           </section>
 
@@ -131,9 +131,10 @@
     <dialog class="admin-confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-title">
       <form method="dialog"><h2 id="confirm-title">작업을 확인해 주세요</h2><p id="confirm-message"></p><label id="confirm-reason-wrap">사유 <textarea id="confirm-reason" rows="3"></textarea></label><label id="confirm-name-wrap" hidden>확인을 위해 키친 이름을 입력 <input id="confirm-name" autocomplete="off"></label><label id="confirm-duration-wrap" hidden>이용 제한 기간 (시간) <input id="confirm-duration" type="number" min="1" max="8760" step="1"></label><div class="review-actions"><button class="secondary-button" value="cancel">취소</button><button class="danger-button" id="confirm-submit" value="confirm">확인</button></div></form>
     </dialog>
+    <dialog class="metric-detail-dialog" id="metric-dialog" aria-labelledby="metric-title"><form method="dialog"><h2 id="metric-title"></h2><p id="metric-total" class="empty-admin"></p><div id="metric-items" class="metric-detail-list"></div><div id="metric-pagination" class="admin-pagination"></div><div class="review-actions"><button class="secondary-button" value="close">닫기</button></div></form></dialog>
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin-v3.js?v=20261002-crud"></script>
+  <script defer src="admin-v3.js?v=20261002-detail"></script>
 </body>
 </html>

@@ -94,7 +94,12 @@ function reportCard(report) {
 }
 
 const dateText = (value) => value ? new Date(value).toLocaleString('ko-KR') : '-';
-const metricRows = (items) => items.map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join('');
+const metricRows = (items, targets = {}) => items.map(([label, value]) => {
+  const target = targets[label];
+  return target
+    ? `<button class="metric-row" type="button" data-dashboard-target="${escapeHtml(target)}" aria-label="${escapeHtml(label)} ${escapeHtml(value)}건, 해당 목록 보기"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></button>`
+    : `<div class="metric-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+}).join('');
 
 function navigateAdminPage(pageId) {
   const panel = byId(`page-${pageId}`);
@@ -136,24 +141,67 @@ function renderSnapshot(snapshot) {
     ['작성자', community.authors ?? 0], ['초안', community.drafts ?? 0], ['검토 대기', community.pending ?? 0],
     ['공개', community.published ?? 0], ['숨김', community.hidden ?? 0], ['후기', community.reviews ?? 0],
     ['좋아요', community.likes ?? 0], ['팔로우', community.follows ?? 0], ['신고 대기', community.open_reports ?? 0],
-  ]);
+  ], { '작성자': 'community:recipe:', '초안': 'community:recipe:draft', '검토 대기': 'community:recipe:pending', '공개': 'community:recipe:published', '숨김': 'community:recipe:hidden', '후기': 'community:review:', '좋아요': 'detail:likes', '팔로우': 'detail:follows', '신고 대기': 'community:report:open' });
   const kitchens = snapshot.kitchens ?? {};
   byId('kitchen-summary').innerHTML = metricRows([
     ['키친', kitchens.total ?? 0], ['멤버', kitchens.members ?? 0], ['활성 초대', kitchens.active_invites ?? 0],
     ['만료 초대', kitchens.expired_invites ?? 0], ['보관 재료', kitchens.inventory_lots ?? 0], ['미완료 장보기', kitchens.shopping_open ?? 0],
-  ]);
+  ], { '키친': 'kitchens', '멤버': 'kitchens', '활성 초대': 'kitchens', '만료 초대': 'kitchens', '보관 재료': 'kitchens', '미완료 장보기': 'kitchens' });
   const push = snapshot.push ?? {};
   byId('push-summary').innerHTML = metricRows([
     ['알림 사용', push.enabled_users ?? 0], ['Android 기기', push.active_android ?? 0], ['iOS 기기', push.active_ios ?? 0],
     ['24시간 발송', push.sent_24h ?? 0], ['처리 중', push.pending_claims ?? 0],
-  ]);
+  ], { '알림 사용': 'push', 'Android 기기': 'push', 'iOS 기기': 'push', '24시간 발송': 'push', '처리 중': 'push' });
   const ingredients = snapshot.ingredients ?? {};
   byId('ingredient-summary').innerHTML = metricRows([
     ['표준 재료', ingredients.canonical ?? 0], ['식약처 재료명', ingredients.source_names ?? 0],
     ['미연결 재료명', ingredients.unmapped_source_names ?? 0], ['상품', ingredients.products ?? 0],
     ['미연결 상품', ingredients.unmapped_products ?? 0], ['공개 레시피', ingredients.recipes ?? 0],
-  ]);
+  ], { '표준 재료': 'catalog:ingredient', '식약처 재료명': 'catalog:source', '미연결 재료명': 'catalog:source', '상품': 'catalog:product', '미연결 상품': 'catalog:product', '공개 레시피': 'catalog:recipe' });
 }
+
+function openDashboardTarget(target) {
+  const [page, kind, filter] = target.split(':');
+  if (page === 'detail') return openMetricDetails(kind, 1);
+  if (page === 'community') {
+    byId('community-kind').value = kind;
+    setCommunityStatuses(false);
+    byId('community-status').value = filter || '';
+    communityPage = 1;
+  } else if (page === 'users') {
+    byId('users-provider').value = 'all';
+    byId('users-search').value = '';
+    userPage = 1;
+  } else if (page === 'catalog') {
+    byId('catalog-kind').value = kind;
+    byId('catalog-search').value = '';
+    catalogPage = 1;
+  }
+  navigateAdminPage(page);
+}
+
+async function openMetricDetails(kind, page = 1) {
+  const title = { likes: '레시피별 좋아요', follows: '팔로우 관계' }[kind];
+  if (!title) return;
+  const dialog = byId('metric-dialog');
+  byId('metric-title').textContent = title;
+  byId('metric-items').innerHTML = '<p class="empty-admin">상세 기록을 불러오는 중이에요…</p>';
+  if (!dialog.open) dialog.showModal();
+  const { data, error } = await db.rpc('operator_list_community_engagement', { p_kind: kind, p_query: null, p_page: page, p_page_size: 25 });
+  if (error) {
+    byId('metric-items').innerHTML = `<p class="empty-admin">기록을 불러오지 못했어요: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+  byId('metric-total').textContent = `${Number(data.total).toLocaleString('ko-KR')}건 · 최신순`;
+  byId('metric-items').innerHTML = (data.items ?? []).map((item) => `<article><strong>${escapeHtml(item.label)}</strong><span>${escapeHtml(item.detail)}</span></article>`).join('') || '<p class="empty-admin">표시할 기록이 없습니다.</p>';
+  byId('metric-pagination').innerHTML = pageControl('metric', page, Number(data.total) || 0, 25);
+  document.querySelectorAll('[data-metric-page]').forEach((button) => button.addEventListener('click', () => openMetricDetails(kind, Number(button.dataset.metricPage))));
+}
+
+document.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-dashboard-target]');
+  if (button) openDashboardTarget(button.dataset.dashboardTarget);
+});
 
 const kstDate = () => {
   const values = Object.fromEntries(new Intl.DateTimeFormat('en', {
@@ -241,7 +289,11 @@ const pageControl = (type, page, total, pageSize) => {
 function renderUsers(data) {
   userRows = data.items ?? [];
   byId('users-total').textContent = `${data.total ?? 0}명`;
-  byId('user-list').innerHTML = userRows.map((user) => `<tr><td data-label="계정">${escapeHtml(user.email)}</td><td data-label="로그인">${escapeHtml(user.provider)}</td><td data-label="닉네임">${escapeHtml(user.display_name || '닉네임 없음')}</td><td data-label="키친">${escapeHtml(user.kitchen || '없음')}</td><td data-label="최근 로그인">${escapeHtml(dateText(user.last_sign_in_at))}</td><td data-label="가입일">${escapeHtml(dateText(user.created_at))}</td><td data-label="상세"><button class="secondary-button" data-user-open="${escapeHtml(user.id)}" type="button">보기</button></td></tr>`).join('') || '<tr><td colspan="7">검색 결과가 없습니다.</td></tr>';
+  const providerLabel = { google: 'Google', kakao: '카카오', email: '이메일' };
+  byId('user-list').innerHTML = userRows.map((user) => {
+    const providers = (user.providers ?? [user.provider]).map((provider) => providerLabel[provider] || provider).join(' · ');
+    return `<tr><td data-label="계정">${escapeHtml(user.email)}</td><td data-label="로그인">${escapeHtml(providers || '이메일')}</td><td data-label="닉네임">${escapeHtml(user.display_name || '닉네임 없음')}</td><td data-label="키친">${escapeHtml(user.kitchen || '없음')}</td><td data-label="최근 로그인">${escapeHtml(dateText(user.last_sign_in_at))}</td><td data-label="가입일">${escapeHtml(dateText(user.created_at))}</td><td data-label="상세"><button class="secondary-button" data-user-open="${escapeHtml(user.id)}" type="button">보기</button></td></tr>`;
+  }).join('') || '<tr><td colspan="7">검색 결과가 없습니다.</td></tr>';
   byId('users-pagination').innerHTML = pageControl('user', userPage, Number(data.total) || 0, 25);
   document.querySelectorAll('[data-user-open]').forEach((button) => button.addEventListener('click', () => openUserDetail(button.dataset.userOpen)));
   document.querySelectorAll('[data-user-page]').forEach((button) => button.addEventListener('click', () => { userPage = Number(button.dataset.userPage); loadUsers(); }));
@@ -250,7 +302,7 @@ function renderUsers(data) {
 async function loadUsers() {
   if (byId('page-users').hidden) return;
   status('사용자 목록을 불러오는 중이에요…');
-  const { data, error } = await db.rpc('operator_list_users', { p_query: byId('users-search').value.trim() || null, p_page: userPage, p_page_size: 25 });
+  const { data, error } = await db.rpc('operator_list_users', { p_query: byId('users-search').value.trim() || null, p_provider: byId('users-provider').value, p_page: userPage, p_page_size: 25 });
   if (error) return status(`사용자 목록을 불러오지 못했어요: ${error.message}`);
   renderUsers(data ?? { total: 0, items: [] });
   status('사용자 목록을 업데이트했습니다.');
@@ -258,9 +310,11 @@ async function loadUsers() {
 
 function userDetailMarkup(user, preview) {
   const kitchens = (user.kitchens ?? []).map((kitchen) => `<li>${escapeHtml(kitchen.name)} · ${escapeHtml(kitchen.role)}${kitchen.archived_at ? ' · 보관됨' : ''}</li>`).join('') || '<li>연결된 키친이 없습니다.</li>';
+  const activity = (user.activity ?? []).slice(0, 20).map((item) => `<li><span>${escapeHtml(item.action)}${item.detail ? ` · ${escapeHtml(item.detail)}` : ''}</span><time>${escapeHtml(dateText(item.at))}</time></li>`).join('') || '<li>현재 기록된 활동이 없습니다.</li>';
+  const providers = (user.providers ?? [user.provider]).map((provider) => ({ google: 'Google', kakao: '카카오', email: '이메일' }[provider] || provider)).join(' · ');
   const locked = user.is_self || user.is_operator;
   const action = locked ? '<p class="empty-admin">운영자 계정과 현재 로그인 계정은 이용 제한 대상에서 제외됩니다.</p>' : `<button class="${user.is_banned ? 'secondary-button' : 'danger-button'}" data-user-ban="${escapeHtml(user.id)}" data-banned="${user.is_banned ? 'true' : 'false'}" type="button">${user.is_banned ? '이용 제한 해제' : '이용 제한'}</button>`;
-  return `<button class="detail-close secondary-button" data-user-close type="button">닫기</button><p class="eyebrow">계정 상세</p><h2>${escapeHtml(user.display_name || '닉네임 없음')}</h2><p>${escapeHtml(user.email)} · ${escapeHtml(user.provider)}</p><p>가입 ${escapeHtml(dateText(user.created_at))} · 최근 로그인 ${escapeHtml(dateText(user.last_sign_in_at))}</p><p>${user.is_banned ? `이용 제한 중 · ${escapeHtml(dateText(user.banned_until))}` : '이용 가능'}</p><h3>키친</h3><ul>${kitchens}</ul><h3>커뮤니티</h3><p>작성 레시피 ${escapeHtml(user.community?.recipes ?? 0)}건 · 받은 신고 ${escapeHtml(user.community?.reports_received ?? 0)}건</p><h3>탈퇴 영향 미리보기</h3><p>${escapeHtml(preview.instruction || '계정 탈퇴는 앱에서 진행해야 합니다.')}</p><p>소유 키친 ${escapeHtml(preview.owned_kitchens ?? 0)}개 · 레시피 ${escapeHtml(preview.community_recipes ?? 0)}개 · 사진 ${escapeHtml(preview.community_photos ?? 0)}개</p>${action}`;
+  return `<button class="detail-close secondary-button" data-user-close type="button">닫기</button><p class="eyebrow">계정 상세</p><h2>${escapeHtml(user.display_name || '닉네임 없음')}</h2><p>${escapeHtml(user.email)} · ${escapeHtml(providers)}</p><p>가입 ${escapeHtml(dateText(user.created_at))} · 최근 로그인 ${escapeHtml(dateText(user.last_sign_in_at))}</p><p>${user.is_banned ? `이용 제한 중 · ${escapeHtml(dateText(user.banned_until))}` : '이용 가능'}</p><h3>키친</h3><ul>${kitchens}</ul><h3>커뮤니티</h3><p>작성 레시피 ${escapeHtml(user.community?.recipes ?? 0)}건 · 받은 신고 ${escapeHtml(user.community?.reports_received ?? 0)}건</p><h3>사용 기록</h3><ul class="user-activity-list">${activity}</ul><p class="empty-admin">가입·로그인과 핵심 기능 변경만 기록합니다. 입력 내용과 화면 열람은 기록하지 않으며, 로그는 90일 후 삭제합니다.</p><h3>탈퇴 영향 미리보기</h3><p>${escapeHtml(preview.instruction || '계정 탈퇴는 앱에서 진행해야 합니다.')}</p><p>소유 키친 ${escapeHtml(preview.owned_kitchens ?? 0)}개 · 레시피 ${escapeHtml(preview.community_recipes ?? 0)}개 · 사진 ${escapeHtml(preview.community_photos ?? 0)}개</p>${action}`;
 }
 
 async function openUserDetail(id) {
@@ -474,12 +528,17 @@ async function loadCatalog() {
   if (byId('page-catalog').hidden) return;
   status('카탈로그를 불러오는 중이에요…');
   const kind = byId('catalog-kind').value;
-  const { data, error } = await db.rpc('operator_list_catalog', { p_kind: kind, p_query: byId('catalog-search').value.trim() || null, p_page: catalogPage, p_page_size: 25 });
+  const pageSize = Number(byId('catalog-page-size').value) || 25;
+  const { data, error } = await db.rpc('operator_list_catalog', { p_kind: kind, p_query: byId('catalog-search').value.trim() || null, p_page: catalogPage, p_page_size: pageSize });
   if (error) return status(`카탈로그를 불러오지 못했어요: ${error.message}`);
   catalogRows = data?.items ?? [];
   byId('catalog-total').textContent = `${data?.total ?? 0}개`;
   byId('catalog-list').innerHTML = catalogRows.length ? catalogRows.map(catalogRow).join('') : '<p class="empty-admin">검색 결과가 없습니다.</p>';
-  byId('catalog-pagination').innerHTML = pageControl('catalog', catalogPage, Number(data?.total) || 0, 25);
+  const total = Number(data?.total) || 0;
+  const first = total ? (catalogPage - 1) * pageSize + 1 : 0;
+  const last = Math.min(catalogPage * pageSize, total);
+  byId('catalog-range').textContent = `${first.toLocaleString('ko-KR')}–${last.toLocaleString('ko-KR')} / ${total.toLocaleString('ko-KR')}개 · 전체 검색 결과`;
+  byId('catalog-pagination').innerHTML = pageControl('catalog', catalogPage, total, pageSize);
   document.querySelectorAll('[data-catalog-open]').forEach((button) => button.addEventListener('click', () => {
     const item = catalogRows.find((row) => row.id === button.dataset.catalogOpen);
     if (item) renderCatalogDetail(item, kind);
@@ -523,6 +582,9 @@ async function removeUnusedProduct(barcode) {
 let pushPage = 1;
 let pushTemplates = [];
 let pushRecipients = [];
+let pushRecipientTotal = 0;
+let pushRecipientPage = 1;
+const selectedPushRecipients = new Map();
 function renderPushTemplate(category) {
   const template = pushTemplates.find((item) => item.category === category);
   if (!template) return;
@@ -546,27 +608,61 @@ async function loadPushOperations() {
   if (!pushTemplates.some((item) => item.category === byId('push-template-category').value)) renderPushTemplate(pushTemplates[0]?.category);
   const data = listResult.data ?? { total: 0, items: [] };
   byId('push-total').textContent = `${data.total ?? 0}건`;
-  byId('push-operations').innerHTML = (data.items ?? []).map((item) => `<article class="admin-record-row"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.kind === 'campaign' ? '개별 예약' : '발송 기록')} · ${escapeHtml(item.recipient || '수신자 정보 없음')} · ${escapeHtml(dateText(item.created_at))}${item.sent_count ? ` · ${item.sent_count}대 전송` : ''}${item.last_error_code ? ` · ${escapeHtml(item.last_error_code)}` : ''}</small></span><span class="record-status">${escapeHtml(item.status)} ${item.kind === 'campaign' && item.status === 'scheduled' ? `<button class="secondary-button" data-push-cancel="${escapeHtml(item.id)}" type="button">예약 취소</button>` : ''}</span></article>`).join('') || '<p class="empty-admin">예약 또는 발송 기록이 없습니다.</p>';
+  byId('push-operations').innerHTML = (data.items ?? []).map((item) => `<article class="admin-record-row"><span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.kind === 'campaign' ? '예약 발송' : '발송 기록')} · ${escapeHtml(item.recipient || '수신자 정보 없음')} · ${escapeHtml(dateText(item.created_at))}${item.kind === 'campaign' ? ` · 대상 ${Number(item.recipient_count ?? 0).toLocaleString('ko-KR')}명` : ''}${item.sent_count ? ` · ${item.sent_count}대 전송` : ''}${item.last_error_code ? ` · ${escapeHtml(item.last_error_code)}` : ''}</small></span><span class="record-status">${escapeHtml(item.status)} ${item.kind === 'campaign' && item.status === 'scheduled' ? `<button class="secondary-button" data-push-cancel="${escapeHtml(item.id)}" type="button">예약 취소</button>` : ''}</span></article>`).join('') || '<p class="empty-admin">예약 또는 발송 기록이 없습니다.</p>';
   byId('push-pagination').innerHTML = pageControl('push', pushPage, Number(data.total) || 0, 25);
   document.querySelectorAll('[data-push-page]').forEach((button) => button.addEventListener('click', () => { pushPage = Number(button.dataset.pushPage); loadPushOperations(); }));
   document.querySelectorAll('[data-push-cancel]').forEach((button) => button.addEventListener('click', () => cancelPushCampaign(button.dataset.pushCancel)));
   status('알림 운영 정보를 업데이트했습니다.');
 }
 
-async function searchPushRecipients() {
-  const { data, error } = await db.rpc('operator_list_push_recipients', { p_query: byId('push-recipient-search').value.trim() || null, p_page: 1, p_page_size: 50 });
-  if (error) return status(`수신자를 찾지 못했어요: ${error.message}`);
+function renderPushRecipients(data) {
   pushRecipients = data?.items ?? [];
-  byId('push-recipient').innerHTML = `<option value="">수신자 선택</option>${pushRecipients.map((user) => `<option value="${escapeHtml(user.id)}">${escapeHtml(user.display_name || '닉네임 없음')} · ${escapeHtml(user.email)} · 기기 ${user.device_count}대</option>`).join('')}`;
-  byId('push-preview-result').textContent = pushRecipients.length ? `${data.total}명 중 ${pushRecipients.length}명을 표시하고 있어요. 검색을 좁혀 수신자 한 명을 선택해 주세요.` : '푸시 수신 설정과 활성 기기가 모두 있는 계정을 찾지 못했어요.';
+  pushRecipientTotal = Number(data?.total ?? pushRecipientTotal);
+  byId('push-recipient-results').innerHTML = pushRecipients.map((user) => `<label class="push-recipient"><input type="checkbox" data-push-user="${escapeHtml(user.id)}" ${selectedPushRecipients.has(user.id) ? 'checked' : ''}><span><strong>${escapeHtml(user.display_name || '닉네임 없음')}</strong><small>${escapeHtml(user.email)} · 활성 기기 ${user.device_count}대</small></span></label>`).join('') || '<p class="empty-admin">수신 동의와 활성 기기가 모두 있는 계정을 찾지 못했어요.</p>';
+  byId('push-recipient-count').textContent = `${selectedPushRecipients.size}명 선택됨 · 현재 검색 결과 ${pushRecipientTotal.toLocaleString('ko-KR')}명`;
+  byId('push-recipient-pagination').innerHTML = pageControl('push-recipient', pushRecipientPage, pushRecipientTotal, 50);
+  document.querySelectorAll('[data-push-user]').forEach((input) => input.addEventListener('change', () => {
+    const user = pushRecipients.find((row) => row.id === input.dataset.pushUser);
+    if (input.checked && user) selectedPushRecipients.set(user.id, user);
+    else selectedPushRecipients.delete(input.dataset.pushUser);
+    renderPushRecipients(data);
+    renderSelectedPushRecipients();
+    byId('push-preview-result').textContent = '대상·기기 수 확인을 눌러 발송 가능 대상을 다시 확인해 주세요.';
+  }));
+  document.querySelectorAll('[data-push-recipient-page]').forEach((button) => button.addEventListener('click', () => {
+    pushRecipientPage = Number(button.dataset.pushRecipientPage);
+    searchPushRecipients();
+  }));
+}
+
+function renderSelectedPushRecipients() {
+  const all = byId('target-mode-all').checked;
+  byId('push-selected-list').hidden = all || selectedPushRecipients.size === 0;
+  byId('push-selected-list').innerHTML = all ? '' : [...selectedPushRecipients.values()].map((user) => `<span class="push-selected-chip">${escapeHtml(user.display_name || user.email)} <button type="button" data-push-remove="${escapeHtml(user.id)}" aria-label="${escapeHtml(user.display_name || user.email)} 선택 해제">×</button></span>`).join('');
+  document.querySelectorAll('[data-push-remove]').forEach((button) => button.addEventListener('click', () => {
+    selectedPushRecipients.delete(button.dataset.pushRemove);
+    renderSelectedPushRecipients();
+    searchPushRecipients();
+  }));
+}
+
+async function searchPushRecipients() {
+  const { data, error } = await db.rpc('operator_list_push_recipients', { p_query: byId('push-recipient-search').value.trim() || null, p_page: pushRecipientPage, p_page_size: 50 });
+  if (error) return status(`수신자를 찾지 못했어요: ${error.message}`);
+  renderPushRecipients(data);
+  renderSelectedPushRecipients();
+}
+
+function pushAudience() {
+  return { p_target_user_ids: [...selectedPushRecipients.keys()], p_all_enabled: byId('target-mode-all').checked };
 }
 
 async function previewPushRecipient() {
-  const userId = byId('push-recipient').value;
-  if (!userId) return status('푸시를 보낼 수신자를 선택해 주세요.');
-  const { data, error } = await db.rpc('operator_preview_push', { p_target_user_id: userId });
+  const audience = pushAudience();
+  if (!audience.p_all_enabled && !audience.p_target_user_ids.length) return status('푸시를 받을 사용자를 한 명 이상 선택해 주세요.');
+  const { data, error } = await db.rpc('operator_preview_push_audience', audience);
   if (error) return status(`수신 조건을 확인하지 못했어요: ${error.message}`);
-  byId('push-preview-result').textContent = data.can_send ? `${data.display_name || '사용자'} · ${data.email} · 활성 기기 ${data.active_devices}대에 보낼 수 있어요.` : '이 사용자는 푸시를 받도록 설정하지 않았거나 활성 기기가 없어요.';
+  byId('push-preview-result').textContent = data.can_send ? `${Number(data.recipient_count).toLocaleString('ko-KR')}명 · 활성 기기 ${Number(data.device_count).toLocaleString('ko-KR')}대에 예약할 수 있어요.` : '선택 대상 중 수신 동의와 활성 기기를 모두 갖춘 계정이 없어요.';
 }
 
 async function savePushTemplate(event) {
@@ -583,20 +679,23 @@ async function savePushTemplate(event) {
 }
 
 async function schedulePushCampaign() {
-  const userId = byId('push-recipient').value;
+  const audience = pushAudience();
   const scheduledAt = new Date(byId('push-scheduled-at').value);
-  if (!userId || !byId('push-campaign-title').value.trim() || !byId('push-campaign-body').value.trim() || !byId('push-scheduled-at').value || Number.isNaN(scheduledAt.getTime())) return status('수신자·제목·내용·예약 시각을 모두 입력해 주세요.');
-  const { data: preview, error: previewError } = await db.rpc('operator_preview_push', { p_target_user_id: userId });
-  if (previewError || !preview?.can_send) return status(previewError ? `수신 상태를 확인하지 못했어요: ${previewError.message}` : '수신자의 알림 설정 또는 활성 기기를 확인해 주세요.');
-  const request = await requestReason('개별 알림 예약', `${preview.display_name || '사용자'} · ${preview.email}에게 ${dateText(scheduledAt.toISOString())} 보냅니다. 전체 발송이 아닌 선택한 한 명에게만 예약됩니다.`);
+  if ((!audience.p_all_enabled && !audience.p_target_user_ids.length) || !byId('push-campaign-title').value.trim() || !byId('push-campaign-body').value.trim() || !byId('push-scheduled-at').value || Number.isNaN(scheduledAt.getTime())) return status('받는 사람·제목·내용·예약 시각을 입력해 주세요.');
+  const { data: preview, error: previewError } = await db.rpc('operator_preview_push_audience', audience);
+  if (previewError || !preview?.can_send) return status(previewError ? `수신 상태를 확인하지 못했어요: ${previewError.message}` : '수신 동의와 활성 기기가 있는 대상이 없습니다.');
+  const audienceName = audience.p_all_enabled ? '전체 수신 동의 사용자' : `선택한 ${preview.recipient_count}명`;
+  const request = await requestReason('푸시 예약 발송', `${audienceName} 중 활성 기기가 있는 ${preview.recipient_count}명, ${preview.device_count}대에 ${dateText(scheduledAt.toISOString())} 발송합니다. 발송 대상은 예약 시점 기준으로 저장하고, 발송 직전 수신 설정을 다시 확인합니다.`);
   if (!request) return;
   const { error } = await db.rpc('operator_create_push_campaign', {
     p_title: byId('push-campaign-title').value.trim(), p_body: byId('push-campaign-body').value.trim(),
-    p_target_user_id: userId, p_scheduled_at: scheduledAt.toISOString(), p_reason: request.reason,
+    ...audience, p_scheduled_at: scheduledAt.toISOString(), p_reason: request.reason,
   });
   if (error) return status(`예약하지 못했어요: ${error.message}`);
+  selectedPushRecipients.clear();
+  renderSelectedPushRecipients();
   await loadPushOperations();
-  status('개별 알림을 예약했습니다.');
+  status('푸시 발송을 예약했습니다.');
 }
 
 async function testPushToSelf() {
@@ -623,26 +722,37 @@ async function cancelPushCampaign(id) {
 let communityPage = 1;
 let communityItems = [];
 
-function setCommunityStatuses() {
+function setCommunityStatuses(load = true) {
   const kind = byId('community-kind').value;
   const values = kind === 'recipe'
-    ? [['pending','검토 대기'],['published','공개'],['hidden','숨김'],['rejected','반려'],['draft','초안']]
-    : kind === 'review' ? [['published','공개'],['hidden','숨김']]
-      : [['open','미처리'],['resolved','처리 완료']];
+    ? [['','모든 상태'],['pending','검토 대기'],['published','공개'],['hidden','숨김'],['rejected','반려'],['draft','초안']]
+    : kind === 'review' ? [['','모든 상태'],['published','공개'],['hidden','숨김']]
+      : [['','모든 상태'],['open','미처리'],['resolved','처리 완료']];
   const select = byId('community-status');
   select.innerHTML = values.map(([value,label]) => `<option value="${value}">${label}</option>`).join('');
+  if (kind === 'recipe') select.value = 'pending';
+  else select.value = kind === 'report' ? 'open' : 'published';
   communityPage = 1;
-  loadCommunity();
+  if (load) loadCommunity();
+}
+
+function statusBadge(value) {
+  const states = {
+    pending: ['pending', '◷', '검토 대기'], published: ['published', '✓', '공개'], hidden: ['hidden', '—', '숨김'],
+    rejected: ['rejected', '×', '반려'], draft: ['draft', '·', '초안'], open: ['pending', '!', '미처리'],
+    resolved: ['resolved', '✓', '처리 완료'],
+  };
+  const [state, marker, label] = states[value] ?? ['draft', '·', value];
+  return `<span class="status-badge status--${state}" aria-label="상태: ${escapeHtml(label)}"><span aria-hidden="true">${marker}</span>${escapeHtml(label)}</span>`;
 }
 
 function communityRow(item) {
   const title = item.kind === 'report' ? item.reason : item.title || item.recipe_title || '제목 없음';
-  const statusText = { pending: '검토 대기', published: '공개', hidden: '숨김', rejected: '반려', draft: '초안', open: '미처리', resolved: '처리 완료' }[item.status] ?? item.status;
   const metadata = item.kind === 'recipe'
     ? `${item.author ?? '한끼유저'} · ${item.minutes}분 · ${item.servings}인분`
     : item.kind === 'review' ? `${item.author ?? '한끼유저'} · 별점 ${item.rating}/5`
       : `${item.recipe_id ? '레시피 신고' : '후기 신고'} · ${dateText(item.created_at)}`;
-  return `<button class="admin-record-row" type="button" data-community-open="${escapeHtml(item.id)}"><span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(metadata)}</small></span><span class="record-status">${escapeHtml(statusText)}</span></button>`;
+  return `<button class="admin-record-row" type="button" data-community-open="${escapeHtml(item.id)}"><span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(metadata)}</small></span>${statusBadge(item.status)}</button>`;
 }
 
 function renderCommunityPage(data) {
@@ -666,7 +776,7 @@ async function loadCommunity() {
   status('커뮤니티 항목을 불러오는 중이에요…');
   const { data, error } = await db.rpc('operator_list_community_items', {
     p_kind: byId('community-kind').value,
-    p_status: byId('community-status').value,
+    p_status: byId('community-status').value || null,
     p_query: byId('community-search').value.trim() || null,
     p_page: communityPage,
     p_page_size: 25,
@@ -930,17 +1040,31 @@ byId('community-search-button').addEventListener('click', () => { communityPage 
 byId('community-search').addEventListener('keydown', (event) => { if (event.key === 'Enter') { communityPage = 1; loadCommunity(); } });
 byId('users-search-button').addEventListener('click', () => { userPage = 1; loadUsers(); });
 byId('users-search').addEventListener('keydown', (event) => { if (event.key === 'Enter') { userPage = 1; loadUsers(); } });
+byId('users-provider').addEventListener('change', () => { userPage = 1; loadUsers(); });
 byId('kitchens-search-button').addEventListener('click', () => { kitchenPage = 1; loadKitchens(); });
 byId('kitchens-search').addEventListener('keydown', (event) => { if (event.key === 'Enter') { kitchenPage = 1; loadKitchens(); } });
 byId('catalog-search-button').addEventListener('click', () => { catalogPage = 1; loadCatalog(); });
 byId('catalog-search').addEventListener('keydown', (event) => { if (event.key === 'Enter') { catalogPage = 1; loadCatalog(); } });
 byId('catalog-kind').addEventListener('change', () => { catalogPage = 1; byId('catalog-detail').hidden = true; loadCatalog(); });
+byId('catalog-page-size').addEventListener('change', () => { catalogPage = 1; loadCatalog(); });
 byId('catalog-create').addEventListener('click', () => renderCatalogDetail(null, byId('catalog-kind').value));
 byId('push-refresh').addEventListener('click', loadPushOperations);
 byId('push-template-form').addEventListener('submit', savePushTemplate);
 byId('push-template-category').addEventListener('change', () => renderPushTemplate(byId('push-template-category').value));
-byId('push-recipient-search-button').addEventListener('click', searchPushRecipients);
-byId('push-recipient-search').addEventListener('keydown', (event) => { if (event.key === 'Enter') searchPushRecipients(); });
+byId('push-recipient-search-button').addEventListener('click', () => { pushRecipientPage = 1; searchPushRecipients(); });
+byId('push-recipient-search').addEventListener('keydown', (event) => { if (event.key === 'Enter') { pushRecipientPage = 1; searchPushRecipients(); } });
+byId('push-recipient-select-page').addEventListener('click', () => {
+  if (byId('target-mode-all').checked) return status('전체 발송은 현재 검색 페이지 선택이 필요하지 않아요.');
+  const additions = pushRecipients.filter((user) => !selectedPushRecipients.has(user.id));
+  if (selectedPushRecipients.size + additions.length > 500) return status('한 번에 선택할 수 있는 최대 인원은 500명입니다. 전체 수신 동의 사용자를 선택해 주세요.');
+  for (const user of pushRecipients) selectedPushRecipients.set(user.id, user);
+  renderPushRecipients({ items: pushRecipients, total: pushRecipientTotal });
+  renderSelectedPushRecipients();
+  byId('push-preview-result').textContent = '대상·기기 수 확인을 눌러 발송 가능 대상을 다시 확인해 주세요.';
+});
+byId('push-recipient-clear').addEventListener('click', () => { selectedPushRecipients.clear(); renderPushRecipients({ items: pushRecipients, total: pushRecipientTotal }); renderSelectedPushRecipients(); });
+byId('target-mode-selected').addEventListener('change', renderSelectedPushRecipients);
+byId('target-mode-all').addEventListener('change', renderSelectedPushRecipients);
 byId('push-preview').addEventListener('click', previewPushRecipient);
 byId('push-schedule').addEventListener('click', schedulePushCampaign);
 byId('push-test').addEventListener('click', testPushToSelf);

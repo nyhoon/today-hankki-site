@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const html = await readFile(new URL('./admin.html', import.meta.url), 'utf8');
+const privacyPage = await readFile(new URL('./privacy.html', import.meta.url), 'utf8');
+const termsPage = await readFile(new URL('./terms.html', import.meta.url), 'utf8');
 const script = await readFile(new URL('./admin-v3.js', import.meta.url), 'utf8');
 const css = await readFile(new URL('./styles.css', import.meta.url), 'utf8');
 const timeseriesMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002100000_operator_dashboard_timeseries.sql', import.meta.url), 'utf8').catch(() => '');
@@ -15,7 +17,11 @@ const policyMigration = await readFile(new URL('../today-hankki/supabase/migrati
 const policyBaseMigration = await readFile(new URL('../today-hankki/supabase/migrations/20260925170000_account_receipt_p0.sql', import.meta.url), 'utf8').catch(() => '');
 const policyAccessTest = await readFile(new URL('../today-hankki/supabase/tests/operator_policy_access.test.sql', import.meta.url), 'utf8').catch(() => '');
 const operatorBootstrapMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002170000_operator_bootstrap_google_moderators.sql', import.meta.url), 'utf8').catch(() => '');
+const dashboardEnhancementsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002180000_operator_dashboard_enhancements.sql', import.meta.url), 'utf8').catch(() => '');
+const userActivityMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002190000_user_activity_logging.sql', import.meta.url), 'utf8').catch(() => '');
+const userActivityConsentMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002210000_require_policy_consent_for_activity_logs.sql', import.meta.url), 'utf8').catch(() => '');
 const pushAdminFunction = await readFile(new URL('../today-hankki/supabase/functions/operator-push-admin/index.ts', import.meta.url), 'utf8').catch(() => '');
+const dispatchPushFunction = await readFile(new URL('../today-hankki/supabase/functions/dispatch-pushes/index.ts', import.meta.url), 'utf8').catch(() => '');
 const fcmShared = await readFile(new URL('../today-hankki/supabase/functions/_shared/fcm.ts', import.meta.url), 'utf8').catch(() => '');
 const authAdminFunction = await readFile(new URL('../today-hankki/supabase/functions/operator-auth-admin/index.ts', import.meta.url), 'utf8').catch(() => '');
 const destinations = ['home', 'community', 'users', 'kitchens', 'catalog', 'push', 'policies', 'operators'];
@@ -28,8 +34,8 @@ test('operator dashboard exposes eight unique destinations and guarded states', 
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261002-crud/);
-  assert.match(html, /admin-v3\.js\?v=20261002-crud/);
+  assert.match(html, /styles\.css\?v=20261002-detail/);
+  assert.match(html, /admin-v3\.js\?v=20261002-detail/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -107,15 +113,66 @@ test('catalog edits run through audited RPCs and reject unsafe data deletion or 
   assert.match(catalogMigration, /record_operator_audit/);
 });
 
-test('push operations keep tokens server-side and restrict sends to one opted-in recipient', () => {
+test('push operations keep tokens server-side and support reviewed multi-recipient audiences', () => {
   for (const rpc of ['operator_save_push_template', 'operator_list_push_operations', 'operator_preview_push', 'operator_create_push_campaign', 'operator_cancel_push_campaign', 'operator_claim_due_push_campaigns']) assert.ok(pushAdminMigration.includes(rpc), `${rpc} exists`);
   assert.match(pushAdminFunction, /community_moderator_status/);
   assert.match(pushAdminFunction, /authData\.user\.id/);
   assert.match(pushAdminFunction, /register_push_device|push_devices/);
   assert.match(fcmShared, /fcm\.googleapis\.com\/v1\/projects/);
-  assert.doesNotMatch(pushAdminFunction, /target_kind: ['"]all|broadcast/i);
+  assert.match(dashboardEnhancementsMigration, /operator_push_campaign_recipients/);
+  assert.match(dashboardEnhancementsMigration, /operator_preview_push_audience/);
+  assert.match(dashboardEnhancementsMigration, /operator_create_push_campaign\(p_title text,p_body text,p_target_user_ids uuid\[\],p_all_enabled boolean/);
+  assert.match(script, /target-mode-all/);
+  assert.match(script, /target-mode-selected/);
+  assert.match(script, /operator_preview_push_audience/);
+  assert.match(dispatchPushFunction, /operator_claim_due_push_campaigns/);
+  assert.match(dispatchPushFunction, /operator_complete_push_campaign_recipient/);
+  assert.match(dispatchPushFunction, /Maximum recipient batch/);
   assert.match(script, /async function loadPushOperations\(/);
   assert.match(script, /operator_create_push_campaign/);
+});
+
+test('account rows do not repeat mobile labels on desktop and provider search includes email, Kakao, and Google', () => {
+  assert.match(html, /id="users-provider"/);
+  assert.match(script, /p_provider:/);
+  assert.match(dashboardEnhancementsMigration, /raw_app_meta_data->'providers'/);
+  assert.match(dashboardEnhancementsMigration, /p_provider text/);
+  assert.match(css, /\.admin-table-cards td::before\{content:attr\(data-label\)/);
+  assert.doesNotMatch(css, /\n\.admin-table-cards td::before\{/);
+});
+
+test('catalog paging exposes real result ranges and configurable page sizes for the complete filtered count', () => {
+  assert.match(html, /id="catalog-page-size"/);
+  assert.match(html, /id="catalog-range"/);
+  assert.match(script, /p_page_size: pageSize/);
+  assert.match(script, /catalog-range/);
+  assert.match(catalogMigration, /'total',\(select count\(\*\) from rows\)/);
+});
+
+test('community statuses use explicit labels and high-contrast non-color cues', () => {
+  assert.match(script, /function statusBadge\(/);
+  for (const state of ['pending', 'published', 'hidden', 'rejected', 'resolved']) assert.match(css, new RegExp(`status--${state}`));
+  assert.match(css, /\.status-badge/);
+  assert.match(script, /검토 대기/);
+  assert.match(script, /처리 완료/);
+});
+
+test('dashboard headline metrics open their matching records and user details show retained core-action logs', () => {
+  assert.match(html, /data-dashboard-target=/);
+  assert.match(script, /data-dashboard-target/);
+  assert.match(script, /function openDashboardTarget\(/);
+  assert.match(script, /user\.activity/);
+  assert.match(dashboardEnhancementsMigration, /'activity'/);
+  assert.match(dashboardEnhancementsMigration, /operator_list_community_engagement/);
+  assert.match(userActivityMigration, /interval '90 days'/);
+  assert.match(userActivityMigration, /user_activity_events/);
+  assert.match(userActivityConsentMigration, /user_has_current_policies/);
+  const activityTable = userActivityMigration.match(/create table private\.user_activity_events \(([\s\S]*?)\);/);
+  assert.ok(activityTable, 'activity table is defined');
+  assert.doesNotMatch(activityTable[1], /detail|value|name|title|ingredient|quantity/i);
+  assert.match(script, /사용 기록/);
+  assert.match(script, /화면 열람은 기록하지 않으며/);
+  assert.match(script, /90일 후 삭제/);
 });
 
 test('policy, operator, audit, and health screens use immutable or append-only server routes', () => {
@@ -142,4 +199,13 @@ test('policy, operator, audit, and health screens use immutable or append-only s
   assert.match(script, /async function loadOperators\(/);
   assert.match(script, /operator_change_moderator/);
   assert.match(script, /operator_publish_policy/);
+});
+
+test('public policy pages explain the new 90-day activity log and non-verified email signup', () => {
+  assert.match(privacyPage, /2026-10-02/);
+  assert.match(privacyPage, /가입·로그인/);
+  assert.match(privacyPage, /90일 후 삭제/);
+  assert.match(privacyPage, /화면 열람 기록을 복사하지 않으며/);
+  assert.match(termsPage, /이메일 주소의 소유 여부를 확인하지 않으므로/);
+  assert.match(termsPage, /자동 연결하지 않습니다/);
 });
