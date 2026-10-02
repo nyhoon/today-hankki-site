@@ -667,6 +667,13 @@ let pushRecipients = [];
 let pushRecipientTotal = 0;
 let pushRecipientPage = 1;
 const selectedPushRecipients = new Map();
+const pushCampaignCategories = {
+  expiry: { label: '식재료 날짜 알림', destination: '재료 탭', title: '먼저 확인할 재료가 있어요', body: '표시 날짜가 가까운 재료를 재료 보관함에서 확인해보세요.' },
+  recipes: { label: '보유 재료 요리 추천', destination: '레시피 탭', title: '오늘 만들 수 있는 요리가 있어요', body: '지금 보관 중인 재료로 만들 수 있는 요리를 확인해보세요.' },
+  shopping: { label: '장보기 목록 알림', destination: '장보기 탭', title: '장볼 재료를 확인해볼까요?', body: '남아 있는 장보기 목록을 확인하고 필요한 것부터 챙겨보세요.' },
+  kitchen: { label: '오늘의 키친 소식', destination: '마이페이지의 키친', title: '키친에 새 소식이 있어요', body: '함께 쓰는 키친의 변경 내용을 확인해보세요.' },
+  operator: { label: '직접 알림', destination: '오늘 탭', title: '새로운 안내가 도착했어요', body: '오늘한끼에서 확인하고 필요한 내용을 살펴보세요.' },
+};
 const pushVariableDefinitions = {
   digest: [
     { token: '{summary}', label: '전체 요약', description: '임박 재료, 만들 수 있는 요리, 남은 장보기 항목을 한 문장으로 묶어요.' },
@@ -716,6 +723,16 @@ function updatePushTemplatePreview() {
   const clipped = expanded.slice(0, 180);
   byId('push-template-preview').textContent = clipped || '본문에 문구를 입력하면 치환 예시가 여기에 표시돼요.';
   byId('push-template-count').textContent = `${expanded.length}/180자${expanded.length > 180 ? ' · 실제 발송에서는 180자까지만 전송돼요.' : ''}${unknown.length ? ` · 지원하지 않는 변수 ${unknown.join(', ')}는 치환되지 않습니다.` : ''}`;
+}
+
+function renderPushCampaignCategory(category, fillCopy = false) {
+  const selectedCategory = pushCampaignCategories[category] ? category : 'operator';
+  const preset = pushCampaignCategories[selectedCategory];
+  byId('push-campaign-destination').textContent = `알림을 누르면 ${preset.destination}으로 이동해요.`;
+  if (fillCopy) {
+    byId('push-campaign-title').value = preset.title;
+    byId('push-campaign-body').value = preset.body;
+  }
 }
 
 function renderPushTemplate(category) {
@@ -828,20 +845,23 @@ async function savePushTemplate(event) {
 
 async function schedulePushCampaign() {
   const audience = pushAudience();
+  const category = byId('push-campaign-category').value;
+  const purpose = pushCampaignCategories[category];
   const scheduledAt = new Date(byId('push-scheduled-at').value);
   const title = byId('push-campaign-title').value.trim();
   const body = byId('push-campaign-body').value.trim();
   if (!audience.p_all_enabled && !audience.p_target_user_ids.length) return status('1단계에서 알림 받을 사용자를 골라주세요.');
+  if (!purpose) return status('알림 종류를 다시 선택해 주세요.');
   if (!title || !body) return status('2단계에서 알림 제목과 내용을 모두 적어주세요.');
   if (!byId('push-scheduled-at').value || Number.isNaN(scheduledAt.getTime())) return status('3단계에서 보낼 날짜와 시간을 정해주세요.');
   if (scheduledAt.getTime() < Date.now() + 5 * 60 * 1000) return status('예약 시간은 지금부터 5분 뒤로 정해주세요.');
   const { data: preview, error: previewError } = await db.rpc('operator_preview_push_audience', audience);
   if (previewError || !preview?.can_send) return status(previewError ? `수신 상태를 확인하지 못했어요: ${previewError.message}` : '수신 동의와 활성 기기가 있는 대상이 없습니다.');
   const audienceName = audience.p_all_enabled ? '모든 알림 동의 사용자' : `선택한 사용자 ${preview.recipient_count}명`;
-  const request = await requestReason('푸시 예약 발송', `아래 내용으로 예약할까요?\n\n제목: ${title}\n내용: ${body}\n받는 사람: ${audienceName} 중 ${preview.recipient_count}명\n휴대폰: ${preview.device_count}대\n보낼 시각: ${dateText(scheduledAt.toISOString())}\n\n발송 직전에도 알림 수신 설정을 확인합니다.`, null, null, '운영자 수동 알림 예약');
+  const request = await requestReason('푸시 예약 발송', `아래 내용으로 예약할까요?\n\n목적: ${purpose.label}\n알림을 누르면 ${purpose.destination}으로 이동합니다.\n제목: ${title}\n내용: ${body}\n받는 사람: ${audienceName} 중 ${preview.recipient_count}명\n휴대폰: ${preview.device_count}대\n보낼 시각: ${dateText(scheduledAt.toISOString())}\n\n발송 직전에도 알림 수신 설정을 확인합니다.`, null, null, '운영자 수동 알림 예약');
   if (!request) return;
   const { error } = await db.rpc('operator_create_push_campaign', {
-    p_title: title, p_body: body,
+    p_title: title, p_body: body, p_category: category,
     ...audience, p_scheduled_at: scheduledAt.toISOString(), p_reason: request.reason,
   });
   if (error) return status(`예약하지 못했어요: ${error.message}`);
@@ -852,12 +872,13 @@ async function schedulePushCampaign() {
 }
 
 async function testPushToSelf() {
+  const category = byId('push-campaign-category').value;
   const title = byId('push-campaign-title').value.trim();
   const body = byId('push-campaign-body').value.trim();
   if (!title || !body) return status('테스트할 제목과 내용을 입력해 주세요.');
-  const request = await requestReason('내 기기에 테스트 발송', '현재 로그인한 운영자 본인의 활성 기기에만 테스트 푸시를 보냅니다.');
+  const request = await requestReason('내 기기에 테스트 발송', `${pushCampaignCategories[category]?.label ?? '직접 알림'} 종류로 현재 로그인한 운영자 본인의 활성 기기에만 테스트 푸시를 보냅니다.`);
   if (!request) return;
-  const { data, error } = await db.functions.invoke('operator-push-admin', { body: { action: 'test', title, body } });
+  const { data, error } = await db.functions.invoke('operator-push-admin', { body: { action: 'test', category, title, body } });
   if (error || data?.error) return status(`테스트 발송에 실패했어요: ${data?.error || error.message}`);
   await loadPushOperations();
   status(`내 기기에 테스트를 보냈어요. 성공 ${data.sent}대 · 실패 ${data.failed}대`);
@@ -1266,6 +1287,8 @@ byId('catalog-kind').addEventListener('change', () => { catalogPage = 1; byId('c
 byId('catalog-page-size').addEventListener('change', () => { catalogPage = 1; loadCatalog(); });
 byId('catalog-create').addEventListener('click', () => renderCatalogDetail(null, byId('catalog-kind').value));
 byId('push-refresh').addEventListener('click', loadPushOperations);
+byId('push-campaign-category').addEventListener('change', () => renderPushCampaignCategory(byId('push-campaign-category').value, true));
+renderPushCampaignCategory(byId('push-campaign-category').value, true);
 byId('push-template-form').addEventListener('submit', savePushTemplate);
 byId('push-template-category').addEventListener('change', () => renderPushTemplate(byId('push-template-category').value));
 byId('push-template-body').addEventListener('input', updatePushTemplatePreview);

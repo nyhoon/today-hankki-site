@@ -36,8 +36,8 @@ test('operator dashboard exposes eight unique destinations and guarded states', 
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261002-chart-hover-1/);
-  assert.match(html, /admin-v3\.js\?v=20261002-chart-hover-1/);
+  assert.match(html, /styles\.css\?v=20261002-push-category-1/);
+  assert.match(html, /admin-v3\.js\?v=20261002-push-category-1/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -191,6 +191,20 @@ test('push sending is presented as a plain three-step flow with template tools o
   assert.match(sendFlow, /requestReason\('푸시 예약 발송'/);
   assert.match(sendFlow, /운영자 수동 알림 예약/);
   assert.match(script, /function requestReason\(title, message, confirmation = null, durationHours = null, reasonDefault = ''\)/);
+});
+
+test('push campaigns choose a purpose, preview their destination, and preserve it through confirmation and APIs', () => {
+  const categories = ['expiry', 'recipes', 'shopping', 'kitchen', 'operator'];
+  for (const category of categories) assert.match(html, new RegExp(`<option value="${category}"`));
+  assert.match(html, /id="push-campaign-destination"/);
+  assert.match(script, /const pushCampaignCategories = \{/);
+  assert.match(script, /byId\('push-campaign-category'\)/);
+  assert.match(script, /destination/);
+  const sendFlow = script.match(/async function schedulePushCampaign\(\) \{[\s\S]*?\n\}/)?.[0] || '';
+  assert.match(sendFlow, /p_category: category/);
+  assert.match(sendFlow, /목적: \$\{purpose\.label\}[\s\S]*?\$\{purpose\.destination\}/);
+  const selfTest = script.match(/async function testPushToSelf\(\) \{[\s\S]*?\n\}/)?.[0] || '';
+  assert.match(selfTest, /category, title, body/);
 });
 
 test('push operations keep tokens server-side and support reviewed multi-recipient audiences', () => {

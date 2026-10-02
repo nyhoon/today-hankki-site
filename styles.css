@@ -201,6 +201,10 @@
 .push-audience label small{color:#40564b;font-size:12px;line-height:1.45}
 .push-recipient-picker{display:grid;gap:8px;padding-top:2px}
 .push-recipient-picker .module-toolbar{margin:0;padding:0}
+.push-purpose{display:grid;max-width:520px;gap:7px;color:#40564b;font-size:13px;font-weight:700}
+.push-purpose select{min-height:46px;padding:10px 12px;border:1px solid var(--ops-line);border-radius:10px;background:#fff;color:var(--ops-text);font:inherit}
+.push-purpose select:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+.push-purpose small{color:#40564b;font-size:12px;font-weight:500;line-height:1.5}
 .push-message-fields{display:grid;gap:14px}
 .push-send-time{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px}
 .push-send-time label,.push-message-fields label{display:grid;gap:7px;color:#40564b;font-size:13px;font-weight:700}

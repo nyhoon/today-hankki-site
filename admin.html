@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>운영 대시보드 · 오늘한끼</title>
-  <link rel="stylesheet" href="styles.css?v=20261002-chart-hover-1">
+  <link rel="stylesheet" href="styles.css?v=20261002-push-category-1">
 </head>
 <body class="admin-body">
   <header class="admin-header">
@@ -122,6 +122,9 @@
               </div>
               <div class="push-step" id="push-step-2">
                 <div class="push-step-heading"><span>2</span><div><h2>어떤 알림을 보낼까요?</h2><p>잠금 화면에 보일 제목과 내용을 적어주세요.</p></div></div>
+                <label class="push-purpose">알림 종류 <select id="push-campaign-category">
+                  <option value="expiry">식재료 날짜 알림</option><option value="recipes">보유 재료 요리 추천</option><option value="shopping">장보기 목록 알림</option><option value="kitchen">오늘의 키친 소식</option><option value="operator" selected>직접 알림</option>
+                </select><small id="push-campaign-destination">알림을 누르면 오늘 탭으로 이동해요.</small></label>
                 <div class="push-message-fields"><label>알림 제목 <input id="push-campaign-title" maxlength="80" placeholder="예: 오늘 저녁은 감자전 어때요?"></label><label>알림 내용 <textarea id="push-campaign-body" rows="3" maxlength="500" placeholder="예: 냉장고에 있는 감자로 간단히 만들어보세요."></textarea></label></div>
                 <button class="secondary-button" id="push-test" type="button">내 휴대폰에 먼저 테스트 보내기</button>
               </div>
@@ -163,6 +166,6 @@
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin-v3.js?v=20261002-chart-hover-1"></script>
+  <script defer src="admin-v3.js?v=20261002-push-category-1"></script>
 </body>
 </html>
