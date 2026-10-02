@@ -224,6 +224,29 @@ function getTrendRange(grain, today = kstDate()) {
   return { from: `${year - 4}-01-01`, to: today };
 }
 
+function trendTicks(max) {
+  const ceilingValue = Math.max(1, Math.ceil(Number(max) || 0));
+  const step = Math.max(1, Math.ceil(ceilingValue / 3));
+  const ceiling = Math.ceil(ceilingValue / step) * step;
+  return [...new Set(Array.from({ length: ceiling / step + 1 }, (_, index) => index * step))];
+}
+
+function formatTrendPeriod(period, grain) {
+  const [year, month, day] = String(period).slice(0, 10).split('-').map(Number);
+  if (!year || !month) return String(period);
+  if (grain === 'year') return `${year}년`;
+  if (grain === 'month') return `${String(year).slice(-2)}.${month}`;
+  return grain === 'week' ? `${month}/${day} 주` : `${month}/${day}`;
+}
+
+function trendMarker(shape, x, y, color, label = '') {
+  const title = label ? `<title>${escapeHtml(label)}</title>` : '';
+  const stroke = 'stroke="#fffdf8" stroke-width="1.5"';
+  if (shape === 'square') return `<rect x="${x - 4}" y="${y - 4}" width="8" height="8" fill="${color}" ${stroke}>${title}</rect>`;
+  if (shape === 'triangle') return `<path d="M ${x} ${y - 5} L ${x + 5} ${y + 4} L ${x - 5} ${y + 4} Z" fill="${color}" ${stroke}>${title}</path>`;
+  return `<circle cx="${x}" cy="${y}" r="4" fill="${color}" ${stroke}>${title}</circle>`;
+}
+
 function renderTrendChart(data) {
   const chart = byId('trend-chart');
   const table = byId('trend-table');
@@ -235,30 +258,32 @@ function renderTrendChart(data) {
     return;
   }
   const series = [
-    { key: 'new_users', label: '신규 가입', color: '#173d33' },
-    { key: 'review_submissions', label: '검토 요청', color: '#718348' },
-    { key: 'moderations', label: '처리 완료', color: '#bf8064' },
+    { key: 'new_users', label: '신규 가입', color: '#2563EB', dash: '', marker: 'circle' },
+    { key: 'review_submissions', label: '검토 요청', color: '#D99A00', dash: '8 4', marker: 'square' },
+    { key: 'moderations', label: '처리 완료', color: '#DC2626', dash: '2 3', marker: 'triangle' },
   ];
   const width = 720, height = 250, left = 44, right = 14, top = 16, bottom = 35;
   const values = buckets.flatMap((bucket) => series.map(({ key }) => Number(bucket[key]) || 0));
   const max = Math.max(1, ...values);
+  const ticks = trendTicks(max);
+  const chartMax = ticks.at(-1) || 1;
   const plotWidth = width - left - right, plotHeight = height - top - bottom;
   const x = (i) => left + (buckets.length === 1 ? plotWidth / 2 : i * plotWidth / (buckets.length - 1));
-  const y = (value) => top + plotHeight - (value / max) * plotHeight;
-  const grid = Array.from({ length: 4 }, (_, i) => {
-    const value = Math.round(max * (3 - i) / 3);
-    const pos = top + i * plotHeight / 3;
+  const y = (value) => top + plotHeight - (value / chartMax) * plotHeight;
+  const grid = [...ticks].reverse().map((value, i) => {
+    const pos = top + i * plotHeight / (ticks.length - 1);
     return `<line x1="${left}" y1="${pos}" x2="${width - right}" y2="${pos}" stroke="#d9dfd3"/><text x="${left - 8}" y="${pos + 4}" text-anchor="end">${value}</text>`;
   }).join('');
-  const lines = series.map(({ key, color, label }) => {
+  const lines = series.map(({ key, color, label, dash, marker }) => {
     const points = buckets.map((bucket, index) => `${x(index)},${y(Number(bucket[key]) || 0)}`).join(' ');
-    return `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="3"/><title>${label}</title>`;
+    const markers = buckets.map((bucket, index) => trendMarker(marker, x(index), y(Number(bucket[key]) || 0), color, `${formatTrendPeriod(bucket.period, data.grain)} · ${label}: ${Number(bucket[key]) || 0}`)).join('');
+    return `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="3" ${dash ? `stroke-dasharray="${dash}"` : ''}><title>${label}</title></polyline>${markers}`;
   }).join('');
   const labelIndexes = new Set([0, Math.floor((buckets.length - 1) / 2), buckets.length - 1]);
-  const xLabels = [...labelIndexes].map((index) => `<text x="${x(index)}" y="${height - 8}" text-anchor="middle">${escapeHtml(buckets[index].period)}</text>`).join('');
-  chart.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="신규 가입, 검토 요청, 처리 완료의 기간별 추이">${grid}${lines}${xLabels}</svg><div class="trend-legend">${series.map(({ label, color }) => `<span><i style="--series-color:${color}"></i>${label}</span>`).join('')}</div>`;
+  const xLabels = [...labelIndexes].map((index) => `<text x="${x(index)}" y="${height - 8}" text-anchor="middle">${escapeHtml(formatTrendPeriod(buckets[index].period, data.grain))}</text>`).join('');
+  chart.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="신규 가입, 검토 요청, 처리 완료의 기간별 추이">${grid}${lines}${xLabels}</svg><div class="trend-legend">${series.map(({ label, color, dash, marker }) => `<span><svg viewBox="0 0 28 14" aria-hidden="true"><line x1="1" y1="7" x2="27" y2="7" stroke="${color}" stroke-width="3" ${dash ? `stroke-dasharray="${dash}"` : ''}/>${trendMarker(marker, 14, 7, color)}</svg>${label}</span>`).join('')}</div>`;
   chart.setAttribute('aria-label', '신규 가입, 검토 요청, 처리 완료의 기간별 추이');
-  table.innerHTML = `<table><caption class="sr-only">운영 활동 시계열 데이터</caption><thead><tr><th scope="col">기간</th><th scope="col">신규 가입</th><th scope="col">검토 요청</th><th scope="col">처리 완료</th></tr></thead><tbody>${buckets.map((bucket) => `<tr><th scope="row">${escapeHtml(bucket.period)}</th>${series.map(({ key }) => `<td>${Number(bucket[key]) || 0}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  table.innerHTML = `<table><caption class="sr-only">운영 활동 시계열 데이터</caption><thead><tr><th scope="col">기간</th><th scope="col">신규 가입</th><th scope="col">검토 요청</th><th scope="col">처리 완료</th></tr></thead><tbody>${buckets.map((bucket) => `<tr><th scope="row">${escapeHtml(formatTrendPeriod(bucket.period, data.grain))}</th>${series.map(({ key }) => `<td>${Number(bucket[key]) || 0}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
 
 async function loadTrend() {
@@ -416,9 +441,10 @@ async function openKitchenDetail(id) {
 
 function catalogRow(item) {
   const detail = item.detail ?? {};
-  const kind = { ingredient: '표준 식재료', source: detail.source || '외부 재료명', product: '바코드 상품', recipe: detail.published ? '공개 레시피' : '비공개 레시피' }[item.kind];
+  const kind = { ingredient: '표준 식재료', source: '식약처 원문 재료명', product: '바코드 상품', recipe: detail.published ? '공개 레시피' : '비공개 레시피' }[item.kind];
+  const sourceStatus = { candidate: '검토 후보', linked: '연결 완료', approved: '검토 승인' }[detail.review_status] || '상태 확인 필요';
   const description = item.kind === 'ingredient' ? `${detail.category} · 재고 ${detail.inventory_refs} · 레시피 ${detail.recipe_refs}`
-    : item.kind === 'source' ? `${detail.source} · ${detail.review_status} · 언급 ${detail.mention_count}회`
+    : item.kind === 'source' ? `${sourceStatus} · 언급 ${Number(detail.mention_count || 0).toLocaleString('ko-KR')}회 · ${detail.ingredient_id ? `표준 재료 연결 ${detail.ingredient_name || detail.ingredient_id}` : '표준 재료 미연결'}`
       : item.kind === 'product' ? `바코드 ${item.id} · ${detail.ingredient_id || '미연결'}`
         : `${detail.minutes}분 · ${detail.servings}인분 · 재료 ${detail.ingredient_rows?.length ?? 0}개`;
   return `<button class="admin-record-row" type="button" data-catalog-open="${escapeHtml(item.id)}"><span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(kind)} · ${escapeHtml(description)}</small></span><span class="record-status">편집</span></button>`;
@@ -439,7 +465,8 @@ function catalogDetailMarkup(kind, id, detail = {}, isNew = false, ingredients =
   if (kind === 'ingredient') {
     form = `${input('식재료 ID', 'id', id, 'text', true)}${input('표시 이름', 'name', detail.name)}${input('분류', 'category', detail.category)}${input('별칭 · 쉼표로 구분', 'aliases', (detail.aliases ?? []).join(', '), 'text', false)}${input('알레르기 유발 정보 · 쉼표로 구분', 'allergens', (detail.allergens ?? []).join(', '), 'text', false)}<p>재고 ${detail.inventory_refs ?? 0} · 레시피 ${detail.recipe_refs ?? 0} · 상품 ${detail.product_refs ?? 0} 참조</p>`;
   } else if (kind === 'source') {
-    form = `${input('원천', 'source', detail.source || 'COOKRCP01')}${input('원천 재료명', 'name', detail.name || (isNew ? '' : detail.name))}<label>표준 재료 연결<select data-field="ingredient_id">${ingredientOptions(ingredients, detail.ingredient_id)}</select></label><label>검토 상태<select data-field="review_status">${['candidate','linked','approved'].map((value) => `<option value="${value}" ${detail.review_status === value ? 'selected' : ''}>${value}</option>`).join('')}</select></label><p>원천 언급 수 ${detail.mention_count ?? 0}회</p>`;
+    const statuses = [['candidate', '검토 후보'], ['linked', '연결 완료'], ['approved', '검토 승인']];
+    form = `${input('원천', 'source', detail.source || 'COOKRCP01')}${input('원천 재료명', 'name', detail.name || (isNew ? '' : detail.name))}<label>표준 재료 연결<select data-field="ingredient_id">${ingredientOptions(ingredients, detail.ingredient_id)}</select></label><label>검토 상태<select data-field="review_status">${statuses.map(([value, label]) => `<option value="${value}" ${detail.review_status === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p>원천 언급 수 ${Number(detail.mention_count || 0).toLocaleString('ko-KR')}회</p>`;
   } else if (kind === 'product') {
     form = `${input('바코드', 'barcode', detail.barcode || id, 'text')}${input('상품명', 'name', detail.name)}<label>표준 식재료<select data-field="ingredient_id">${ingredientOptions(ingredients, detail.ingredient_id)}</select></label>${input('원천', 'source', detail.source || 'operator')}<p>재고 참조 ${detail.inventory_refs ?? 0}건</p>`;
   } else {
@@ -585,6 +612,57 @@ let pushRecipients = [];
 let pushRecipientTotal = 0;
 let pushRecipientPage = 1;
 const selectedPushRecipients = new Map();
+const pushVariableDefinitions = {
+  digest: [
+    { token: '{summary}', label: '전체 요약', description: '임박 재료, 만들 수 있는 요리, 남은 장보기 항목을 한 문장으로 묶어요.' },
+    { token: '{expiry_items}', label: '임박 재료', description: '재료명과 남은 날짜를 최대 3개까지 표시해요.' },
+    { token: '{recipe_titles}', label: '추천 요리', description: '보유 재료로 만들 수 있는 요리명을 최대 3개까지 표시해요.' },
+    { token: '{shopping_items}', label: '장보기 목록', description: '아직 체크하지 않은 장보기 재료를 최대 3개까지 표시해요.' },
+  ],
+  kitchen: [
+    { token: '{event_count}', label: '새 소식 수', description: '키친에 도착한 새 소식 개수예요.' },
+  ],
+};
+const pushVariableExamples = {
+  '{summary}': '날짜가 가까운 재료: 계란 (3일 남음) · 만들 수 있는 요리: 감자전, 달걀국 · 장보기: 우유, 양파',
+  '{expiry_items}': '계란 (3일 남음), 소고기 (오늘), 후추 (1일 남음)',
+  '{recipe_titles}': '감자전, 달걀국, 두부조림',
+  '{shopping_items}': '우유, 양파, 당근',
+  '{event_count}': '2',
+};
+
+function renderPushVariableHelp(category) {
+  const variables = pushVariableDefinitions[category] ?? [];
+  byId('push-variable-buttons').innerHTML = variables.map(({ token, label }) => `<button class="push-variable-chip" type="button" data-push-variable="${token}" title="${escapeHtml(token)} 삽입">${escapeHtml(label)} <code>${escapeHtml(token)}</code></button>`).join('');
+  byId('push-template-guide').textContent = variables.map(({ token, description }) => `${token}: ${description}\n치환 예시: ${token} → ${pushVariableExamples[token]}`).join('\n\n')
+    + '\n\n변수는 내용에서만 치환되고, 해당 데이터가 없으면 빈 문자열이 됩니다. 최종 내용은 180자까지만 전송됩니다.';
+  document.querySelectorAll('[data-push-variable]').forEach((button) => button.addEventListener('click', () => insertPushVariable(button.dataset.pushVariable)));
+}
+
+function insertPushVariable(token) {
+  const body = byId('push-template-body');
+  const start = body.selectionStart ?? body.value.length;
+  const end = body.selectionEnd ?? start;
+  const next = `${body.value.slice(0, start)}${token}${body.value.slice(end)}`;
+  if (next.length > Number(body.maxLength)) return status('변수를 넣으면 문구 입력 한도 180자를 넘어요.');
+  body.value = next;
+  body.focus();
+  body.setSelectionRange(start + token.length, start + token.length);
+  updatePushTemplatePreview();
+}
+
+function updatePushTemplatePreview() {
+  const category = byId('push-template-category').value;
+  const variables = pushVariableDefinitions[category] ?? [];
+  const supported = new Set(variables.map(({ token }) => token));
+  const body = byId('push-template-body').value;
+  const unknown = [...body.matchAll(/\{[^{}]+\}/g)].map(([token]) => token).filter((token) => !supported.has(token));
+  const expanded = variables.reduce((text, { token }) => text.replaceAll(token, pushVariableExamples[token]), body).trim();
+  const clipped = expanded.slice(0, 180);
+  byId('push-template-preview').textContent = clipped || '본문에 문구를 입력하면 치환 예시가 여기에 표시돼요.';
+  byId('push-template-count').textContent = `${expanded.length}/180자${expanded.length > 180 ? ' · 실제 발송에서는 180자까지만 전송돼요.' : ''}${unknown.length ? ` · 지원하지 않는 변수 ${unknown.join(', ')}는 치환되지 않습니다.` : ''}`;
+}
+
 function renderPushTemplate(category) {
   const template = pushTemplates.find((item) => item.category === category);
   if (!template) return;
@@ -592,6 +670,8 @@ function renderPushTemplate(category) {
   byId('push-template-title').value = template.title;
   byId('push-template-body').value = template.body;
   byId('push-template-enabled').checked = template.enabled;
+  renderPushVariableHelp(category);
+  updatePushTemplatePreview();
 }
 
 async function loadPushOperations() {
@@ -724,6 +804,8 @@ let communityItems = [];
 
 function setCommunityStatuses(load = true) {
   const kind = byId('community-kind').value;
+  byId('community-rating-filter-wrap').hidden = kind !== 'review';
+  byId('community-rating-filter').value = '';
   const values = kind === 'recipe'
     ? [['','모든 상태'],['pending','검토 대기'],['published','공개'],['hidden','숨김'],['rejected','반려'],['draft','초안']]
     : kind === 'review' ? [['','모든 상태'],['published','공개'],['hidden','숨김']]
@@ -746,13 +828,44 @@ function statusBadge(value) {
   return `<span class="status-badge status--${state}" aria-label="상태: ${escapeHtml(label)}"><span aria-hidden="true">${marker}</span>${escapeHtml(label)}</span>`;
 }
 
+function statusText(value) {
+  return ({ draft: '초안', pending: '검토 대기', published: '공개', hidden: '숨김', rejected: '반려', open: '미처리', resolved: '처리 완료' })[value] || value;
+}
+
+function providerText(value) {
+  const labels = { google: 'Google', kakao: '카카오', email: '일반 이메일' };
+  const providers = Array.isArray(value) ? value : value ? [value] : [];
+  return providers.map((provider) => labels[provider] || provider).join(' · ') || '로그인 정보 없음';
+}
+
+function communityStatusOptions(item) {
+  if (item.kind === 'recipe') {
+    if (item.status === 'pending') return [['publish', '승인·공개'], ['reject', '반려']];
+    if (item.status === 'published') return [['hide', '숨김']];
+    if (item.status === 'hidden') return [['restore', '공개 복구']];
+    if (item.status === 'rejected') return [['pending', '검토 대기로 이동']];
+  }
+  if (item.kind === 'review') return item.status === 'published' ? [['hide', '후기 숨김']] : item.status === 'hidden' ? [['restore', '후기 복구']] : [];
+  if (item.kind === 'report' && item.status === 'open') return [['content_hidden', '신고 콘텐츠 숨김'], ['dismissed', '신고 기각']];
+  return [];
+}
+
+function ratingStars(value) {
+  const rating = Math.max(0, Math.min(5, Number(value) || 0));
+  return `<span class="rating-stars" aria-label="별점 ${rating}점"><span aria-hidden="true">${'★'.repeat(rating)}<span class="rating-stars-empty">${'☆'.repeat(5 - rating)}</span></span><b>${rating}/5</b></span>`;
+}
+
 function communityRow(item) {
-  const title = item.kind === 'report' ? item.reason : item.title || item.recipe_title || '제목 없음';
-  const metadata = item.kind === 'recipe'
-    ? `${item.author ?? '한끼유저'} · ${item.minutes}분 · ${item.servings}인분`
-    : item.kind === 'review' ? `${item.author ?? '한끼유저'} · 별점 ${item.rating}/5`
-      : `${item.recipe_id ? '레시피 신고' : '후기 신고'} · ${dateText(item.created_at)}`;
-  return `<button class="admin-record-row" type="button" data-community-open="${escapeHtml(item.id)}"><span><strong>${escapeHtml(title)}</strong><small>${escapeHtml(metadata)}</small></span>${statusBadge(item.status)}</button>`;
+  const title = item.kind === 'report' ? item.title || item.reason : item.title || item.recipe_title || '제목 없음';
+  const author = item.kind === 'report' ? `신고자 ${item.reporter ?? '계정 정보 없음'} · 대상 작성자 ${item.author ?? '계정 정보 없음'}` : item.author ?? '한끼유저';
+  const email = item.kind === 'report' ? `${item.reporter_email ?? '이메일 없음'} · 대상 ${item.author_email ?? '이메일 없음'}` : item.author_email ?? '이메일 없음';
+  const providers = item.kind === 'report' ? `${providerText(item.reporter_providers)} · 대상 ${providerText(item.author_providers)}` : providerText(item.author_providers);
+  const detail = item.kind === 'recipe' ? `${item.minutes}분 · ${item.servings}인분 · 좋아요 ${item.like_count ?? 0} · 후기 ${item.review_count ?? 0} · ${item.average_rating == null ? '별점 없음' : `평균 ★${Number(item.average_rating).toFixed(1)}`} · ${dateText(item.submitted_at || item.created_at)}`
+    : item.kind === 'review' ? `${dateText(item.created_at)} · ${ratingStars(item.rating)}` : `${item.recipe_id ? '레시피 신고' : '후기 신고'} · ${dateText(item.created_at)}`;
+  const excerpt = item.kind === 'recipe' ? item.summary : item.kind === 'review' ? item.body_preview : item.reason;
+  const actions = communityStatusOptions(item);
+  const menu = actions.length ? `<div class="community-status-menu" data-community-status-menu="${escapeHtml(item.id)}" hidden>${actions.map(([action, label]) => `<button type="button" data-community-status-action="${escapeHtml(action)}" data-community-id="${escapeHtml(item.id)}">${escapeHtml(label)}</button>`).join('')}</div>` : '';
+  return `<article class="admin-record-row community-row"><button class="community-row-main" type="button" data-community-open="${escapeHtml(item.id)}"><strong>${escapeHtml(title)}</strong><small>${escapeHtml(author)} · ${escapeHtml(email)} · ${escapeHtml(providers)} · ${escapeHtml(detail)}</small>${excerpt ? `<span class="community-excerpt">${escapeHtml(excerpt)}</span>` : ''}</button><div class="community-row-actions"><button class="community-status-control" type="button" data-community-status="${escapeHtml(item.id)}" aria-expanded="false" ${actions.length ? '' : 'disabled'}>${statusBadge(item.status)}<span class="sr-only">상태 관리</span></button>${menu}</div></article>`;
 }
 
 function renderCommunityPage(data) {
@@ -769,6 +882,20 @@ function renderCommunityPage(data) {
     communityPage = Number(button.dataset.communityPage);
     loadCommunity();
   }));
+  document.querySelectorAll('[data-community-status]').forEach((button) => button.addEventListener('click', () => {
+    const menu = document.querySelector(`[data-community-status-menu="${button.dataset.communityStatus}"]`);
+    const opening = menu?.hidden;
+    document.querySelectorAll('[data-community-status-menu]').forEach((item) => { item.hidden = true; });
+    document.querySelectorAll('[data-community-status]').forEach((item) => item.setAttribute('aria-expanded', 'false'));
+    if (menu && opening) {
+      menu.hidden = false;
+      button.setAttribute('aria-expanded', 'true');
+    }
+  }));
+  document.querySelectorAll('[data-community-status-action]').forEach((button) => button.addEventListener('click', () => {
+    const item = communityItems.find((row) => row.id === button.dataset.communityId);
+    if (item) moderateCommunityStatus(item, button.dataset.communityStatusAction);
+  }));
 }
 
 async function loadCommunity() {
@@ -780,6 +907,7 @@ async function loadCommunity() {
     p_query: byId('community-search').value.trim() || null,
     p_page: communityPage,
     p_page_size: 25,
+    p_rating: byId('community-kind').value === 'review' && byId('community-rating-filter').value ? Number(byId('community-rating-filter').value) : null,
   });
   if (error) return status(`커뮤니티 목록을 불러오지 못했어요: ${error.message}`);
   renderCommunityPage(data ?? { total: 0, items: [] });
@@ -791,6 +919,7 @@ function actionButtons(item) {
     if (item.status === 'pending') return '<button class="button" data-community-action="publish">승인</button><button class="danger-button" data-community-action="reject">반려</button>';
     if (item.status === 'published') return '<button class="danger-button" data-community-action="hide">숨김</button>';
     if (item.status === 'hidden') return '<button class="button" data-community-action="restore">복구</button>';
+    if (item.status === 'rejected') return '<button class="button" data-community-action="pending">검토 대기로 이동</button>';
   }
   if (item.kind === 'review' && item.status === 'published') return '<button class="danger-button" data-community-action="hide">후기 숨김</button>';
   if (item.kind === 'review' && item.status === 'hidden') return '<button class="button" data-community-action="restore">후기 복구</button>';
@@ -800,17 +929,21 @@ function actionButtons(item) {
 
 function communityDetailMarkup(item) {
   const title = item.kind === 'report' ? '신고 상세' : item.kind === 'review' ? '후기 상세' : '레시피 상세';
+  const userLink = (id, text) => id ? `<button class="community-user-link" data-community-user="${escapeHtml(id)}" type="button">${escapeHtml(text)}</button>` : escapeHtml(text);
+  const identity = item.kind === 'report'
+    ? `<p class="community-author-detail">신고자 ${userLink(item.reporter_user_id, item.reporter || '계정 정보 없음')} · ${escapeHtml(item.reporter_email || '이메일 없음')} · ${escapeHtml(providerText(item.reporter_providers))}</p><p class="community-author-detail">대상 작성자 ${userLink(item.author_user_id, item.author || '계정 정보 없음')} · ${escapeHtml(item.author_email || '이메일 없음')} · ${escapeHtml(providerText(item.author_providers))}</p>`
+    : `<p class="community-author-detail">작성자 ${userLink(item.author_user_id, item.author || '한끼유저')} · ${escapeHtml(item.author_email || '이메일 없음')} · ${escapeHtml(providerText(item.author_providers))}</p>`;
   let content = '';
   if (item.kind === 'recipe') {
     const ingredients = (item.ingredients ?? []).map((row) => `<li>${escapeHtml(row.name)} <span>${escapeHtml(row.amount)}</span></li>`).join('');
     const steps = (item.steps ?? []).map((step, index) => `<li>${escapeHtml(step.text)}${step.photo_path ? `<img class="admin-recipe-photo" data-storage-path="${escapeHtml(step.photo_path)}" alt="${index + 1}단계 사진">` : ''}</li>`).join('');
-    content = `<p>${escapeHtml(item.summary)}</p>${item.cover_path ? `<img class="admin-recipe-photo" data-storage-path="${escapeHtml(item.cover_path)}" alt="레시피 대표 사진">` : '<p class="empty-admin">사진 없이 등록된 레시피입니다.</p>'}<h3>재료</h3><ul>${ingredients}</ul><h3>조리 단계</h3><ol>${steps}</ol>`;
+    content = `<p>${escapeHtml(item.summary)}</p><p class="community-engagement">좋아요 ${escapeHtml(item.like_count ?? 0)} · 후기 ${escapeHtml(item.review_count ?? 0)} · ${item.average_rating == null ? '평가 없음' : `평균 별점 ${escapeHtml(Number(item.average_rating).toFixed(1))}/5`}</p>${item.cover_path ? `<img class="admin-recipe-photo" data-storage-path="${escapeHtml(item.cover_path)}" alt="레시피 대표 사진">` : '<p class="empty-admin">사진 없이 등록된 레시피입니다.</p>'}<h3>재료</h3><ul>${ingredients}</ul><h3>조리 단계</h3><ol>${steps}</ol>`;
   } else if (item.kind === 'review') {
-    content = `<p>레시피: ${escapeHtml(item.recipe_title)}</p><p>작성자: ${escapeHtml(item.author)} · 별점 ${escapeHtml(item.rating)}/5</p><blockquote>${escapeHtml(item.body)}</blockquote>`;
+    content = `<p>레시피: ${escapeHtml(item.recipe_title)}</p><p>${ratingStars(item.rating)}</p><blockquote>${escapeHtml(item.body)}</blockquote>`;
   } else {
     content = `<p>신고 사유</p><blockquote>${escapeHtml(item.reason)}</blockquote><p>대상: ${escapeHtml(item.recipe_title || '후기')}</p>${item.review_body ? `<blockquote>${escapeHtml(item.review_body)}</blockquote>` : ''}${item.cover_path ? `<img class="admin-recipe-photo" data-storage-path="${escapeHtml(item.cover_path)}" alt="신고된 레시피 사진">` : ''}${item.steps?.length ? `<ol>${item.steps.map((step,index) => `<li>${escapeHtml(step.text)}${step.photo_path ? `<img class="admin-recipe-photo" data-storage-path="${escapeHtml(step.photo_path)}" alt="${index + 1}단계 사진">` : ''}</li>`).join('')}</ol>` : ''}<p>등록 ${escapeHtml(dateText(item.created_at))}</p>${item.resolution ? `<p>처리: ${escapeHtml(item.resolution)} · ${escapeHtml(item.resolution_note)}</p>` : ''}`;
   }
-  return `<button class="detail-close secondary-button" type="button" data-community-close>닫기</button><p class="eyebrow">${escapeHtml(item.status)}</p><h2>${escapeHtml(item.title || item.reason || item.recipe_title || title)}</h2><p class="detail-kind">${title}</p>${content}<div class="review-actions detail-actions">${actionButtons(item)}</div>`;
+  return `<button class="detail-close secondary-button" type="button" data-community-close>닫기</button><p class="eyebrow">${escapeHtml(statusText(item.status))}</p><h2>${escapeHtml(item.title || item.reason || item.recipe_title || title)}</h2><p class="detail-kind">${title}</p>${identity}<p class="detail-kind">등록 ${escapeHtml(dateText(item.created_at || item.submitted_at))}</p>${content}<div class="review-actions detail-actions">${actionButtons(item)}</div>`;
 }
 
 async function openCommunityDetail(summary) {
@@ -826,23 +959,33 @@ async function openCommunityDetail(summary) {
   const item = data;
   detail.innerHTML = communityDetailMarkup(item);
   detail.querySelector('[data-community-close]').addEventListener('click', () => { detail.hidden = true; });
+  detail.querySelectorAll('[data-community-user]').forEach((button) => button.addEventListener('click', () => {
+    detail.hidden = true;
+    navigateAdminPage('users');
+    openUserDetail(button.dataset.communityUser);
+  }));
   detail.querySelectorAll('[data-storage-path]').forEach(async (image) => {
     const { data, error } = await db.storage.from('community-recipe-photos').createSignedUrl(image.dataset.storagePath, 900);
     if (error) image.replaceWith(document.createTextNode('사진을 불러오지 못했어요.'));
     else image.src = data.signedUrl;
   });
-  detail.querySelectorAll('[data-community-action]').forEach((button) => button.addEventListener('click', () => moderateCommunityItem(item, button.dataset.communityAction)));
+  detail.querySelectorAll('[data-community-action]').forEach((button) => button.addEventListener('click', () => moderateCommunityStatus(item, button.dataset.communityAction)));
 }
 
-async function moderateCommunityItem(item, action) {
-  const label = { publish: '레시피 승인', reject: '레시피 반려', hide: '콘텐츠 숨김', restore: '콘텐츠 복구', content_hidden: '신고 콘텐츠 숨김', dismissed: '신고 기각' }[action];
-  const request = await requestReason(label, '처리 내용과 사유를 운영 기록에 남깁니다. 사유를 입력해 주세요.');
+async function moderateCommunityStatus(item, action) {
+  const label = { publish: '레시피 승인', reject: '레시피 반려', pending: '검토 대기로 이동', hide: '콘텐츠 숨김', restore: '콘텐츠 복구', content_hidden: '신고 콘텐츠 숨김', dismissed: '신고 기각' }[action];
+  const nextStatus = { publish: '공개', reject: '반려', pending: '검토 대기', hide: '숨김', restore: '공개', content_hidden: '신고 콘텐츠 숨김', dismissed: '신고 기각' }[action];
+  const subject = item.title || item.recipe_title || item.reason || (item.kind === 'review' ? '후기' : '콘텐츠');
+  const author = item.author ? `${item.author}${item.author_email ? ` · ${item.author_email}` : ''} · ${providerText(item.author_providers)}` : '계정 정보 없음';
+  const reporter = item.reporter ? `${item.reporter}${item.reporter_email ? ` · ${item.reporter_email}` : ''} · ${providerText(item.reporter_providers)}` : '';
+  const confirmation = item.kind === 'report' ? `신고자: ${reporter || '계정 정보 없음'}\n대상 작성자: ${author}` : `작성자: ${author}`;
+  const request = await requestReason(label, `${subject}\n${confirmation}\n현재 상태: ${statusText(item.status)} → 변경 상태: ${nextStatus}\n정말 변경할까요? 운영 기록에 남길 사유를 입력해 주세요.`);
   if (!request) return;
   const { reason } = request;
   status('변경을 저장하는 중이에요…');
   let result;
   if (item.kind === 'recipe') {
-    const decision = action === 'publish' || action === 'restore' ? 'published' : action === 'reject' ? 'rejected' : 'hidden';
+    const decision = action === 'publish' || action === 'restore' ? 'published' : action === 'reject' ? 'rejected' : action === 'pending' ? 'pending' : 'hidden';
     result = await db.rpc('operator_moderate_community_recipe', { p_recipe_id: item.id, p_decision: decision, p_reason: reason });
   } else if (item.kind === 'review') {
     result = await db.rpc('operator_moderate_community_review', { p_review_id: item.id, p_action: action, p_reason: reason });
@@ -951,7 +1094,7 @@ async function deletePolicyDraft() {
 }
 
 function renderOperators() {
-  byId('moderator-list').innerHTML = operatorRows.map((operator) => `<article class="compact-row"><span><strong>${escapeHtml(operator.display_name || operator.email)}</strong><small>${escapeHtml(operator.email)} · 등록 ${escapeHtml(dateText(operator.added_at))}${operator.last_action ? ` · 최근 작업 ${escapeHtml(dateText(operator.last_action))}` : ''}</small></span><button class="danger-button" data-moderator-remove="${escapeHtml(operator.id)}" type="button" ${operator.id === operatorUserId ? 'disabled title="현재 로그인 계정은 여기서 해제할 수 없습니다."' : ''}>권한 해제</button></article>`).join('') || '<p class="empty-admin">등록된 운영자가 없습니다.</p>';
+  byId('moderator-list').innerHTML = operatorRows.map((operator) => `<article class="compact-row"><span><strong>${escapeHtml(operator.display_name || operator.email)}</strong><small>${escapeHtml(operator.email)} · ${escapeHtml(providerText(operator.providers))} · 등록 ${escapeHtml(dateText(operator.added_at))}${operator.last_action ? ` · 최근 작업 ${escapeHtml(dateText(operator.last_action))}` : ''}</small></span><button class="danger-button" data-moderator-remove="${escapeHtml(operator.id)}" type="button" ${operator.id === operatorUserId ? 'disabled title="현재 로그인 계정은 여기서 해제할 수 없습니다."' : ''}>권한 해제</button></article>`).join('') || '<p class="empty-admin">등록된 운영자가 없습니다.</p>';
   document.querySelectorAll('[data-moderator-remove]').forEach((button) => button.addEventListener('click', () => changeModerator(button.dataset.moderatorRemove, false)));
 }
 
@@ -1036,6 +1179,7 @@ byId('refresh').addEventListener('click', loadDashboard);
 byId('trend-grain').addEventListener('change', loadTrend);
 byId('community-kind').addEventListener('change', setCommunityStatuses);
 byId('community-status').addEventListener('change', () => { communityPage = 1; loadCommunity(); });
+byId('community-rating-filter').addEventListener('change', () => { communityPage = 1; loadCommunity(); });
 byId('community-search-button').addEventListener('click', () => { communityPage = 1; loadCommunity(); });
 byId('community-search').addEventListener('keydown', (event) => { if (event.key === 'Enter') { communityPage = 1; loadCommunity(); } });
 byId('users-search-button').addEventListener('click', () => { userPage = 1; loadUsers(); });
@@ -1051,6 +1195,7 @@ byId('catalog-create').addEventListener('click', () => renderCatalogDetail(null,
 byId('push-refresh').addEventListener('click', loadPushOperations);
 byId('push-template-form').addEventListener('submit', savePushTemplate);
 byId('push-template-category').addEventListener('change', () => renderPushTemplate(byId('push-template-category').value));
+byId('push-template-body').addEventListener('input', updatePushTemplatePreview);
 byId('push-recipient-search-button').addEventListener('click', () => { pushRecipientPage = 1; searchPushRecipients(); });
 byId('push-recipient-search').addEventListener('keydown', (event) => { if (event.key === 'Enter') { pushRecipientPage = 1; searchPushRecipients(); } });
 byId('push-recipient-select-page').addEventListener('click', () => {

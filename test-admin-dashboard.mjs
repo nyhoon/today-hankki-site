@@ -9,9 +9,11 @@ const script = await readFile(new URL('./admin-v3.js', import.meta.url), 'utf8')
 const css = await readFile(new URL('./styles.css', import.meta.url), 'utf8');
 const timeseriesMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002100000_operator_dashboard_timeseries.sql', import.meta.url), 'utf8').catch(() => '');
 const communityMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002120000_operator_community.sql', import.meta.url), 'utf8').catch(() => '');
+const communityAdminMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002220000_operator_community_admin_details.sql', import.meta.url), 'utf8').catch(() => '');
 const auditMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002110000_operator_audit_log.sql', import.meta.url), 'utf8').catch(() => '');
 const usersKitchensMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002130000_operator_users_kitchens.sql', import.meta.url), 'utf8').catch(() => '');
 const catalogMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002140000_operator_catalog.sql', import.meta.url), 'utf8').catch(() => '');
+const catalogSourceLabelsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002240000_operator_catalog_source_labels.sql', import.meta.url), 'utf8').catch(() => '');
 const pushAdminMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002150000_operator_push_admin.sql', import.meta.url), 'utf8').catch(() => '');
 const policyMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002160000_operator_policy_access.sql', import.meta.url), 'utf8').catch(() => '');
 const policyBaseMigration = await readFile(new URL('../today-hankki/supabase/migrations/20260925170000_account_receipt_p0.sql', import.meta.url), 'utf8').catch(() => '');
@@ -34,8 +36,8 @@ test('operator dashboard exposes eight unique destinations and guarded states', 
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261002-detail/);
-  assert.match(html, /admin-v3\.js\?v=20261002-detail/);
+  assert.match(html, /styles\.css\?v=20261002-community-ops-2/);
+  assert.match(html, /admin-v3\.js\?v=20261002-community-ops-2/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -52,9 +54,19 @@ test('operator forms use unique control IDs and cap notification templates at th
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(ids).size, ids.length, 'HTML control IDs are unique');
   assert.match(html, /id="push-template-body"[^>]*maxlength="180"/);
+  assert.match(html, /변수는 제목에서 치환되지 않습니다/);
   assert.match(script, /id="policy-body"/);
   assert.match(html, /id="operator-search"/);
+  assert.doesNotMatch(html, /id="kakao-login"|id="operator-email-login"/);
   assert.match(html, /id="audit-action"/);
+  assert.match(html, /id="push-variable-buttons"/);
+  assert.match(html, /id="push-template-preview"/);
+  assert.match(script, /function insertPushVariable\(/);
+  assert.match(script, /function updatePushTemplatePreview\(/);
+  assert.match(script, /치환 예시: \$\{token\} → \$\{pushVariableExamples\[token\]\}/);
+  assert.match(script, /body\.selectionStart/);
+  assert.match(script, /body\.selectionEnd/);
+  assert.match(script, /실제 발송에서는 180자까지만/);
 });
 
 test('home chart uses a manual KST series query with an accessible data table', () => {
@@ -63,6 +75,25 @@ test('home chart uses a manual KST series query with an accessible data table', 
   assert.match(script, /operator_dashboard_timeseries/);
   assert.match(script, /function renderTrendChart\(/);
   assert.match(script, /function getTrendRange\(/);
+  assert.match(script, /function formatTrendPeriod\(/);
+  assert.match(script, /#2563EB/);
+  assert.match(script, /#D99A00/);
+  assert.match(script, /#DC2626/);
+  assert.match(script, /function trendTicks\(/);
+  assert.match(script, /marker: 'circle'/);
+  assert.match(script, /marker: 'square'/);
+  assert.match(script, /marker: 'triangle'/);
+  assert.match(script, /function trendMarker\(/);
+  const tickFunction = script.match(/function trendTicks\(max\) \{[\s\S]*?\n\}/)?.[0];
+  assert.ok(tickFunction, 'tick calculation is present');
+  const trendTicks = new Function(`${tickFunction}; return trendTicks;`)();
+  for (const max of [0, 1, 2, 3, 4, 5, 10, 99, 1000]) {
+    const ticks = trendTicks(max);
+    assert.equal(new Set(ticks).size, ticks.length, `ticks are unique for max ${max}`);
+    assert.equal(ticks[0], 0);
+    assert.ok(ticks.at(-1) >= max);
+    assert.ok(ticks.length >= 2);
+  }
   assert.match(timeseriesMigration, /operator_dashboard_timeseries/);
   for (const grain of ['day', 'week', 'month', 'year']) assert.match(timeseriesMigration, new RegExp(`'${grain}'`));
   assert.match(timeseriesMigration, /Asia\/Seoul/);
@@ -77,6 +108,19 @@ test('community screen uses paged operator RPCs and keeps recipe photos optional
   assert.match(script, /operator_list_community_items/);
   assert.match(script, /operator_get_community_item/);
   assert.match(script, /openCommunityDetail/);
+  assert.match(script, /data-community-status/);
+  assert.match(script, /function communityStatusOptions\(/);
+  assert.match(script, /function moderateCommunityStatus\(/);
+  assert.match(communityAdminMigration, /author_email/);
+  assert.match(communityAdminMigration, /author_provider/);
+  assert.match(communityAdminMigration, /'body',v\.body/);
+  assert.match(communityAdminMigration, /'recipe_title',r\.title/);
+  assert.match(communityAdminMigration, /'body_preview',left\(v\.body,220\)/);
+  assert.match(communityAdminMigration, /and \(p_rating is null or rating=p_rating\)/);
+  assert.match(script, /p_rating:/);
+  assert.match(script, /item\.body_preview/);
+  assert.match(script, /item\.kind === 'review' && item\.status === 'hidden'.*후기 복구/s);
+  assert.match(communityAdminMigration, /'reporter_email'/);
   assert.match(communityMigration, /r\.cover_path is not null/);
   assert.match(communitySubmit, /not \(select private\.has_current_policies\(\)\)/);
   assert.match(communityMigration, /record_operator_audit/);
@@ -111,6 +155,14 @@ test('catalog edits run through audited RPCs and reject unsafe data deletion or 
   assert.match(script, /operator_save_official_recipe/);
   assert.match(script, /operator_merge_ingredients/);
   assert.match(catalogMigration, /record_operator_audit/);
+  assert.match(script, /function catalogRow\(/);
+  assert.match(script, /검토 후보/);
+  assert.match(script, /표준 재료 연결 \$\{detail\.ingredient_name \|\| detail\.ingredient_id\}/);
+  assert.match(catalogSourceLabelsMigration, /'ingredient_name',i\.name/);
+  assert.doesNotMatch(catalogSourceLabelsMigration, /\b(update|insert|delete)\s+public\.source_ingredient_names\b/i);
+  const sourceRow = script.match(/function catalogRow\(item\) \{[\s\S]*?\n\}/)?.[0] || '';
+  assert.equal((sourceRow.match(/escapeHtml\(item\.name\)/g) ?? []).length, 1, 'source name appears once in each catalog row');
+  assert.doesNotMatch(script, /\$\{kind\} · \$\{escapeHtml\(description\)\}/);
 });
 
 test('push operations keep tokens server-side and support reviewed multi-recipient audiences', () => {
@@ -139,6 +191,18 @@ test('account rows do not repeat mobile labels on desktop and provider search in
   assert.match(dashboardEnhancementsMigration, /p_provider text/);
   assert.match(css, /\.admin-table-cards td::before\{content:attr\(data-label\)/);
   assert.doesNotMatch(css, /\n\.admin-table-cards td::before\{/);
+});
+
+test('operator login and grant flow remain Google-only', () => {
+  assert.match(html, /등록된 Google 운영자 계정만/);
+  assert.match(html, /Google 계정 검색/);
+  assert.match(script, /operator_list_google_accounts/);
+  assert.match(script, /provider: 'google'/);
+  assert.doesNotMatch(script, /operator_list_moderator_accounts/);
+  const moderatorFlow = script.match(/async function changeModerator\([\s\S]*?\n\}/)?.[0] || '';
+  assert.match(moderatorFlow, /operator_change_moderator/);
+  assert.doesNotMatch(moderatorFlow, /p_confirmation/);
+  assert.doesNotMatch(html, /Google·카카오·이메일 로그인 계정/);
 });
 
 test('catalog paging exposes real result ranges and configurable page sizes for the complete filtered count', () => {
