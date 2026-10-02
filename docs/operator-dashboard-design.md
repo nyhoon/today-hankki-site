@@ -114,4 +114,4 @@
 
 검증 결과: `node --check admin-v3.js` 통과, 대시보드·제철 페이지 Node 테스트 11/11 통과, 로컬 `/admin.html` HTTP 200. 앱 저장소에서는 Flutter 분석과 테스트 86개, 푸시 로직 테스트 8개, PGlite 전체 40개 migration 적용 및 DB 스모크 검사 31개가 통과했다. 운영자 권한 pgTAP 23개와 커뮤니티 pgTAP 15개는 작성했지만 Docker 기반 로컬 Supabase가 없어 실행하지 못했다. Deno Edge 런타임 검사와 브라우저 375–1440px/키보드 시각 검수도 미완료다.
 
-운영 Supabase에는 migration을 적용하지 않았다. `main:/`이 GitHub Pages 공개 원본이므로 사이트 저장소를 푸시하면 대시보드와 제철 페이지가 자동 발행된다. Figma 파일은 만들었지만 MCP 쓰기 한도에 막혀 화면 레이어를 저장하지 못했다. 정적 SVG 시안은 앱 저장소의 설계 문서에 보관한다. 추천·제철 데이터의 앱 추천 연동은 후속 작업이다.
+2026-10-02 운영 Supabase에 8개 migration을 적용하고 계정 관리·테스트 푸시용 Edge Function 2개를 JWT 검증으로 배포했다. 익명 호출은 스키마 오류 없이 권한 거부됨을 확인했다. `main:/`은 GitHub Pages 공개 원본이며 새 대시보드도 발행됐다. 운영자 Google 로그인 상태의 CRUD 왕복, PostgreSQL pgTAP 38개, Deno 런타임, 모바일·키보드 시각 검수는 아직 미완료다. Figma 파일은 만들었지만 MCP 쓰기 한도에 막혀 화면 레이어를 저장하지 못했다. 정적 SVG 시안은 앱 저장소의 설계 문서에 보관한다. 추천·제철 데이터의 앱 추천 연동은 후속 작업이다.
