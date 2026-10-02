@@ -19,7 +19,7 @@ async function login() {
   if (error) status(`로그인을 시작하지 못했어요: ${error.message}`);
 }
 
-function requestReason(title, message, confirmation = null, durationHours = null) {
+function requestReason(title, message, confirmation = null, durationHours = null, reasonDefault = '') {
   const dialog = byId('confirm-dialog');
   const input = byId('confirm-reason');
   const submit = byId('confirm-submit');
@@ -29,7 +29,7 @@ function requestReason(title, message, confirmation = null, durationHours = null
   const durationInput = byId('confirm-duration');
   byId('confirm-title').textContent = title;
   byId('confirm-message').textContent = message;
-  input.value = '';
+  input.value = reasonDefault;
   nameInput.value = '';
   nameWrap.hidden = !confirmation;
   durationInput.value = durationHours ?? '';
@@ -38,6 +38,7 @@ function requestReason(title, message, confirmation = null, durationHours = null
   const onInput = () => {
     submit.disabled = input.value.trim().length < 3 || (confirmation !== null && nameInput.value !== confirmation) || (durationHours !== null && (!Number.isInteger(Number(durationInput.value)) || Number(durationInput.value) < 1 || Number(durationInput.value) > 8760));
   };
+  onInput();
   input.addEventListener('input', onInput);
   nameInput.addEventListener('input', onInput);
   durationInput.addEventListener('input', onInput);
@@ -239,12 +240,19 @@ function formatTrendPeriod(period, grain) {
   return grain === 'week' ? `${month}/${day} 주` : `${month}/${day}`;
 }
 
-function trendMarker(shape, x, y, color, label = '') {
-  const title = label ? `<title>${escapeHtml(label)}</title>` : '';
+function fullTrendPeriod(period, grain) {
+  const [year, month, day] = String(period).slice(0, 10).split('-').map(Number);
+  if (!year || !month) return String(period);
+  if (grain === 'year') return `${year}년`;
+  if (grain === 'month') return `${year}년 ${month}월`;
+  return `${year}년 ${month}월 ${day}일${grain === 'week' ? ' 시작 주' : ''}`;
+}
+
+function trendMarker(shape, x, y, color) {
   const stroke = 'stroke="#fffdf8" stroke-width="1.5"';
-  if (shape === 'square') return `<rect x="${x - 4}" y="${y - 4}" width="8" height="8" fill="${color}" ${stroke}>${title}</rect>`;
-  if (shape === 'triangle') return `<path d="M ${x} ${y - 5} L ${x + 5} ${y + 4} L ${x - 5} ${y + 4} Z" fill="${color}" ${stroke}>${title}</path>`;
-  return `<circle cx="${x}" cy="${y}" r="4" fill="${color}" ${stroke}>${title}</circle>`;
+  if (shape === 'square') return `<rect x="${x - 4}" y="${y - 4}" width="8" height="8" fill="${color}" ${stroke}/>`;
+  if (shape === 'triangle') return `<path d="M ${x} ${y - 5} L ${x + 5} ${y + 4} L ${x - 5} ${y + 4} Z" fill="${color}" ${stroke}/>`;
+  return `<circle cx="${x}" cy="${y}" r="4" fill="${color}" ${stroke}/>`;
 }
 
 function renderTrendChart(data) {
@@ -258,9 +266,9 @@ function renderTrendChart(data) {
     return;
   }
   const series = [
-    { key: 'new_users', label: '신규 가입', color: '#2563EB', dash: '', marker: 'circle' },
-    { key: 'review_submissions', label: '검토 요청', color: '#D99A00', dash: '8 4', marker: 'square' },
-    { key: 'moderations', label: '처리 완료', color: '#DC2626', dash: '2 3', marker: 'triangle' },
+    { key: 'new_users', label: '신규 가입', color: '#2563EB', marker: 'circle' },
+    { key: 'review_submissions', label: '검토 요청', color: '#D99A00', marker: 'square' },
+    { key: 'moderations', label: '처리 완료', color: '#DC2626', marker: 'triangle' },
   ];
   const width = 720, height = 250, left = 44, right = 14, top = 16, bottom = 35;
   const values = buckets.flatMap((bucket) => series.map(({ key }) => Number(bucket[key]) || 0));
@@ -274,14 +282,61 @@ function renderTrendChart(data) {
     const pos = top + i * plotHeight / (ticks.length - 1);
     return `<line x1="${left}" y1="${pos}" x2="${width - right}" y2="${pos}" stroke="#d9dfd3"/><text x="${left - 8}" y="${pos + 4}" text-anchor="end">${value}</text>`;
   }).join('');
-  const lines = series.map(({ key, color, label, dash, marker }) => {
+  const lines = series.map(({ key, color, marker }) => {
     const points = buckets.map((bucket, index) => `${x(index)},${y(Number(bucket[key]) || 0)}`).join(' ');
-    const markers = buckets.map((bucket, index) => trendMarker(marker, x(index), y(Number(bucket[key]) || 0), color, `${formatTrendPeriod(bucket.period, data.grain)} · ${label}: ${Number(bucket[key]) || 0}`)).join('');
-    return `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="3" ${dash ? `stroke-dasharray="${dash}"` : ''}><title>${label}</title></polyline>${markers}`;
+    const markers = buckets.map((bucket, index) => trendMarker(marker, x(index), y(Number(bucket[key]) || 0), color)).join('');
+    return `<polyline points="${points}" fill="none" stroke="${color}" stroke-width="3"/>${markers}`;
   }).join('');
   const labelIndexes = new Set([0, Math.floor((buckets.length - 1) / 2), buckets.length - 1]);
-  const xLabels = [...labelIndexes].map((index) => `<text x="${x(index)}" y="${height - 8}" text-anchor="middle">${escapeHtml(formatTrendPeriod(buckets[index].period, data.grain))}</text>`).join('');
-  chart.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="신규 가입, 검토 요청, 처리 완료의 기간별 추이">${grid}${lines}${xLabels}</svg><div class="trend-legend">${series.map(({ label, color, dash, marker }) => `<span><svg viewBox="0 0 28 14" aria-hidden="true"><line x1="1" y1="7" x2="27" y2="7" stroke="${color}" stroke-width="3" ${dash ? `stroke-dasharray="${dash}"` : ''}/>${trendMarker(marker, 14, 7, color)}</svg>${label}</span>`).join('')}</div>`;
+  const xLabels = [...labelIndexes].map((index) => {
+    const bucket = buckets[index];
+    const summary = `${fullTrendPeriod(bucket.period, data.grain)} · ${series.map(({ key, label }) => `${label}: ${Number(bucket[key]) || 0}`).join(' · ')}`;
+    return `<text class="trend-date-hit" x="${x(index)}" y="${height - 8}" text-anchor="middle" tabindex="0" role="img" data-trend-index="${index}" aria-label="${escapeHtml(summary)}">${escapeHtml(formatTrendPeriod(bucket.period, data.grain))}</text>`;
+  }).join('');
+  chart.innerHTML = `<svg viewBox="0 0 ${width} ${height}" role="group" aria-label="신규 가입, 검토 요청, 처리 완료의 기간별 추이">${grid}${lines}${xLabels}</svg><div class="trend-tooltip" role="tooltip" hidden></div><div class="trend-legend">${series.map(({ label, color, marker }) => `<span><svg viewBox="0 0 28 14" aria-hidden="true"><line x1="1" y1="7" x2="27" y2="7" stroke="${color}" stroke-width="3"/>${trendMarker(marker, 14, 7, color)}</svg>${label}</span>`).join('')}</div>`;
+  const svg = chart.querySelector('svg');
+  const tooltip = chart.querySelector('.trend-tooltip');
+  let touchTimer;
+  function showTrendTooltip(index, clientX, clientY) {
+    const bucket = buckets[index];
+    if (!bucket) return;
+    tooltip.textContent = `${fullTrendPeriod(bucket.period, data.grain)}\n${series.map(({ key, label }) => `${label}: ${Number(bucket[key]) || 0}`).join('\n')}`;
+    tooltip.hidden = false;
+    const chartBounds = chart.getBoundingClientRect();
+    const left = Math.max(8, Math.min(clientX - chartBounds.left + 12, chartBounds.width - tooltip.offsetWidth - 8));
+    const preferredTop = clientY - chartBounds.top + 14;
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${preferredTop + tooltip.offsetHeight > chartBounds.height ? Math.max(8, clientY - chartBounds.top - tooltip.offsetHeight - 12) : preferredTop}px`;
+  }
+  function hideTrendTooltip() { tooltip.hidden = true; }
+  svg.addEventListener('pointermove', (event) => {
+    if (event.pointerType === 'touch') return;
+    const bounds = svg.getBoundingClientRect();
+    const viewX = (event.clientX - bounds.left) * width / bounds.width;
+    if (viewX < left || viewX > width - right) return hideTrendTooltip();
+    const index = buckets.length === 1 ? 0 : Math.round((viewX - left) / plotWidth * (buckets.length - 1));
+    showTrendTooltip(index, event.clientX, event.clientY);
+  });
+  svg.addEventListener('pointerdown', (event) => {
+    if (event.pointerType !== 'touch') return;
+    const bounds = svg.getBoundingClientRect();
+    const viewX = (event.clientX - bounds.left) * width / bounds.width;
+    if (viewX < left || viewX > width - right) return hideTrendTooltip();
+    const index = buckets.length === 1 ? 0 : Math.round((viewX - left) / plotWidth * (buckets.length - 1));
+    showTrendTooltip(index, event.clientX, event.clientY);
+    clearTimeout(touchTimer);
+    touchTimer = setTimeout(hideTrendTooltip, 4500);
+  });
+  svg.addEventListener('pointerleave', (event) => { if (event.pointerType !== 'touch') hideTrendTooltip(); });
+  svg.addEventListener('focusin', (event) => {
+    const target = event.target.closest('[data-trend-index]');
+    if (!target) return;
+    const bounds = target.getBoundingClientRect();
+    showTrendTooltip(Number(target.dataset.trendIndex), bounds.left + bounds.width / 2, bounds.top);
+  });
+  svg.addEventListener('focusout', (event) => {
+    if (!event.relatedTarget?.closest?.('[data-trend-index]')) hideTrendTooltip();
+  });
   chart.setAttribute('aria-label', '신규 가입, 검토 요청, 처리 완료의 기간별 추이');
   table.innerHTML = `<table><caption class="sr-only">운영 활동 시계열 데이터</caption><thead><tr><th scope="col">기간</th><th scope="col">신규 가입</th><th scope="col">검토 요청</th><th scope="col">처리 완료</th></tr></thead><tbody>${buckets.map((bucket) => `<tr><th scope="row">${escapeHtml(formatTrendPeriod(bucket.period, data.grain))}</th>${series.map(({ key }) => `<td>${Number(bucket[key]) || 0}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
@@ -726,6 +781,19 @@ function renderSelectedPushRecipients() {
   }));
 }
 
+function updatePushAudienceControls() {
+  const selectSpecific = byId('target-mode-selected').checked;
+  byId('push-recipient-picker').hidden = !selectSpecific;
+  renderSelectedPushRecipients();
+  byId('push-preview-result').textContent = '예약 전에 받는 사람 수와 휴대폰 수를 확인해요.';
+}
+
+function setPushScheduleMinutes(minutes) {
+  const scheduledAt = new Date(Date.now() + minutes * 60 * 1000);
+  scheduledAt.setMinutes(scheduledAt.getMinutes() - scheduledAt.getTimezoneOffset());
+  byId('push-scheduled-at').value = scheduledAt.toISOString().slice(0, 16);
+}
+
 async function searchPushRecipients() {
   const { data, error } = await db.rpc('operator_list_push_recipients', { p_query: byId('push-recipient-search').value.trim() || null, p_page: pushRecipientPage, p_page_size: 50 });
   if (error) return status(`수신자를 찾지 못했어요: ${error.message}`);
@@ -739,10 +807,10 @@ function pushAudience() {
 
 async function previewPushRecipient() {
   const audience = pushAudience();
-  if (!audience.p_all_enabled && !audience.p_target_user_ids.length) return status('푸시를 받을 사용자를 한 명 이상 선택해 주세요.');
+  if (!audience.p_all_enabled && !audience.p_target_user_ids.length) return status('1단계에서 알림 받을 사용자를 선택해 주세요.');
   const { data, error } = await db.rpc('operator_preview_push_audience', audience);
   if (error) return status(`수신 조건을 확인하지 못했어요: ${error.message}`);
-  byId('push-preview-result').textContent = data.can_send ? `${Number(data.recipient_count).toLocaleString('ko-KR')}명 · 활성 기기 ${Number(data.device_count).toLocaleString('ko-KR')}대에 예약할 수 있어요.` : '선택 대상 중 수신 동의와 활성 기기를 모두 갖춘 계정이 없어요.';
+  byId('push-preview-result').textContent = data.can_send ? `받을 사람 ${Number(data.recipient_count).toLocaleString('ko-KR')}명 · 휴대폰 ${Number(data.device_count).toLocaleString('ko-KR')}대예요.` : '선택한 사용자 중 알림을 받을 수 있는 사람이 없어요. 수신 동의와 활성 기기를 확인해 주세요.';
 }
 
 async function savePushTemplate(event) {
@@ -761,21 +829,26 @@ async function savePushTemplate(event) {
 async function schedulePushCampaign() {
   const audience = pushAudience();
   const scheduledAt = new Date(byId('push-scheduled-at').value);
-  if ((!audience.p_all_enabled && !audience.p_target_user_ids.length) || !byId('push-campaign-title').value.trim() || !byId('push-campaign-body').value.trim() || !byId('push-scheduled-at').value || Number.isNaN(scheduledAt.getTime())) return status('받는 사람·제목·내용·예약 시각을 입력해 주세요.');
+  const title = byId('push-campaign-title').value.trim();
+  const body = byId('push-campaign-body').value.trim();
+  if (!audience.p_all_enabled && !audience.p_target_user_ids.length) return status('1단계에서 알림 받을 사용자를 골라주세요.');
+  if (!title || !body) return status('2단계에서 알림 제목과 내용을 모두 적어주세요.');
+  if (!byId('push-scheduled-at').value || Number.isNaN(scheduledAt.getTime())) return status('3단계에서 보낼 날짜와 시간을 정해주세요.');
+  if (scheduledAt.getTime() < Date.now() + 5 * 60 * 1000) return status('예약 시간은 지금부터 5분 뒤로 정해주세요.');
   const { data: preview, error: previewError } = await db.rpc('operator_preview_push_audience', audience);
   if (previewError || !preview?.can_send) return status(previewError ? `수신 상태를 확인하지 못했어요: ${previewError.message}` : '수신 동의와 활성 기기가 있는 대상이 없습니다.');
-  const audienceName = audience.p_all_enabled ? '전체 수신 동의 사용자' : `선택한 ${preview.recipient_count}명`;
-  const request = await requestReason('푸시 예약 발송', `${audienceName} 중 활성 기기가 있는 ${preview.recipient_count}명, ${preview.device_count}대에 ${dateText(scheduledAt.toISOString())} 발송합니다. 발송 대상은 예약 시점 기준으로 저장하고, 발송 직전 수신 설정을 다시 확인합니다.`);
+  const audienceName = audience.p_all_enabled ? '모든 알림 동의 사용자' : `선택한 사용자 ${preview.recipient_count}명`;
+  const request = await requestReason('푸시 예약 발송', `아래 내용으로 예약할까요?\n\n제목: ${title}\n내용: ${body}\n받는 사람: ${audienceName} 중 ${preview.recipient_count}명\n휴대폰: ${preview.device_count}대\n보낼 시각: ${dateText(scheduledAt.toISOString())}\n\n발송 직전에도 알림 수신 설정을 확인합니다.`, null, null, '운영자 수동 알림 예약');
   if (!request) return;
   const { error } = await db.rpc('operator_create_push_campaign', {
-    p_title: byId('push-campaign-title').value.trim(), p_body: byId('push-campaign-body').value.trim(),
+    p_title: title, p_body: body,
     ...audience, p_scheduled_at: scheduledAt.toISOString(), p_reason: request.reason,
   });
   if (error) return status(`예약하지 못했어요: ${error.message}`);
   selectedPushRecipients.clear();
   renderSelectedPushRecipients();
   await loadPushOperations();
-  status('푸시 발송을 예약했습니다.');
+  status(`${preview.recipient_count}명에게 보낼 알림을 예약했어요.`);
 }
 
 async function testPushToSelf() {
@@ -1208,10 +1281,11 @@ byId('push-recipient-select-page').addEventListener('click', () => {
   byId('push-preview-result').textContent = '대상·기기 수 확인을 눌러 발송 가능 대상을 다시 확인해 주세요.';
 });
 byId('push-recipient-clear').addEventListener('click', () => { selectedPushRecipients.clear(); renderPushRecipients({ items: pushRecipients, total: pushRecipientTotal }); renderSelectedPushRecipients(); });
-byId('target-mode-selected').addEventListener('change', renderSelectedPushRecipients);
-byId('target-mode-all').addEventListener('change', renderSelectedPushRecipients);
+byId('target-mode-selected').addEventListener('change', () => { updatePushAudienceControls(); searchPushRecipients(); });
+byId('target-mode-all').addEventListener('change', updatePushAudienceControls);
 byId('push-preview').addEventListener('click', previewPushRecipient);
 byId('push-schedule').addEventListener('click', schedulePushCampaign);
+byId('push-schedule-quick').addEventListener('click', () => setPushScheduleMinutes(10));
 byId('push-test').addEventListener('click', testPushToSelf);
 byId('push-history-search-button').addEventListener('click', () => { pushPage = 1; loadPushOperations(); });
 byId('push-history-search').addEventListener('keydown', (event) => { if (event.key === 'Enter') { pushPage = 1; loadPushOperations(); } });
@@ -1228,4 +1302,5 @@ byId('logout').addEventListener('click', async () => { await db.auth.signOut(); 
 const earliestPushSchedule = new Date(Date.now() + 5 * 60 * 1000);
 earliestPushSchedule.setMinutes(earliestPushSchedule.getMinutes() - earliestPushSchedule.getTimezoneOffset());
 byId('push-scheduled-at').min = earliestPushSchedule.toISOString().slice(0, 16);
+updatePushAudienceControls();
 boot().catch((error) => status(`운영 화면을 열지 못했어요: ${error.message}`));

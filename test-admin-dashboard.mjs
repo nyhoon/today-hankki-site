@@ -36,8 +36,8 @@ test('operator dashboard exposes eight unique destinations and guarded states', 
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261002-community-ops-2/);
-  assert.match(html, /admin-v3\.js\?v=20261002-community-ops-2/);
+  assert.match(html, /styles\.css\?v=20261002-chart-hover-1/);
+  assert.match(html, /admin-v3\.js\?v=20261002-chart-hover-1/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -84,6 +84,14 @@ test('home chart uses a manual KST series query with an accessible data table', 
   assert.match(script, /marker: 'square'/);
   assert.match(script, /marker: 'triangle'/);
   assert.match(script, /function trendMarker\(/);
+  assert.doesNotMatch(script, /dash: ['"](?:8 4|2 3)['"]/, 'all activity series use solid lines');
+  assert.match(script, /function fullTrendPeriod\(/);
+  assert.match(script, /function showTrendTooltip\(/);
+  assert.match(script, /class="trend-tooltip" role="tooltip" hidden/);
+  assert.match(script, /data-trend-index=/);
+  assert.match(script, /addEventListener\('pointermove'/);
+  assert.match(script, /addEventListener\('focusin'/);
+  assert.match(css, /\.trend-tooltip\[hidden\]\s*\{[^}]*display:\s*none/s);
   const tickFunction = script.match(/function trendTicks\(max\) \{[\s\S]*?\n\}/)?.[0];
   assert.ok(tickFunction, 'tick calculation is present');
   const trendTicks = new Function(`${tickFunction}; return trendTicks;`)();
@@ -163,6 +171,26 @@ test('catalog edits run through audited RPCs and reject unsafe data deletion or 
   const sourceRow = script.match(/function catalogRow\(item\) \{[\s\S]*?\n\}/)?.[0] || '';
   assert.equal((sourceRow.match(/escapeHtml\(item\.name\)/g) ?? []).length, 1, 'source name appears once in each catalog row');
   assert.doesNotMatch(script, /\$\{kind\} · \$\{escapeHtml\(description\)\}/);
+});
+
+test('push sending is presented as a plain three-step flow with template tools out of the way', () => {
+  assert.match(html, /id="push-step-1"[\s\S]*?누구에게 보낼까요\?/);
+  assert.match(html, /id="push-step-2"[\s\S]*?어떤 알림을 보낼까요\?/);
+  assert.match(html, /id="push-step-3"[\s\S]*?언제 보낼까요\?/);
+  assert.match(html, /id="push-template-manager"[\s\S]*?<summary>자동 알림 문구 관리<\/summary>/);
+  assert.match(html, /id="push-schedule"[^>]*>예약 발송</);
+  assert.match(html, /10분 뒤로 정하기/);
+  assert.match(css, /\.admin-title>\.secondary-button\{flex:none;white-space:nowrap\}/);
+  assert.match(script, /function setPushScheduleMinutes\(/);
+  assert.match(script, /function updatePushAudienceControls\(/);
+  assert.match(html, /모든 알림 동의 사용자/);
+  assert.match(html, /최근 활성 기기가 있는 사용자/);
+  const sendFlow = script.match(/async function schedulePushCampaign\(\) \{[\s\S]*?\n\}/)?.[0] || '';
+  assert.match(sendFlow, /byId\('push-campaign-title'\)\.value\.trim\(\)/);
+  assert.match(sendFlow, /byId\('push-campaign-body'\)\.value\.trim\(\)/);
+  assert.match(sendFlow, /requestReason\('푸시 예약 발송'/);
+  assert.match(sendFlow, /운영자 수동 알림 예약/);
+  assert.match(script, /function requestReason\(title, message, confirmation = null, durationHours = null, reasonDefault = ''\)/);
 });
 
 test('push operations keep tokens server-side and support reviewed multi-recipient audiences', () => {
