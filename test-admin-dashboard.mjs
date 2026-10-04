@@ -321,6 +321,8 @@ test('public policy pages explain the new 90-day activity log and non-verified e
 test('affiliate ingredient click totals are visible to operators and disclosed', () => {
   assert.match(html, /id="affiliate-searches"/);
   assert.match(html, /외부 브라우저를 연 횟수 · 실제 구매와 수수료는 쿠팡 파트너스 리포트에서 확인/);
+  assert.match(html, /class="admin-panel admin-affiliate-panel"/);
+  assert.match(css, /\.admin-affiliate-panel\s*>\s*p\s*\{[^}]*padding/s);
   assert.match(script, /operator_top_affiliate_ingredients/);
   assert.match(affiliateAnalyticsMigration, /create table private\.affiliate_search_daily/);
   assert.match(affiliateAnalyticsMigration, /ingredient_id text/);

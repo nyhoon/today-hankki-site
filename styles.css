@@ -17,6 +17,7 @@
 .admin-nav-button[aria-current=page]{border-left-color:#173d33;background:#e4eadf}
 .admin-nav-button:focus-visible,.admin-menu-toggle:focus-visible,.admin-confirm-dialog button:focus-visible,.admin-confirm-dialog textarea:focus-visible{outline:3px solid #82934e;outline-offset:2px}
 .admin-content{min-width:0}
+.admin-affiliate-panel>p{margin:0;padding:14px 20px 0;color:#4d5e54;line-height:1.6}
 .admin-content .admin-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
 .admin-page{min-width:0}
 .admin-page>.admin-title{margin:3px 0 22px}
