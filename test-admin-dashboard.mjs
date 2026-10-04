@@ -24,14 +24,15 @@ const userActivityMigration = await readFile(new URL('../today-hankki/supabase/m
 const userActivityConsentMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002210000_require_policy_consent_for_activity_logs.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateAnalyticsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004120000_saved_recipes_and_affiliate_search_metrics.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliatePrivacyMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004130000_publish_affiliate_search_privacy.sql', import.meta.url), 'utf8').catch(() => '');
+const affiliateAggregationMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005100000_reliable_affiliate_handoff_aggregation.sql', import.meta.url), 'utf8').catch(() => '');
 const userInsightsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004150000_user_search_insights.sql', import.meta.url), 'utf8').catch(() => '');
 const pushAdminFunction = await readFile(new URL('../today-hankki/supabase/functions/operator-push-admin/index.ts', import.meta.url), 'utf8').catch(() => '');
 const dispatchPushFunction = await readFile(new URL('../today-hankki/supabase/functions/dispatch-pushes/index.ts', import.meta.url), 'utf8').catch(() => '');
 const fcmShared = await readFile(new URL('../today-hankki/supabase/functions/_shared/fcm.ts', import.meta.url), 'utf8').catch(() => '');
 const authAdminFunction = await readFile(new URL('../today-hankki/supabase/functions/operator-auth-admin/index.ts', import.meta.url), 'utf8').catch(() => '');
-const destinations = ['home', 'community', 'users', 'kitchens', 'catalog', 'push', 'policies', 'operators'];
+const destinations = ['home', 'community', 'users', 'kitchens', 'catalog', 'push', 'policies', 'operators', 'affiliate'];
 
-test('operator dashboard exposes eight unique destinations and guarded states', () => {
+test('operator dashboard exposes nine unique destinations and guarded states', () => {
   for (const id of destinations) {
     assert.match(html, new RegExp(`data-admin-page="${id}"`), `${id} navigation exists`);
     assert.match(html, new RegExp(`id="page-${id}"`), `${id} panel exists`);
@@ -39,8 +40,8 @@ test('operator dashboard exposes eight unique destinations and guarded states', 
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261004-user-profile-4/);
-  assert.match(html, /admin-v3\.js\?v=20261004-user-profile-4/);
+  assert.match(html, /styles\.css\?v=20261005-affiliate-1/);
+  assert.match(html, /admin-v3\.js\?v=20261005-affiliate-1/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -311,7 +312,7 @@ test('policy, operator, audit, and health screens use immutable or append-only s
 });
 
 test('public policy pages explain the new 90-day activity log and non-verified email signup', () => {
-  assert.match(privacyPage, /2026-10-04-v4/);
+  assert.match(privacyPage, /2026-10-05-v5/);
   assert.match(privacyPage, /가입·로그인/);
   assert.match(privacyPage, /90일 후 삭제/);
   assert.match(privacyPage, /화면 열람 기록을 복사하지 않으며/);
@@ -320,15 +321,14 @@ test('public policy pages explain the new 90-day activity log and non-verified e
 });
 
 test('affiliate ingredient click totals are visible to operators and disclosed', () => {
-  assert.match(html, /id="affiliate-searches"/);
-  assert.match(html, /외부 브라우저를 연 횟수 · 실제 구매와 수수료는 쿠팡 파트너스 리포트에서 확인/);
-  assert.match(html, /class="admin-panel admin-affiliate-panel"/);
-  assert.match(css, /\.admin-affiliate-panel\s*>\s*p\s*\{[^}]*padding/s);
+  assert.match(html, /id="affiliate-top"/);
+  assert.match(html, /최근 30일 외부 열기/);
+  assert.match(html, /파트너스 실적 리포트/);
   assert.match(script, /operator_top_affiliate_ingredients/);
   assert.match(affiliateAnalyticsMigration, /create table private\.affiliate_search_daily/);
   assert.match(affiliateAnalyticsMigration, /ingredient_id text/);
   assert.match(affiliateAnalyticsMigration, /not exists\s*\(\s*select 1 from public\.ingredients/i);
-  assert.match(privacyPage, /표준 재료 코드·진입 경로별 외부 브라우저 열기 합계/);
+  assert.match(privacyPage, /한국 날짜·진입 경로별 외부 브라우저 열기 합계/);
   assert.match(privacyPage, /검색어 원문, 재료명, 수량, 계정 ID와 이메일은 이 합계에 저장하지 않습니다/);
   assert.match(affiliateAnalyticsMigration, /private\.has_current_policies/);
   assert.match(affiliateAnalyticsMigration, /Asia\/Seoul/);
@@ -336,6 +336,24 @@ test('affiliate ingredient click totals are visible to operators and disclosed',
   assert.match(affiliateAnalyticsMigration, /cron\.schedule/);
   assert.match(affiliatePrivacyMigration, /매일 오전 1시\(한국 시간\)/);
   assert.match(affiliatePrivacyMigration, /2026-10-04-v3/);
+  assert.match(affiliateAggregationMigration, /2026-10-05-v5/);
+});
+
+test('Coupang management separates browser handoffs from Coupang sales reports', () => {
+  assert.match(html, /data-admin-page="affiliate"/);
+  assert.match(html, /id="page-affiliate"/);
+  for (const id of ['affiliate-total', 'affiliate-known', 'affiliate-unmapped', 'affiliate-sources', 'affiliate-daily', 'affiliate-top']) {
+    assert.match(html, new RegExp(`id="${id}"`));
+  }
+  assert.match(script, /operator_affiliate_search_daily/);
+  assert.match(script, /operator_top_affiliate_ingredients/);
+  assert.match(script, /function renderAffiliateManagement\(/);
+  assert.match(html, /COUPANG PARTNERS/);
+  assert.match(html, /구매와 수수료는 쿠팡 파트너스 실적 리포트에서 확인/);
+  assert.match(affiliateAggregationMigration, /affiliate_search_daily_totals/);
+  assert.match(affiliateAggregationMigration, /operator_affiliate_search_daily/);
+  assert.match(html, /AF9512210/);
+  assert.match(html, /TodayHankki/);
 });
 
 test('user detail is a single responsive workspace with consented ingredient history', () => {
@@ -372,7 +390,7 @@ test('account-linked ingredient searches are optional, canonical-only, and expir
   const detailRpc = userInsightsMigration.match(/create or replace function public\.operator_get_user_detail[\s\S]*?revoke all on function public\.operator_get_user_detail/)?.[0] ?? '';
   assert.match(detailRpc, /language plpgsql stable security definer/i);
   assert.doesNotMatch(detailRpc, /delete\s+from/i, 'read-only detail RPC does not delete expired rows');
-  assert.match(privacyPage, /2026-10-04-v4/);
+  assert.match(privacyPage, /2026-10-05-v5/);
   assert.match(privacyPage, /계정별 재료 검색 이력/);
   assert.match(privacyPage, /끄면 기존 계정 연결 검색 이력을 삭제합니다/);
   assert.match(privacyPage, /자유 입력 원문, 일부 입력, 수량, 키 입력 과정은 저장하지 않습니다/);

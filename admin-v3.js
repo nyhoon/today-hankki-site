@@ -115,6 +115,7 @@ function navigateAdminPage(pageId) {
   byId('mobile-menu-toggle').setAttribute('aria-expanded', 'false');
   byId('mobile-menu-toggle').setAttribute('aria-label', '운영 메뉴 열기');
   if (pageId === 'community') loadCommunity();
+  if (pageId === 'affiliate') loadAffiliateManagement();
   if (pageId === 'users') loadUsers();
   if (pageId === 'kitchens') loadKitchens();
   if (pageId === 'catalog') loadCatalog();
@@ -1132,15 +1133,10 @@ async function moderateCommunityStatus(item, action) {
 
 async function loadDashboard() {
   status('운영 데이터를 불러오는 중이에요…');
-  const today = new Date();
-  const from = new Date(today);
-  from.setDate(from.getDate() - 29);
-  const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  const [recipesResult, reportsResult, snapshotResult, affiliateResult] = await Promise.all([
+  const [recipesResult, reportsResult, snapshotResult] = await Promise.all([
     db.rpc('operator_list_community_items', { p_kind: 'recipe', p_status: 'pending', p_page: 1, p_page_size: 5 }),
     db.rpc('operator_list_community_items', { p_kind: 'report', p_status: 'open', p_page: 1, p_page_size: 5 }),
     db.rpc('operator_dashboard_snapshot'),
-    db.rpc('operator_top_affiliate_ingredients', { p_from: isoDate(from), p_to: isoDate(today), p_limit: 20 }),
   ]);
   const error = recipesResult.error || reportsResult.error || snapshotResult.error;
   if (error) return status(`데이터를 불러오지 못했어요: ${error.message}`);
@@ -1150,7 +1146,6 @@ async function loadDashboard() {
   const reports = reportPage.items ?? [];
   const snapshot = snapshotResult.data ?? {};
   renderSnapshot(snapshot);
-  renderAffiliateSearches(affiliateResult.data, affiliateResult.error);
   byId('pending-count').textContent = pendingPage.total;
   byId('report-count').textContent = reportPage.total;
   byId('published-count').textContent = snapshot.community?.published ?? '–';
@@ -1164,18 +1159,86 @@ async function loadDashboard() {
   await loadTrend();
 }
 
-function renderAffiliateSearches(rows, error) {
-  const target = byId('affiliate-searches');
+function renderAffiliateTable(target, rows, columns, empty, error) {
   if (error) {
-    target.innerHTML = `<p class="empty-admin">검색 통계를 불러오지 못했어요: ${escapeHtml(error.message)}</p>`;
+    target.innerHTML = `<p class="empty-admin">집계를 불러오지 못했어요: ${escapeHtml(error.message)}</p>`;
     return;
   }
-  if (!rows?.length) {
-    target.innerHTML = '<p class="empty-admin">아직 기록된 클릭이 없습니다. 동의한 사용자가 장보기에서 쿠팡 검색 버튼을 열면 집계돼요.</p>';
+  if (!rows.length) {
+    target.innerHTML = `<p class="empty-admin">${empty}</p>`;
     return;
   }
-  target.innerHTML = `<table><thead><tr><th scope="col">재료</th><th scope="col">검색 버튼 클릭</th></tr></thead><tbody>${rows.map((row) => `<tr><th scope="row">${escapeHtml(row.ingredient_name)}</th><td>${Number(row.click_count).toLocaleString('ko-KR')}</td></tr>`).join('')}</tbody></table>`;
+  target.innerHTML = `<table><thead><tr>${columns.map(([label]) => `<th scope="col">${escapeHtml(label)}</th>`).join('')}</tr></thead><tbody>${rows.map((row) => `<tr>${columns.map(([, value]) => `<td>${escapeHtml(value(row))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
+
+function renderAffiliateManagement(dailyRows, ingredientRows, dailyError, ingredientError) {
+  const total = dailyRows.reduce((sum, row) => sum + Number(row.click_count || 0), 0);
+  const known = dailyRows.reduce((sum, row) => sum + Number(row.ingredient_click_count || 0), 0);
+  const unmapped = dailyRows.reduce((sum, row) => sum + Number(row.unmapped_click_count || 0), 0);
+  byId('affiliate-total').textContent = dailyError ? '–' : total.toLocaleString('ko-KR');
+  byId('affiliate-known').textContent = dailyError ? '–' : known.toLocaleString('ko-KR');
+  byId('affiliate-unmapped').textContent = dailyError ? '–' : unmapped.toLocaleString('ko-KR');
+
+  const sourceLabels = { shopping_list: '장보기', recipe_detail: '레시피 상세' };
+  const sources = new Map();
+  const dates = new Map();
+  for (const row of dailyRows) {
+    const source = sources.get(row.source) || { total: 0, known: 0, unmapped: 0 };
+    source.total += Number(row.click_count || 0);
+    source.known += Number(row.ingredient_click_count || 0);
+    source.unmapped += Number(row.unmapped_click_count || 0);
+    sources.set(row.source, source);
+    const date = dates.get(row.event_date) || { total: 0, known: 0, unmapped: 0 };
+    date.total += Number(row.click_count || 0);
+    date.known += Number(row.ingredient_click_count || 0);
+    date.unmapped += Number(row.unmapped_click_count || 0);
+    dates.set(row.event_date, date);
+  }
+  const format = (value) => Number(value).toLocaleString('ko-KR');
+  renderAffiliateTable(
+    byId('affiliate-sources'),
+    [...sources].map(([source, count]) => ({ source: sourceLabels[source] || source, ...count })),
+    [['진입 화면', (row) => row.source], ['외부 열기', (row) => format(row.total)], ['재료 확인', (row) => format(row.known)], ['미확인', (row) => format(row.unmapped)]],
+    '최근 30일 외부 브라우저 열기 기록이 없습니다.',
+    dailyError,
+  );
+  renderAffiliateTable(
+    byId('affiliate-daily'),
+    [...dates].sort(([a], [b]) => b.localeCompare(a)).map(([date, count]) => ({ date, ...count })),
+    [['날짜', (row) => row.date], ['외부 열기', (row) => format(row.total)], ['재료 확인', (row) => format(row.known)], ['미확인', (row) => format(row.unmapped)]],
+    '최근 30일 외부 브라우저 열기 기록이 없습니다.',
+    dailyError,
+  );
+  renderAffiliateTable(
+    byId('affiliate-top'),
+    ingredientRows,
+    [['표준 재료', (row) => row.ingredient_name], ['외부 열기', (row) => format(row.click_count)]],
+    '재료 코드가 확인된 기록이 아직 없습니다.',
+    ingredientError,
+  );
+}
+
+async function loadAffiliateManagement() {
+  status('쿠팡 제휴 집계를 불러오는 중이에요…');
+  const today = new Date();
+  const from = new Date(today);
+  from.setDate(from.getDate() - 29);
+  const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const [dailyResult, ingredientResult] = await Promise.all([
+    db.rpc('operator_affiliate_search_daily', { p_from: isoDate(from), p_to: isoDate(today) }),
+    db.rpc('operator_top_affiliate_ingredients', { p_from: isoDate(from), p_to: isoDate(today), p_limit: 20 }),
+  ]);
+  renderAffiliateManagement(
+    dailyResult.data ?? [],
+    ingredientResult.data ?? [],
+    dailyResult.error,
+    ingredientResult.error,
+  );
+  const errors = [dailyResult.error, ingredientResult.error].filter(Boolean);
+  status(errors.length ? `쿠팡 제휴 집계를 일부 불러오지 못했어요: ${errors.map((error) => error.message).join(' · ')}` : '최근 30일 쿠팡 제휴 집계를 업데이트했습니다.');
+}
+
+byId('affiliate-refresh').addEventListener('click', loadAffiliateManagement);
 
 let policyRows = [];
 let operatorRows = [];

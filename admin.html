@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>운영 대시보드 · 오늘한끼</title>
-  <link rel="stylesheet" href="styles.css?v=20261004-user-profile-4">
+  <link rel="stylesheet" href="styles.css?v=20261005-affiliate-1">
 </head>
 <body class="admin-body">
   <header class="admin-header">
@@ -36,6 +36,7 @@
         <aside class="admin-sidebar" id="admin-sidebar" aria-label="운영 메뉴">
           <nav class="admin-nav" aria-label="운영 메뉴">
             <button class="admin-nav-button" type="button" data-admin-page="home" aria-current="page">홈 <span>요약과 추이</span></button>
+            <button class="admin-nav-button" type="button" data-admin-page="affiliate">쿠팡 제휴 <span>유입·재료·실적</span></button>
             <button class="admin-nav-button" type="button" data-admin-page="community">커뮤니티 <span>레시피·후기·신고</span></button>
             <button class="admin-nav-button" type="button" data-admin-page="users">사용자 <span>계정·이용 제한</span></button>
             <button class="admin-nav-button" type="button" data-admin-page="kitchens">키친·초대 <span>멤버와 연결</span></button>
@@ -69,16 +70,49 @@
               <section class="admin-panel"><div class="panel-title"><h2>게시 검토 요청</h2><span id="pending-label">–</span></div><div id="pending-list"></div></section>
               <section class="admin-panel"><div class="panel-title"><h2>신고 처리</h2><span id="report-label">–</span></div><div id="report-list"></div></section>
             </div>
-            <section class="admin-panel admin-affiliate-panel">
-              <div class="panel-title"><div><p class="eyebrow">PARTNER LINKS</p><h2>쿠팡 검색 인기 재료</h2></div><span>최근 30일</span></div>
-              <p>외부 브라우저를 연 횟수 · 실제 구매와 수수료는 쿠팡 파트너스 리포트에서 확인</p>
-              <div id="affiliate-searches" class="table-wrap" aria-live="polite"><p class="empty-admin">데이터를 불러오는 중입니다.</p></div>
-            </section>
             <div class="ops-grid">
               <section class="admin-panel"><div class="panel-title"><h2>커뮤니티 현황</h2></div><div class="metric-list" id="community-summary"></div></section>
               <section class="admin-panel"><div class="panel-title"><h2>키친·초대 현황</h2></div><div class="metric-list" id="kitchen-summary"></div></section>
               <section class="admin-panel"><div class="panel-title"><h2>푸시 현황</h2></div><div class="metric-list" id="push-summary"></div></section>
               <section class="admin-panel"><div class="panel-title"><h2>식재료 데이터 현황</h2></div><div class="metric-list" id="ingredient-summary"></div></section>
+            </div>
+          </section>
+
+          <section class="admin-page" id="page-affiliate" data-page-panel="affiliate" hidden>
+            <div class="admin-title">
+              <div><p class="eyebrow">COUPANG PARTNERS</p><h1>쿠팡 제휴 관리</h1></div>
+              <button class="secondary-button" id="affiliate-refresh" type="button">새로고침</button>
+            </div>
+            <p class="affiliate-page-intro">앱에서 쿠팡 외부 브라우저를 연 흐름과 많이 찾은 표준 재료를 확인합니다. 구매와 수수료는 쿠팡 파트너스 실적 리포트에서 확인하세요.</p>
+            <div class="admin-stats affiliate-summary" aria-live="polite">
+              <article><span>최근 30일 외부 열기</span><strong id="affiliate-total">–</strong><small>쿠팡 화면 로드·구매를 뜻하지 않음</small></article>
+              <article><span>재료 코드 확인</span><strong id="affiliate-known">–</strong><small>인기 재료 표에 포함</small></article>
+              <article><span>재료 코드 미확인</span><strong id="affiliate-unmapped">–</strong><small>이름 원문은 저장하지 않음</small></article>
+            </div>
+            <div class="ops-grid">
+              <section class="admin-panel">
+                <div class="panel-title"><div><p class="eyebrow">CHANNEL</p><h2>추적 설정</h2></div></div>
+                <div class="table-wrap"><table><tbody>
+                  <tr><th scope="row">파트너 ID</th><td>AF9512210</td></tr>
+                  <tr><th scope="row">채널 ID · SubID</th><td>TodayHankki</td></tr>
+                  <tr><th scope="row">앱 링크</th><td>AFFSRP 쿠팡 검색 이동</td></tr>
+                  <tr><th scope="row">앱 고지</th><td>장보기 목록 상단에 1회 표시</td></tr>
+                </tbody></table></div>
+                <p class="affiliate-note">앱 집계는 외부 브라우저를 연 횟수입니다. 쿠팡 검색 결과 노출, 주문, 수수료를 확인하거나 보장하지 않습니다.</p>
+                <div class="affiliate-report-link"><a class="secondary-button" href="https://partners.coupang.com/" target="_blank" rel="noopener noreferrer">쿠팡 파트너스 실적 리포트 열기</a></div>
+              </section>
+              <section class="admin-panel">
+                <div class="panel-title"><div><p class="eyebrow">ENTRY SOURCE</p><h2>진입 화면</h2></div><span>최근 30일</span></div>
+                <div id="affiliate-sources" class="table-wrap" aria-live="polite"><p class="empty-admin">데이터를 불러오는 중입니다.</p></div>
+              </section>
+              <section class="admin-panel ops-wide">
+                <div class="panel-title"><div><p class="eyebrow">DAILY HANDOFFS</p><h2>일별 외부 열기</h2></div><span>최근 30일</span></div>
+                <div id="affiliate-daily" class="table-wrap" aria-live="polite"><p class="empty-admin">데이터를 불러오는 중입니다.</p></div>
+              </section>
+              <section class="admin-panel ops-wide">
+                <div class="panel-title"><div><p class="eyebrow">POPULAR INGREDIENTS</p><h2>쿠팡에서 많이 찾은 재료</h2></div><span>표준 재료로 확인된 항목</span></div>
+                <div id="affiliate-top" class="table-wrap" aria-live="polite"><p class="empty-admin">데이터를 불러오는 중입니다.</p></div>
+              </section>
             </div>
           </section>
 
@@ -172,6 +206,6 @@
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin-v3.js?v=20261004-user-profile-4"></script>
+  <script defer src="admin-v3.js?v=20261005-affiliate-1"></script>
 </body>
 </html>
