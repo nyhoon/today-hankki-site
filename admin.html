@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>운영 대시보드 · 오늘한끼</title>
-  <link rel="stylesheet" href="styles.css?v=20261002-push-category-1">
+  <link rel="stylesheet" href="styles.css?v=20261004-affiliate-search-2">
 </head>
 <body class="admin-body">
   <header class="admin-header">
@@ -69,6 +69,11 @@
               <section class="admin-panel"><div class="panel-title"><h2>게시 검토 요청</h2><span id="pending-label">–</span></div><div id="pending-list"></div></section>
               <section class="admin-panel"><div class="panel-title"><h2>신고 처리</h2><span id="report-label">–</span></div><div id="report-list"></div></section>
             </div>
+            <section class="admin-panel">
+              <div class="panel-title"><div><p class="eyebrow">PARTNER LINKS</p><h2>쿠팡 검색 인기 재료</h2></div><span>최근 30일</span></div>
+              <p>외부 브라우저를 연 횟수 · 실제 구매와 수수료는 쿠팡 파트너스 리포트에서 확인</p>
+              <div id="affiliate-searches" class="table-wrap" aria-live="polite"><p class="empty-admin">데이터를 불러오는 중입니다.</p></div>
+            </section>
             <div class="ops-grid">
               <section class="admin-panel"><div class="panel-title"><h2>커뮤니티 현황</h2></div><div class="metric-list" id="community-summary"></div></section>
               <section class="admin-panel"><div class="panel-title"><h2>키친·초대 현황</h2></div><div class="metric-list" id="kitchen-summary"></div></section>
@@ -166,6 +171,6 @@
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin-v3.js?v=20261002-push-category-1"></script>
+  <script defer src="admin-v3.js?v=20261004-affiliate-search-2"></script>
 </body>
 </html>

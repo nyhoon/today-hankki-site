@@ -1094,10 +1094,15 @@ async function moderateCommunityStatus(item, action) {
 
 async function loadDashboard() {
   status('운영 데이터를 불러오는 중이에요…');
-  const [recipesResult, reportsResult, snapshotResult] = await Promise.all([
+  const today = new Date();
+  const from = new Date(today);
+  from.setDate(from.getDate() - 29);
+  const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const [recipesResult, reportsResult, snapshotResult, affiliateResult] = await Promise.all([
     db.rpc('operator_list_community_items', { p_kind: 'recipe', p_status: 'pending', p_page: 1, p_page_size: 5 }),
     db.rpc('operator_list_community_items', { p_kind: 'report', p_status: 'open', p_page: 1, p_page_size: 5 }),
     db.rpc('operator_dashboard_snapshot'),
+    db.rpc('operator_top_affiliate_ingredients', { p_from: isoDate(from), p_to: isoDate(today), p_limit: 20 }),
   ]);
   const error = recipesResult.error || reportsResult.error || snapshotResult.error;
   if (error) return status(`데이터를 불러오지 못했어요: ${error.message}`);
@@ -1107,6 +1112,7 @@ async function loadDashboard() {
   const reports = reportPage.items ?? [];
   const snapshot = snapshotResult.data ?? {};
   renderSnapshot(snapshot);
+  renderAffiliateSearches(affiliateResult.data, affiliateResult.error);
   byId('pending-count').textContent = pendingPage.total;
   byId('report-count').textContent = reportPage.total;
   byId('published-count').textContent = snapshot.community?.published ?? '–';
@@ -1118,6 +1124,19 @@ async function loadDashboard() {
   document.querySelectorAll('[data-report]').forEach((button) => button.addEventListener('click', () => resolveReport(button.dataset.report, button.dataset.hide === 'true')));
   status('최신 운영 상태입니다.');
   await loadTrend();
+}
+
+function renderAffiliateSearches(rows, error) {
+  const target = byId('affiliate-searches');
+  if (error) {
+    target.innerHTML = `<p class="empty-admin">검색 통계를 불러오지 못했어요: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+  if (!rows?.length) {
+    target.innerHTML = '<p class="empty-admin">아직 기록된 클릭이 없습니다. 동의한 사용자가 장보기에서 쿠팡 검색 버튼을 열면 집계돼요.</p>';
+    return;
+  }
+  target.innerHTML = `<table><thead><tr><th scope="col">재료</th><th scope="col">검색 버튼 클릭</th></tr></thead><tbody>${rows.map((row) => `<tr><th scope="row">${escapeHtml(row.ingredient_name)}</th><td>${Number(row.click_count).toLocaleString('ko-KR')}</td></tr>`).join('')}</tbody></table>`;
 }
 
 let policyRows = [];
