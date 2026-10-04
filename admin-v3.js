@@ -116,6 +116,7 @@ function navigateAdminPage(pageId) {
   byId('mobile-menu-toggle').setAttribute('aria-label', '운영 메뉴 열기');
   if (pageId === 'community') loadCommunity();
   if (pageId === 'affiliate') loadAffiliateManagement();
+  if (pageId === 'lifecycle') loadLifecycleManagement();
   if (pageId === 'users') loadUsers();
   if (pageId === 'kitchens') loadKitchens();
   if (pageId === 'catalog') loadCatalog();
@@ -1239,6 +1240,51 @@ async function loadAffiliateManagement() {
 }
 
 byId('affiliate-refresh').addEventListener('click', loadAffiliateManagement);
+
+function renderLifecycleManagement(rows, error) {
+  const target = byId('lifecycle-daily');
+  if (error) {
+    byId('lifecycle-withdrawals').textContent = '–';
+    byId('lifecycle-invalid-tokens').textContent = '–';
+    target.innerHTML = `<p class="empty-admin">집계를 불러오지 못했어요: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+  const totals = rows.reduce((result, row) => {
+    result[row.event_type] = (result[row.event_type] || 0) + Number(row.event_count || 0);
+    return result;
+  }, {});
+  const format = (value) => Number(value || 0).toLocaleString('ko-KR');
+  byId('lifecycle-withdrawals').textContent = format(totals.account_withdrawal);
+  byId('lifecycle-invalid-tokens').textContent = format(totals.invalid_fcm_token);
+  renderAffiliateTable(
+    target,
+    rows,
+    [
+      ['날짜', (row) => row.event_date],
+      ['구분', (row) => row.event_type === 'account_withdrawal' ? '확정 탈퇴' : '무효 FCM 토큰 · 삭제 추정'],
+      ['플랫폼', (row) => ({ android: 'Android', ios: 'iOS', unknown: '미기록' }[row.platform] || row.platform)],
+      ['건수', (row) => format(row.event_count)],
+    ],
+    '최근 30일 기록이 없습니다.',
+    null,
+  );
+}
+
+async function loadLifecycleManagement() {
+  status('탈퇴·앱 이탈 집계를 불러오는 중이에요…');
+  const today = new Date();
+  const from = new Date(today);
+  from.setDate(from.getDate() - 29);
+  const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  const { data, error } = await db.rpc('operator_app_lifecycle_daily', {
+    p_from: isoDate(from),
+    p_to: isoDate(today),
+  });
+  renderLifecycleManagement(data ?? [], error);
+  status(error ? `탈퇴·앱 이탈 집계를 불러오지 못했어요: ${error.message}` : '최근 30일 탈퇴·앱 이탈 집계를 업데이트했습니다.');
+}
+
+byId('lifecycle-refresh').addEventListener('click', loadLifecycleManagement);
 
 let policyRows = [];
 let operatorRows = [];

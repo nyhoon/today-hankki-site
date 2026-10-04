@@ -25,14 +25,15 @@ const userActivityConsentMigration = await readFile(new URL('../today-hankki/sup
 const affiliateAnalyticsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004120000_saved_recipes_and_affiliate_search_metrics.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliatePrivacyMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004130000_publish_affiliate_search_privacy.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateAggregationMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005100000_reliable_affiliate_handoff_aggregation.sql', import.meta.url), 'utf8').catch(() => '');
+const lifecycleMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005120000_app_lifecycle_tracking.sql', import.meta.url), 'utf8').catch(() => '');
 const userInsightsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004150000_user_search_insights.sql', import.meta.url), 'utf8').catch(() => '');
 const pushAdminFunction = await readFile(new URL('../today-hankki/supabase/functions/operator-push-admin/index.ts', import.meta.url), 'utf8').catch(() => '');
 const dispatchPushFunction = await readFile(new URL('../today-hankki/supabase/functions/dispatch-pushes/index.ts', import.meta.url), 'utf8').catch(() => '');
 const fcmShared = await readFile(new URL('../today-hankki/supabase/functions/_shared/fcm.ts', import.meta.url), 'utf8').catch(() => '');
 const authAdminFunction = await readFile(new URL('../today-hankki/supabase/functions/operator-auth-admin/index.ts', import.meta.url), 'utf8').catch(() => '');
-const destinations = ['home', 'community', 'users', 'kitchens', 'catalog', 'push', 'policies', 'operators', 'affiliate'];
+const destinations = ['home', 'community', 'users', 'kitchens', 'catalog', 'push', 'policies', 'operators', 'affiliate', 'lifecycle'];
 
-test('operator dashboard exposes nine unique destinations and guarded states', () => {
+test('operator dashboard exposes ten unique destinations and guarded states', () => {
   for (const id of destinations) {
     assert.match(html, new RegExp(`data-admin-page="${id}"`), `${id} navigation exists`);
     assert.match(html, new RegExp(`id="page-${id}"`), `${id} panel exists`);
@@ -40,8 +41,8 @@ test('operator dashboard exposes nine unique destinations and guarded states', (
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261005-affiliate-1/);
-  assert.match(html, /admin-v3\.js\?v=20261005-affiliate-1/);
+  assert.match(html, /styles\.css\?v=20261005-lifecycle-1/);
+  assert.match(html, /admin-v3\.js\?v=20261005-lifecycle-1/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -312,7 +313,7 @@ test('policy, operator, audit, and health screens use immutable or append-only s
 });
 
 test('public policy pages explain the new 90-day activity log and non-verified email signup', () => {
-  assert.match(privacyPage, /2026-10-05-v5/);
+  assert.match(privacyPage, /2026-10-05-v6/);
   assert.match(privacyPage, /가입·로그인/);
   assert.match(privacyPage, /90일 후 삭제/);
   assert.match(privacyPage, /화면 열람 기록을 복사하지 않으며/);
@@ -337,6 +338,28 @@ test('affiliate ingredient click totals are visible to operators and disclosed',
   assert.match(affiliatePrivacyMigration, /매일 오전 1시\(한국 시간\)/);
   assert.match(affiliatePrivacyMigration, /2026-10-04-v3/);
   assert.match(affiliateAggregationMigration, /2026-10-05-v5/);
+});
+
+test('account withdrawals and invalid FCM tokens are shown only as anonymous lifecycle aggregates', () => {
+  assert.match(html, /data-admin-page="lifecycle"/);
+  assert.match(html, /id="page-lifecycle"/);
+  assert.match(html, /확정 탈퇴/);
+  assert.match(html, /삭제 추정 신호/);
+  assert.match(html, /Android.*Firebase Analytics/s);
+  assert.match(html, /앱 삭제는 개인별로 추적하지 않습니다/);
+  assert.match(script, /operator_app_lifecycle_daily/);
+  assert.match(dispatchPushFunction, /rpc\/record_invalid_push_device/);
+  assert.doesNotMatch(dispatchPushFunction, /markDeviceInactive/);
+  assert.match(script, /invalid_fcm_token/);
+  assert.match(lifecycleMigration, /create table private\.app_lifecycle_daily/i);
+  assert.match(lifecycleMigration, /account_withdrawal/);
+  assert.match(lifecycleMigration, /invalid_fcm_token/);
+  assert.match(lifecycleMigration, /delete from auth\.users where id = auth\.uid\(\)/i);
+  assert.match(lifecycleMigration, /operator_app_lifecycle_daily/);
+  assert.match(lifecycleMigration, /grant execute on function public\.record_invalid_push_device\(uuid\) to service_role/i);
+  assert.match(privacyPage, /탈퇴 완료 건수는 개인 식별자 없이/);
+  assert.match(privacyPage, /FCM 토큰 무효화는 앱 삭제 확정이 아닙니다/);
+  assert.match(privacyPage, /Android에서 Firebase Analytics를 허용한 경우/);
 });
 
 test('Coupang management separates browser handoffs from Coupang sales reports', () => {
@@ -390,7 +413,7 @@ test('account-linked ingredient searches are optional, canonical-only, and expir
   const detailRpc = userInsightsMigration.match(/create or replace function public\.operator_get_user_detail[\s\S]*?revoke all on function public\.operator_get_user_detail/)?.[0] ?? '';
   assert.match(detailRpc, /language plpgsql stable security definer/i);
   assert.doesNotMatch(detailRpc, /delete\s+from/i, 'read-only detail RPC does not delete expired rows');
-  assert.match(privacyPage, /2026-10-05-v5/);
+  assert.match(privacyPage, /2026-10-05-v6/);
   assert.match(privacyPage, /계정별 재료 검색 이력/);
   assert.match(privacyPage, /끄면 기존 계정 연결 검색 이력을 삭제합니다/);
   assert.match(privacyPage, /자유 입력 원문, 일부 입력, 수량, 키 입력 과정은 저장하지 않습니다/);
