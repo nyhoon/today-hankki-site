@@ -24,6 +24,7 @@ const userActivityMigration = await readFile(new URL('../today-hankki/supabase/m
 const userActivityConsentMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261002210000_require_policy_consent_for_activity_logs.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateAnalyticsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004120000_saved_recipes_and_affiliate_search_metrics.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliatePrivacyMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004130000_publish_affiliate_search_privacy.sql', import.meta.url), 'utf8').catch(() => '');
+const userInsightsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004150000_user_search_insights.sql', import.meta.url), 'utf8').catch(() => '');
 const pushAdminFunction = await readFile(new URL('../today-hankki/supabase/functions/operator-push-admin/index.ts', import.meta.url), 'utf8').catch(() => '');
 const dispatchPushFunction = await readFile(new URL('../today-hankki/supabase/functions/dispatch-pushes/index.ts', import.meta.url), 'utf8').catch(() => '');
 const fcmShared = await readFile(new URL('../today-hankki/supabase/functions/_shared/fcm.ts', import.meta.url), 'utf8').catch(() => '');
@@ -38,8 +39,8 @@ test('operator dashboard exposes eight unique destinations and guarded states', 
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261004-affiliate-search-3/);
-  assert.match(html, /admin-v3\.js\?v=20261004-affiliate-search-3/);
+  assert.match(html, /styles\.css\?v=20261004-user-profile-4/);
+  assert.match(html, /admin-v3\.js\?v=20261004-user-profile-4/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -278,9 +279,9 @@ test('dashboard headline metrics open their matching records and user details sh
   const activityTable = userActivityMigration.match(/create table private\.user_activity_events \(([\s\S]*?)\);/);
   assert.ok(activityTable, 'activity table is defined');
   assert.doesNotMatch(activityTable[1], /detail|value|name|title|ingredient|quantity/i);
-  assert.match(script, /사용 기록/);
+  assert.match(script, /RECENT ACTIVITY/);
   assert.match(script, /화면 열람은 기록하지 않으며/);
-  assert.match(script, /90일 후 삭제/);
+  assert.match(script, /90일 후 정리합니다/);
 });
 
 test('policy, operator, audit, and health screens use immutable or append-only server routes', () => {
@@ -310,7 +311,7 @@ test('policy, operator, audit, and health screens use immutable or append-only s
 });
 
 test('public policy pages explain the new 90-day activity log and non-verified email signup', () => {
-  assert.match(privacyPage, /2026-10-04-v3/);
+  assert.match(privacyPage, /2026-10-04-v4/);
   assert.match(privacyPage, /가입·로그인/);
   assert.match(privacyPage, /90일 후 삭제/);
   assert.match(privacyPage, /화면 열람 기록을 복사하지 않으며/);
@@ -335,4 +336,44 @@ test('affiliate ingredient click totals are visible to operators and disclosed',
   assert.match(affiliateAnalyticsMigration, /cron\.schedule/);
   assert.match(affiliatePrivacyMigration, /매일 오전 1시\(한국 시간\)/);
   assert.match(affiliatePrivacyMigration, /2026-10-04-v3/);
+});
+
+test('user detail is a single responsive workspace with consented ingredient history', () => {
+  assert.match(html, /사용자 프로필 한 화면에서 이어서 볼 수 있습니다/);
+  assert.match(script, /classList\.add\('user-profile-detail'\)/);
+  for (const section of ['user-profile-summary', 'user-profile-kitchens', 'user-profile-community', 'user-profile-privacy', 'user-profile-searches', 'user-profile-activity', 'user-profile-actions']) {
+    assert.ok(script.includes(section), `${section} is present in the one-page user profile`);
+  }
+  assert.match(script, /const locked = preview\.is_self \|\| preview\.is_operator/);
+  assert.match(script, /user\.search_events/);
+  assert.match(script, /user\.analytics_consent/);
+  assert.match(script, /자유 입력 원문과 수량은 저장하지 않습니다/);
+  assert.match(css, /\.user-profile-detail\s*\{/);
+  assert.match(css, /\.user-profile-grid\s*\{/);
+});
+
+test('account-linked ingredient searches are optional, canonical-only, and expire after 90 days', () => {
+  for (const fragment of [
+    'private.user_ingredient_search_consent',
+    'private.user_ingredient_search_events',
+    'public.get_my_ingredient_search_consent',
+    'public.set_my_ingredient_search_consent',
+    'public.record_my_ingredient_search',
+    'private.cleanup_user_ingredient_search_events',
+    "interval '90 days'",
+    "'2026-10-04-v4'",
+  ]) assert.ok(userInsightsMigration.includes(fragment), `${fragment} is installed`);
+  assert.match(userInsightsMigration, /delete from private\.user_ingredient_search_events where user_id=current_user_id/i);
+  assert.match(userInsightsMigration, /not exists\s*\(\s*select 1 from public\.ingredients/i);
+  assert.match(userInsightsMigration, /'search_events'/);
+  assert.match(userInsightsMigration, /'analytics_consent'/);
+  assert.match(userInsightsMigration, /'is_self'/);
+  assert.match(userInsightsMigration, /'is_operator'/);
+  const detailRpc = userInsightsMigration.match(/create or replace function public\.operator_get_user_detail[\s\S]*?revoke all on function public\.operator_get_user_detail/)?.[0] ?? '';
+  assert.match(detailRpc, /language plpgsql stable security definer/i);
+  assert.doesNotMatch(detailRpc, /delete\s+from/i, 'read-only detail RPC does not delete expired rows');
+  assert.match(privacyPage, /2026-10-04-v4/);
+  assert.match(privacyPage, /계정별 재료 검색 이력/);
+  assert.match(privacyPage, /끄면 기존 계정 연결 검색 이력을 삭제합니다/);
+  assert.match(privacyPage, /자유 입력 원문, 일부 입력, 수량, 키 입력 과정은 저장하지 않습니다/);
 });

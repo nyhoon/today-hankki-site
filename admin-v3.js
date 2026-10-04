@@ -389,16 +389,50 @@ async function loadUsers() {
 }
 
 function userDetailMarkup(user, preview) {
-  const kitchens = (user.kitchens ?? []).map((kitchen) => `<li>${escapeHtml(kitchen.name)} · ${escapeHtml(kitchen.role)}${kitchen.archived_at ? ' · 보관됨' : ''}</li>`).join('') || '<li>연결된 키친이 없습니다.</li>';
-  const activity = (user.activity ?? []).slice(0, 20).map((item) => `<li><span>${escapeHtml(item.action)}${item.detail ? ` · ${escapeHtml(item.detail)}` : ''}</span><time>${escapeHtml(dateText(item.at))}</time></li>`).join('') || '<li>현재 기록된 활동이 없습니다.</li>';
+  const number = (value) => new Intl.NumberFormat('ko-KR').format(Number(value) || 0);
   const providers = (user.providers ?? [user.provider]).map((provider) => ({ google: 'Google', kakao: '카카오', email: '이메일' }[provider] || provider)).join(' · ');
-  const locked = user.is_self || user.is_operator;
-  const action = locked ? '<p class="empty-admin">운영자 계정과 현재 로그인 계정은 이용 제한 대상에서 제외됩니다.</p>' : `<button class="${user.is_banned ? 'secondary-button' : 'danger-button'}" data-user-ban="${escapeHtml(user.id)}" data-banned="${user.is_banned ? 'true' : 'false'}" type="button">${user.is_banned ? '이용 제한 해제' : '이용 제한'}</button>`;
-  return `<button class="detail-close secondary-button" data-user-close type="button">닫기</button><p class="eyebrow">계정 상세</p><h2>${escapeHtml(user.display_name || '닉네임 없음')}</h2><p>${escapeHtml(user.email)} · ${escapeHtml(providers)}</p><p>가입 ${escapeHtml(dateText(user.created_at))} · 최근 로그인 ${escapeHtml(dateText(user.last_sign_in_at))}</p><p>${user.is_banned ? `이용 제한 중 · ${escapeHtml(dateText(user.banned_until))}` : '이용 가능'}</p><h3>키친</h3><ul>${kitchens}</ul><h3>커뮤니티</h3><p>작성 레시피 ${escapeHtml(user.community?.recipes ?? 0)}건 · 받은 신고 ${escapeHtml(user.community?.reports_received ?? 0)}건</p><h3>사용 기록</h3><ul class="user-activity-list">${activity}</ul><p class="empty-admin">가입·로그인과 핵심 기능 변경만 기록합니다. 입력 내용과 화면 열람은 기록하지 않으며, 로그는 90일 후 삭제합니다.</p><h3>탈퇴 영향 미리보기</h3><p>${escapeHtml(preview.instruction || '계정 탈퇴는 앱에서 진행해야 합니다.')}</p><p>소유 키친 ${escapeHtml(preview.owned_kitchens ?? 0)}개 · 레시피 ${escapeHtml(preview.community_recipes ?? 0)}개 · 사진 ${escapeHtml(preview.community_photos ?? 0)}개</p>${action}`;
+  const kitchens = (user.kitchens ?? []).map((kitchen) => `<article class="user-profile-kitchen"><div><strong>${escapeHtml(kitchen.name)}</strong><span>${escapeHtml(kitchen.role)}${kitchen.archived_at ? ' · 보관됨' : ' · 사용 중'}</span></div><p>멤버 ${number(kitchen.member_count)}명 · 재료 ${number(kitchen.inventory_count)}개 · 장보기 미완료 ${number(kitchen.shopping_open)}개</p></article>`).join('') || '<p class="empty-admin">연결된 키친이 없습니다.</p>';
+  const community = user.community ?? {};
+  const communityItems = [
+    ['유저 레시피', community.recipes], ['공개 레시피', community.published_recipes], ['작성 후기', community.reviews],
+    ['받은 후기', community.reviews_received], ['받은 좋아요', community.likes_received], ['받은 신고', community.reports_received],
+    ['작성한 신고', community.reports_filed], ['저장한 한끼유저 레시피', community.saved_community_recipes],
+    ['저장한 오늘한끼 레시피', community.saved_official_recipes], ['좋아요한 오늘한끼 레시피', community.liked_official_recipes],
+    ['팔로잉', community.following], ['팔로워', community.followers],
+  ].map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${number(value)}</strong></div>`).join('');
+  const activity = (user.activity ?? []).slice(0, 50).map((item) => `<li><strong>${escapeHtml(item.action)}</strong><time>${escapeHtml(dateText(item.at))}</time></li>`).join('') || '<li class="user-profile-empty-row">현재 기록된 활동이 없습니다.</li>';
+  const consent = user.analytics_consent ?? {};
+  const searchEvents = (user.search_events ?? []).slice(0, 100).map((item) => `<li><strong>${escapeHtml(item.ingredient_name)}</strong><span>${escapeHtml(({ inventory: '재료', recipe_catalog: '레시피 검색', recipe_suggestions: '재료 추천', shopping_list: '장보기', recipe_detail: '레시피 상세' })[item.surface] || item.surface)}</span><time>${escapeHtml(dateText(item.at))}</time></li>`).join('') || '<li class="user-profile-empty-row">동의하지 않았거나 최근 90일 검색 기록이 없습니다.</li>';
+  const topIngredients = (user.search_counts?.top_ingredients ?? []).map((item) => `<span>${escapeHtml(item.ingredient_name)} <b>${number(item.count)}</b></span>`).join('') || '<span>집계할 검색이 없습니다.</span>';
+  const savedRecipes = (user.saved_recipes ?? []).map((item) => `<li><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.kind)}</span><time>${escapeHtml(dateText(item.at))}</time></li>`).join('') || '<li class="user-profile-empty-row">저장한 레시피가 없습니다.</li>';
+  const acceptedPolicies = (user.policy_acceptances ?? []).map((item) => `<li><strong>${escapeHtml(item.kind === 'terms' ? '이용약관' : '개인정보처리방침')}</strong><span>${escapeHtml(item.version)}</span><time>${escapeHtml(dateText(item.accepted_at))}</time></li>`).join('') || '<li class="user-profile-empty-row">확인된 동의 기록이 없습니다.</li>';
+  const push = user.push ?? {};
+  const locked = preview.is_self || preview.is_operator;
+  const action = locked ? '<p class="empty-admin">본인과 운영자 계정은 이용 제한 대상에서 제외됩니다.</p>' : `<button class="${user.is_banned ? 'secondary-button' : 'danger-button'}" data-user-ban="${escapeHtml(user.id)}" data-banned="${user.is_banned ? 'true' : 'false'}" type="button">${user.is_banned ? '이용 제한 해제' : '이용 제한'}</button>`;
+  const stats = [
+    ['키친', (user.kitchens ?? []).length], ['커뮤니티 레시피', community.recipes],
+    ['최근 90일 재료 검색', user.search_counts?.total], ['최근 활동', (user.activity ?? []).length],
+  ].map(([label, value]) => `<article><span>${escapeHtml(label)}</span><strong>${number(value)}</strong></article>`).join('');
+  const platforms = (push.platforms ?? []).map((item) => item === 'ios' ? 'iOS' : item === 'android' ? 'Android' : item).join(' · ') || '등록된 기기 없음';
+  return `<div class="user-profile-heading"><div><p class="eyebrow">ACCOUNT PROFILE</p><h2 id="user-profile-title" tabindex="-1">${escapeHtml(user.display_name || '닉네임 없음')}</h2><p>${escapeHtml(user.email)} · ${escapeHtml(providers)}</p></div><button class="secondary-button" data-user-close type="button">닫기</button></div>
+    <div id="user-profile-summary" class="user-profile-summary"><div><span>${user.is_banned ? '이용 제한 중' : '계정 상태'}</span><strong>${user.is_banned ? `제한 · ${escapeHtml(dateText(user.banned_until))}` : '이용 가능'}</strong><small>가입 ${escapeHtml(dateText(user.created_at))} · 최근 로그인 ${escapeHtml(dateText(user.last_sign_in_at))}</small></div><div class="user-profile-metrics">${stats}</div></div>
+    <nav class="user-profile-nav" aria-label="사용자 상세 섹션">${[['user-profile-kitchens','키친'],['user-profile-community','커뮤니티'],['user-profile-privacy','동의·알림'],['user-profile-searches','재료 검색'],['user-profile-activity','활동'],['user-profile-actions','계정 조치']].map(([id,label])=>`<a href="#${id}">${label}</a>`).join('')}</nav>
+    <div class="user-profile-grid">
+      <section id="user-profile-kitchens" class="user-profile-card"><p class="eyebrow">HOUSEHOLD</p><h3>키친과 사용 요약</h3><div class="user-profile-kitchens">${kitchens}</div><p class="user-profile-note">공유 냉장고의 재료 이름·수량은 여기 표시하지 않습니다.</p></section>
+      <section id="user-profile-community" class="user-profile-card"><p class="eyebrow">COMMUNITY</p><h3>레시피와 참여</h3><div class="user-profile-community-metrics">${communityItems}</div><h4>최근 저장한 레시피</h4><ul class="user-profile-list">${savedRecipes}</ul></section>
+      <section id="user-profile-privacy" class="user-profile-card"><p class="eyebrow">PREFERENCES</p><h3>동의와 알림</h3><div class="user-profile-consent"><strong>${consent.enabled ? '계정별 재료 검색 기록 동의' : '계정별 재료 검색 기록 미동의'}</strong><span>개인정보 버전 ${escapeHtml(consent.policy_version || '기록 없음')}</span><small>동의 ${escapeHtml(dateText(consent.consented_at))} · 철회 ${escapeHtml(dateText(consent.revoked_at))}</small></div><dl><div><dt>푸시 알림</dt><dd>${push.enabled ? '켜짐' : '꺼짐'}</dd></div><div><dt>활성 기기</dt><dd>${number(push.active_devices)}대 · ${escapeHtml(platforms)}</dd></div><div><dt>알림 종류</dt><dd>${[['expiry','기한'],['recipes','요리'],['kitchen','키친'],['shopping','장보기']].filter(([key])=>push[key]).map(([,label])=>label).join(' · ') || '선택 없음'}</dd></div></dl><h4>최근 약관 동의</h4><ul class="user-profile-list">${acceptedPolicies}</ul><p class="user-profile-note">기기 푸시 토큰과 원문 입력은 운영 화면에 노출하지 않습니다.</p></section>
+      <section id="user-profile-searches" class="user-profile-card user-profile-search-card"><p class="eyebrow">INGREDIENT INTENT · LAST 90 DAYS</p><h3>검색한 재료</h3><p class="user-profile-note">사용자가 별도 동의한 경우에만 표준 재료와 검색 화면을 표시합니다. 자유 입력 원문과 수량은 저장하지 않습니다.</p><div class="user-profile-top-ingredients">${topIngredients}</div><ul class="user-profile-list user-profile-search-list">${searchEvents}</ul></section>
+      <section id="user-profile-activity" class="user-profile-card"><p class="eyebrow">RECENT ACTIVITY</p><h3>최근 90일 활동</h3><ul class="user-activity-list">${activity}</ul><p class="user-profile-note">핵심 기능의 종류와 시각만 표시합니다. 입력 내용과 화면 열람은 기록하지 않으며, 90일 후 정리합니다.</p></section>
+      <section id="user-profile-actions" class="user-profile-card user-profile-actions"><p class="eyebrow">ACCOUNT ACTIONS</p><h3>계정 조치와 탈퇴 영향</h3><p>${escapeHtml(preview.instruction || '계정 탈퇴는 앱에서 진행해야 합니다.')}</p><p>소유 키친 ${number(preview.owned_kitchens)}개 · 레시피 ${number(preview.community_recipes)}개 · 사진 ${number(preview.community_photos)}개</p>${action}</section>
+    </div>`;
 }
 
 async function openUserDetail(id) {
   const panel = byId('users-detail');
+  panel.classList.add('user-profile-detail');
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'true');
+  panel.setAttribute('aria-label', '사용자 상세 프로필');
   panel.hidden = false;
   panel.innerHTML = '<p class="empty-admin">계정 상세를 불러오는 중이에요…</p>';
   const [{ data: user, error }, { data: preview, error: previewError }] = await Promise.all([
@@ -408,7 +442,11 @@ async function openUserDetail(id) {
   if (error || previewError) {
     panel.innerHTML = `<p class="empty-admin">계정 상세를 불러오지 못했어요: ${escapeHtml((error || previewError).message)}</p><button class="secondary-button" data-user-close type="button">닫기</button>`;
   } else panel.innerHTML = userDetailMarkup(user, preview);
-  panel.querySelector('[data-user-close]').addEventListener('click', () => { panel.hidden = true; });
+  panel.querySelector('[data-user-close]')?.addEventListener('click', () => { panel.hidden = true; panel.removeAttribute('aria-modal'); });
+  panel.querySelector('h2')?.focus();
+  panel.onkeydown = (event) => {
+    if (event.key === 'Escape') { panel.hidden = true; panel.removeAttribute('aria-modal'); }
+  };
   panel.querySelector('[data-user-ban]')?.addEventListener('click', () => changeUserBan(id, panel.querySelector('[data-user-ban]').dataset.banned === 'true'));
 }
 

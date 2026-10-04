@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>운영 대시보드 · 오늘한끼</title>
-  <link rel="stylesheet" href="styles.css?v=20261004-affiliate-search-3">
+  <link rel="stylesheet" href="styles.css?v=20261004-user-profile-4">
 </head>
 <body class="admin-body">
   <header class="admin-header">
@@ -91,6 +91,7 @@
 
           <section class="admin-page" id="page-users" data-page-panel="users" hidden>
             <div class="admin-title"><div><p class="eyebrow">ACCOUNTS</p><h1>사용자</h1></div></div>
+            <p class="user-page-intro">검색한 재료, 앱 활동, 키친과 커뮤니티 정보를 사용자 프로필 한 화면에서 이어서 볼 수 있습니다.</p>
             <div class="module-toolbar"><label>로그인 방식 <select id="users-provider"><option value="all">전체</option><option value="google">Google</option><option value="kakao">카카오</option><option value="email">이메일</option></select></label><label class="search-field">이메일·닉네임 <input id="users-search" type="search" autocomplete="off"></label><button class="secondary-button" id="users-search-button" type="button">검색</button></div>
             <div class="admin-panel"><div class="panel-title"><h2>계정 목록</h2><span id="users-total">-</span></div><div class="table-wrap admin-table-cards"><table><thead><tr><th scope="col">계정</th><th scope="col">로그인</th><th scope="col">닉네임</th><th scope="col">키친</th><th scope="col">최근 로그인</th><th scope="col">가입일</th><th scope="col">상세</th></tr></thead><tbody id="user-list"></tbody></table></div><div class="admin-pagination" id="users-pagination"></div></div>
             <aside class="admin-detail" id="users-detail" aria-label="선택한 사용자 상세" hidden></aside>
@@ -171,6 +172,6 @@
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin-v3.js?v=20261004-affiliate-search-3"></script>
+  <script defer src="admin-v3.js?v=20261004-user-profile-4"></script>
 </body>
 </html>
