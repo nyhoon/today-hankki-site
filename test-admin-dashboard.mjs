@@ -26,6 +26,7 @@ const affiliateAnalyticsMigration = await readFile(new URL('../today-hankki/supa
 const affiliatePrivacyMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004130000_publish_affiliate_search_privacy.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateAggregationMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005100000_reliable_affiliate_handoff_aggregation.sql', import.meta.url), 'utf8').catch(() => '');
 const lifecycleMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005120000_app_lifecycle_tracking.sql', import.meta.url), 'utf8').catch(() => '');
+const boundedActivityMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005130000_privacy_bounded_activity_and_affiliate_counts.sql', import.meta.url), 'utf8').catch(() => '');
 const userInsightsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004150000_user_search_insights.sql', import.meta.url), 'utf8').catch(() => '');
 const pushAdminFunction = await readFile(new URL('../today-hankki/supabase/functions/operator-push-admin/index.ts', import.meta.url), 'utf8').catch(() => '');
 const dispatchPushFunction = await readFile(new URL('../today-hankki/supabase/functions/dispatch-pushes/index.ts', import.meta.url), 'utf8').catch(() => '');
@@ -313,12 +314,27 @@ test('policy, operator, audit, and health screens use immutable or append-only s
 });
 
 test('public policy pages explain the new 90-day activity log and non-verified email signup', () => {
-  assert.match(privacyPage, /2026-10-05-v6/);
+  assert.match(privacyPage, /2026-10-05-v7/);
   assert.match(privacyPage, /가입·로그인/);
-  assert.match(privacyPage, /90일 후 삭제/);
-  assert.match(privacyPage, /화면 열람 기록을 복사하지 않으며/);
+  assert.match(privacyPage, /최근 90일/);
+  assert.match(privacyPage, /화면 열람 기록은 활동 상세에 복사하지 않습니다/);
+  assert.match(privacyPage, /변경 전·후 값/);
   assert.match(termsPage, /이메일 주소의 소유 여부를 확인하지 않으므로/);
   assert.match(termsPage, /자동 연결하지 않습니다/);
+});
+
+test('privacy v7 activity detail is allowlisted, moderator-only, and retained for 90 days', () => {
+  assert.match(boundedActivityMigration, /add column details jsonb not null default '\{\}'::jsonb/i);
+  assert.match(boundedActivityMigration, /build_user_activity_details/);
+  assert.match(boundedActivityMigration, /name','quantity','unit','location','date_kind','label_date','opened_at','confirmed/);
+  assert.match(boundedActivityMigration, /array\['name','quantity','unit','location','checked'\]/);
+  assert.match(boundedActivityMigration, /interval '90 days'/);
+  assert.match(boundedActivityMigration, /details',events\.details/);
+  assert.match(boundedActivityMigration, /Moderator only/);
+  assert.match(privacyPage, /2026-10-05-v7/);
+  assert.match(privacyPage, /바코드, 레시피·후기·신고 본문, 사진/);
+  assert.match(privacyPage, /최신 이용약관·개인정보처리방침 동의를 확인한 뒤/);
+  assert.match(privacyPage, /이 익명 집계는 Firebase 분석 동의와 별개입니다/);
 });
 
 test('affiliate ingredient click totals are visible to operators and disclosed', () => {
@@ -329,8 +345,8 @@ test('affiliate ingredient click totals are visible to operators and disclosed',
   assert.match(affiliateAnalyticsMigration, /create table private\.affiliate_search_daily/);
   assert.match(affiliateAnalyticsMigration, /ingredient_id text/);
   assert.match(affiliateAnalyticsMigration, /not exists\s*\(\s*select 1 from public\.ingredients/i);
-  assert.match(privacyPage, /한국 날짜·진입 경로별 외부 브라우저 열기 합계/);
-  assert.match(privacyPage, /검색어 원문, 재료명, 수량, 계정 ID와 이메일은 이 합계에 저장하지 않습니다/);
+  assert.match(privacyPage, /한국 날짜·진입 경로별 횟수/);
+  assert.match(privacyPage, /검색어 원문, 재료명, 수량, 계정 ID와 이메일은 집계에 저장하지 않습니다/);
   assert.match(affiliateAnalyticsMigration, /private\.has_current_policies/);
   assert.match(affiliateAnalyticsMigration, /Asia\/Seoul/);
   assert.match(affiliateAnalyticsMigration, /cleanup_affiliate_search_daily/);
@@ -357,7 +373,7 @@ test('account withdrawals and invalid FCM tokens are shown only as anonymous lif
   assert.match(lifecycleMigration, /delete from auth\.users where id = auth\.uid\(\)/i);
   assert.match(lifecycleMigration, /operator_app_lifecycle_daily/);
   assert.match(lifecycleMigration, /grant execute on function public\.record_invalid_push_device\(uuid\) to service_role/i);
-  assert.match(privacyPage, /탈퇴 완료 건수는 개인 식별자 없이/);
+  assert.match(privacyPage, /탈퇴 완료 건수와 무효 FCM 토큰 건수는 개인 식별자·토큰 없이/);
   assert.match(privacyPage, /FCM 토큰 무효화는 앱 삭제 확정이 아닙니다/);
   assert.match(privacyPage, /Android에서 Firebase Analytics를 허용한 경우/);
 });
@@ -413,8 +429,8 @@ test('account-linked ingredient searches are optional, canonical-only, and expir
   const detailRpc = userInsightsMigration.match(/create or replace function public\.operator_get_user_detail[\s\S]*?revoke all on function public\.operator_get_user_detail/)?.[0] ?? '';
   assert.match(detailRpc, /language plpgsql stable security definer/i);
   assert.doesNotMatch(detailRpc, /delete\s+from/i, 'read-only detail RPC does not delete expired rows');
-  assert.match(privacyPage, /2026-10-05-v6/);
+  assert.match(privacyPage, /2026-10-05-v7/);
   assert.match(privacyPage, /계정별 재료 검색 이력/);
-  assert.match(privacyPage, /끄면 기존 계정 연결 검색 이력을 삭제합니다/);
+  assert.match(privacyPage, /계정별 재료 검색 이력을 끄면 해당 계정 검색 이력을 바로 삭제/);
   assert.match(privacyPage, /자유 입력 원문, 일부 입력, 수량, 키 입력 과정은 저장하지 않습니다/);
 });
