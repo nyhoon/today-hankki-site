@@ -1191,7 +1191,8 @@ async function loadDashboard() {
   await loadTrend();
 }
 
-function renderAffiliateTable(target, rows, columns, empty, error) {
+function renderAffiliateTable(target, rows, columns, empty, error, onCellDetail = null) {
+  target.onclick = null;
   if (error) {
     target.innerHTML = `<p class="empty-admin">집계를 불러오지 못했어요: ${escapeHtml(error.message)}</p>`;
     return;
@@ -1200,7 +1201,88 @@ function renderAffiliateTable(target, rows, columns, empty, error) {
     target.innerHTML = `<p class="empty-admin">${empty}</p>`;
     return;
   }
-  target.innerHTML = `<table><thead><tr>${columns.map(([label]) => `<th scope="col">${escapeHtml(label)}</th>`).join('')}</tr></thead><tbody>${rows.map((row) => `<tr>${columns.map(([, value]) => `<td>${escapeHtml(value(row))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  target.innerHTML = `<table><thead><tr>${columns.map(([label]) => `<th scope="col">${escapeHtml(label)}</th>`).join('')}</tr></thead><tbody>${rows.map((row, rowIndex) => `<tr>${columns.map(([, value, detailKind], columnIndex) => `<td>${detailKind && onCellDetail ? `<button type="button" class="affiliate-detail-button" data-affiliate-row-index="${rowIndex}" data-affiliate-detail-column="${columnIndex}" aria-label="${escapeHtml(value(row))} ${escapeHtml(typeof detailKind === 'function' ? detailKind(row) : '상세')} 보기">${escapeHtml(value(row))}</button>` : escapeHtml(value(row))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  if (onCellDetail) target.onclick = (event) => {
+    const button = event.target.closest('[data-affiliate-row-index]');
+    if (!button) return;
+    const row = rows[Number(button.dataset.affiliateRowIndex)];
+    const column = columns[Number(button.dataset.affiliateDetailColumn)];
+    if (row && column?.[2]) onCellDetail(row, typeof column[2] === 'function' ? column[2](row) : column[2]);
+  };
+}
+
+let affiliateDailyRows = [];
+let affiliateDateRange = { from: '', to: '' };
+
+function renderAffiliateMetricDetails(title, rows, valueLabel = '외부 열기') {
+  const dialog = byId('metric-dialog');
+  byId('metric-title').textContent = title;
+  if (rows.length === 1 && rows[0].error) {
+    byId('metric-total').textContent = '상세 내역을 불러오지 못했어요.';
+    byId('metric-items').innerHTML = `<p class="empty-admin">${escapeHtml(rows[0].error)}</p>`;
+    byId('metric-pagination').innerHTML = '';
+    if (!dialog.open) dialog.showModal();
+    return;
+  }
+  byId('metric-total').textContent = `${rows.reduce((sum, row) => sum + Number(row.count || 0), 0).toLocaleString('ko-KR')}건 · 날짜·화면별 익명 합계 (개별 이용자 내역 없음)`;
+  byId('metric-items').innerHTML = rows.map((row) => `<article><strong>${escapeHtml(row.label)}</strong><span>${escapeHtml(valueLabel)} ${Number(row.count || 0).toLocaleString('ko-KR')}건${row.detail ? ` · ${escapeHtml(row.detail)}` : ''}</span></article>`).join('') || '<p class="empty-admin">표시할 상세 집계가 없습니다.</p>';
+  byId('metric-pagination').innerHTML = '';
+  if (!dialog.open) dialog.showModal();
+}
+
+async function openAffiliateMetricDetail(kind, row = null) {
+  const sourceLabels = { shopping_list: '장보기', recipe_detail: '레시피 상세' };
+  const sourceText = (source) => sourceLabels[source] || source;
+  const filtered = kind.startsWith('source_')
+    ? affiliateDailyRows.filter((item) => item.source === row.sourceKey)
+    : kind.startsWith('date_')
+      ? affiliateDailyRows.filter((item) => item.event_date === row.date)
+      : affiliateDailyRows;
+  const metric = kind.endsWith('_known') || kind === 'summary_known' ? 'known'
+    : kind.endsWith('_unmapped') || kind === 'summary_unmapped' ? 'unmapped' : 'total';
+  if (kind === 'ingredient') {
+    const title = `${row.ingredient_name} · 날짜별 외부 열기`;
+    byId('metric-title').textContent = title;
+    byId('metric-total').textContent = '상세 집계를 불러오는 중이에요…';
+    byId('metric-items').innerHTML = '';
+    byId('metric-pagination').innerHTML = '';
+    const dialog = byId('metric-dialog');
+    if (!dialog.open) dialog.showModal();
+    const { data, error } = await db.rpc('operator_affiliate_ingredient_daily', {
+      p_from: affiliateDateRange.from, p_to: affiliateDateRange.to, p_ingredient_id: row.ingredient_id,
+    });
+    if (error) return renderAffiliateMetricDetails(title, [{ error: error.message }]);
+    return renderAffiliateMetricDetails(title, (data ?? []).map((item) => ({
+      label: `${item.event_date} · ${sourceText(item.source)}`, count: item.click_count,
+    })));
+  }
+  if (kind === 'term') {
+    const title = `“${row.search_term}” · 날짜별 외부 열기`;
+    byId('metric-title').textContent = title;
+    byId('metric-total').textContent = '상세 집계를 불러오는 중이에요…';
+    byId('metric-items').innerHTML = '';
+    byId('metric-pagination').innerHTML = '';
+    const dialog = byId('metric-dialog');
+    if (!dialog.open) dialog.showModal();
+    const { data, error } = await db.rpc('operator_affiliate_search_term_daily', {
+      p_from: affiliateDateRange.from, p_to: affiliateDateRange.to,
+      p_search_term: row.search_term, p_source: row.source,
+    });
+    if (error) return renderAffiliateMetricDetails(title, [{ error: error.message }]);
+    return renderAffiliateMetricDetails(title, (data ?? []).map((item) => ({
+      label: `${item.event_date} · ${sourceText(item.source)}`, count: item.click_count,
+    })));
+  }
+  const labels = { total: '외부 열기', known: '재료 코드 확인', unmapped: '재료 코드 미확인' };
+  const items = filtered.map((item) => ({
+    label: `${item.event_date} · ${sourceText(item.source)}`,
+    count: metric === 'known' ? item.ingredient_click_count : metric === 'unmapped' ? item.unmapped_click_count : item.click_count,
+    detail: `외부 열기 ${Number(item.click_count).toLocaleString('ko-KR')}건 · 확인 ${Number(item.ingredient_click_count).toLocaleString('ko-KR')}건 · 미확인 ${Number(item.unmapped_click_count).toLocaleString('ko-KR')}건`,
+  })).filter((item) => metric === 'total' || item.count > 0);
+  const title = kind.startsWith('source_') ? `${row.source} · ${labels[metric]} 날짜별 내역`
+    : kind.startsWith('date_') ? `${row.date} · 진입 화면별 내역`
+      : `${labels[metric]} · 날짜별 내역`;
+  renderAffiliateMetricDetails(title, items, labels[metric]);
 }
 
 function setAffiliateRefreshState(state, message) {
@@ -1210,6 +1292,7 @@ function setAffiliateRefreshState(state, message) {
 }
 
 function renderAffiliateManagement(dailyRows, ingredientRows, termRows, dailyError, ingredientError, termError) {
+  affiliateDailyRows = dailyRows;
   const total = dailyRows.reduce((sum, row) => sum + Number(row.click_count || 0), 0);
   const known = dailyRows.reduce((sum, row) => sum + Number(row.ingredient_click_count || 0), 0);
   const unmapped = dailyRows.reduce((sum, row) => sum + Number(row.unmapped_click_count || 0), 0);
@@ -1235,33 +1318,42 @@ function renderAffiliateManagement(dailyRows, ingredientRows, termRows, dailyErr
   const format = (value) => Number(value).toLocaleString('ko-KR');
   renderAffiliateTable(
     byId('affiliate-sources'),
-    [...sources].map(([source, count]) => ({ source: sourceLabels[source] || source, ...count })),
-    [['진입 화면', (row) => row.source], ['외부 열기', (row) => format(row.total)], ['재료 확인', (row) => format(row.known)], ['미확인', (row) => format(row.unmapped)]],
+    [...sources].map(([source, count]) => ({ source: sourceLabels[source] || source, sourceKey: source, ...count })),
+    [['진입 화면', (row) => row.source], ['외부 열기', (row) => format(row.total), 'source_total'], ['재료 확인', (row) => format(row.known), 'source_known'], ['미확인', (row) => format(row.unmapped), 'source_unmapped']],
     '최근 30일 외부 브라우저 열기 기록이 없습니다.',
     dailyError,
+    (row, kind) => openAffiliateMetricDetail(kind, row),
   );
   renderAffiliateTable(
     byId('affiliate-daily'),
     [...dates].sort(([a], [b]) => b.localeCompare(a)).map(([date, count]) => ({ date, ...count })),
-    [['날짜', (row) => row.date], ['외부 열기', (row) => format(row.total)], ['재료 확인', (row) => format(row.known)], ['미확인', (row) => format(row.unmapped)]],
+    [['날짜', (row) => row.date], ['외부 열기', (row) => format(row.total), 'date_total'], ['재료 확인', (row) => format(row.known), 'date_known'], ['미확인', (row) => format(row.unmapped), 'date_unmapped']],
     '최근 30일 외부 브라우저 열기 기록이 없습니다.',
     dailyError,
+    (row, kind) => openAffiliateMetricDetail(kind, row),
   );
   renderAffiliateTable(
     byId('affiliate-top'),
     ingredientRows,
-    [['표준 재료', (row) => row.ingredient_name], ['외부 열기', (row) => format(row.click_count)]],
+    [['표준 재료', (row) => row.ingredient_name], ['외부 열기', (row) => format(row.click_count), 'ingredient']],
     '재료 코드가 확인된 기록이 아직 없습니다.',
     ingredientError,
+    (row, kind) => openAffiliateMetricDetail(kind, row),
   );
   renderAffiliateTable(
     byId('affiliate-terms'),
     termRows,
-    [['검색어', (row) => row.search_term], ['진입 화면', (row) => sourceLabels[row.source] || row.source], ['외부 열기', (row) => format(row.click_count)]],
+    [['검색어', (row) => row.search_term], ['진입 화면', (row) => sourceLabels[row.source] || row.source], ['외부 열기', (row) => format(row.click_count), 'term']],
     '최근 30일 앱에서 쿠팡으로 전달한 검색어가 없습니다.',
     termError,
+    (row, kind) => openAffiliateMetricDetail(kind, row),
   );
 }
+
+document.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-affiliate-summary]');
+  if (button) openAffiliateMetricDetail(`summary_${button.dataset.affiliateSummary}`);
+});
 
 async function loadAffiliateManagement() {
   status('쿠팡 제휴 집계를 불러오는 중이에요…');
@@ -1275,11 +1367,12 @@ async function loadAffiliateManagement() {
   const from = new Date(today);
   from.setDate(from.getDate() - 29);
   const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  affiliateDateRange = { from: isoDate(from), to: isoDate(today) };
   try {
     const [dailyResult, ingredientResult, termResult] = await Promise.all([
-      db.rpc('operator_affiliate_search_daily', { p_from: isoDate(from), p_to: isoDate(today) }),
-      db.rpc('operator_top_affiliate_ingredients', { p_from: isoDate(from), p_to: isoDate(today), p_limit: 20 }),
-      db.rpc('operator_top_affiliate_search_terms', { p_from: isoDate(from), p_to: isoDate(today), p_limit: 30 }),
+      db.rpc('operator_affiliate_search_daily', { p_from: affiliateDateRange.from, p_to: affiliateDateRange.to }),
+      db.rpc('operator_top_affiliate_ingredients', { p_from: affiliateDateRange.from, p_to: affiliateDateRange.to, p_limit: 20 }),
+      db.rpc('operator_top_affiliate_search_terms', { p_from: affiliateDateRange.from, p_to: affiliateDateRange.to, p_limit: 30 }),
     ]);
     renderAffiliateManagement(
       dailyResult.data ?? [],

@@ -26,6 +26,7 @@ const affiliateAnalyticsMigration = await readFile(new URL('../today-hankki/supa
 const affiliatePrivacyMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004130000_publish_affiliate_search_privacy.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateAggregationMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005100000_reliable_affiliate_handoff_aggregation.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateSearchTermsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005150000_affiliate_search_terms.sql', import.meta.url), 'utf8').catch(() => '');
+const affiliateDetailMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005160000_affiliate_metric_details.sql', import.meta.url), 'utf8').catch(() => '');
 const lifecycleMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005120000_app_lifecycle_tracking.sql', import.meta.url), 'utf8').catch(() => '');
 const boundedActivityMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005130000_privacy_bounded_activity_and_affiliate_counts.sql', import.meta.url), 'utf8').catch(() => '');
 const userInsightsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004150000_user_search_insights.sql', import.meta.url), 'utf8').catch(() => '');
@@ -58,8 +59,8 @@ test('operator dashboard exposes ten unique destinations and guarded states', ()
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261005-activity-affiliate-2/);
-  assert.match(html, /admin-v3\.js\?v=20261005-activity-affiliate-2/);
+  assert.match(html, /styles\.css\?v=20261005-activity-affiliate-3/);
+  assert.match(html, /admin-v3\.js\?v=20261005-activity-affiliate-3/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -438,6 +439,22 @@ test('Coupang management shows last successful refresh and keeps empty, loading,
   assert.match(script, /최근 30일 외부 브라우저 열기 기록이 없습니다\./);
   assert.match(script, /집계를 불러오지 못했어요:/);
   assert.match(script, /마지막 성공 조회/);
+});
+
+test('Coupang dashboard counts open privacy-safe aggregated detail', () => {
+  assert.match(html, /data-affiliate-summary="total"/);
+  assert.match(html, /data-affiliate-summary="known"/);
+  assert.match(html, /data-affiliate-summary="unmapped"/);
+  assert.match(script, /function openAffiliateMetricDetail\(/);
+  assert.match(script, /data-affiliate-detail-column/);
+  assert.match(script, /operator_affiliate_ingredient_daily/);
+  assert.match(script, /operator_affiliate_search_term_daily/);
+  assert.match(script, /날짜·화면별 익명 합계 \(개별 이용자 내역 없음\)/);
+  assert.match(affiliateDetailMigration, /operator_affiliate_ingredient_daily/);
+  assert.match(affiliateDetailMigration, /operator_affiliate_search_term_daily/);
+  assert.match(affiliateDetailMigration, /private\.is_community_moderator\(\)/);
+  assert.match(affiliateDetailMigration, /Moderator only/);
+  assert.match(affiliateDetailMigration, /p_to - p_from > 90/);
 });
 
 test('user detail is a single responsive workspace with consented ingredient history', () => {

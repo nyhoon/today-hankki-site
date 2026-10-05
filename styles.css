@@ -160,7 +160,11 @@
 .admin-stats.affiliate-summary{grid-template-columns:repeat(3,minmax(0,1fr));margin:0}
 .affiliate-summary article{display:grid;min-width:0;min-height:122px;align-content:center;justify-items:start;gap:6px;padding:17px 18px}
 .affiliate-summary article span{color:#415b4f;font-size:13px;font-weight:750}
-.affiliate-summary article strong{font-size:30px;line-height:1.1;letter-spacing:-.04em}
+.affiliate-summary-value{min-height:40px;padding:0;border:0;background:transparent;color:var(--ops-text);font-size:30px;line-height:1.1;letter-spacing:-.04em;font-weight:800;text-align:left;font-variant-numeric:tabular-nums;cursor:pointer}
+.affiliate-summary-value:hover{color:#496d4f;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}
+.affiliate-summary-value:focus-visible,.affiliate-detail-button:focus-visible{outline:3px solid #718348;outline-offset:2px;border-radius:5px}
+.affiliate-detail-button{min-height:36px;padding:4px 8px;border:0;border-radius:6px;background:transparent;color:#173d33;font:inherit;font-variant-numeric:tabular-nums;text-decoration:underline;text-decoration-color:#9aac80;text-underline-offset:3px;cursor:pointer}
+.affiliate-detail-button:hover{background:#f1f4e9;color:#315b43}
 .affiliate-summary article small{color:#4d5e54;font-size:12px}
 .affiliate-note{margin:0;padding:0 20px;color:#667267;font-size:13px;line-height:1.65}
 .affiliate-report-link{padding:16px 20px 20px}
