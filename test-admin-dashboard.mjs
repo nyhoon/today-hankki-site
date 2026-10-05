@@ -26,6 +26,9 @@ const affiliateAnalyticsMigration = await readFile(new URL('../today-hankki/supa
 const affiliatePrivacyMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004130000_publish_affiliate_search_privacy.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateAggregationMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005100000_reliable_affiliate_handoff_aggregation.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateSearchTermsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005150000_affiliate_search_terms.sql', import.meta.url), 'utf8').catch(() => '');
+const affiliateTermDetailsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005170000_affiliate_search_term_details.sql', import.meta.url), 'utf8').catch(() => '');
+const ingredientCatalogExpansionMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005180000_expand_ingredient_catalog.sql', import.meta.url), 'utf8').catch(() => '');
+const ingredientVariantExpansionMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005190000_expand_recipe_ingredient_variants.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateDetailMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005160000_affiliate_metric_details.sql', import.meta.url), 'utf8').catch(() => '');
 const lifecycleMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005120000_app_lifecycle_tracking.sql', import.meta.url), 'utf8').catch(() => '');
 const boundedActivityMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005130000_privacy_bounded_activity_and_affiliate_counts.sql', import.meta.url), 'utf8').catch(() => '');
@@ -59,8 +62,8 @@ test('operator dashboard exposes ten unique destinations and guarded states', ()
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261005-activity-affiliate-3/);
-  assert.match(html, /admin-v3\.js\?v=20261005-activity-affiliate-3/);
+  assert.match(html, /styles\.css\?v=20261005-affiliate-catalog-4/);
+  assert.match(html, /admin-v3\.js\?v=20261005-affiliate-catalog-4/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -375,20 +378,49 @@ test('affiliate ingredient click totals are visible to operators and disclosed',
 
 test('outbound Coupang search terms are anonymous, bounded, disclosed, and visible to operators', () => {
   assert.match(html, /id="affiliate-terms"/);
-  assert.match(html, /앱에서 쿠팡으로 전달한 검색어/);
-  assert.match(script, /operator_top_affiliate_search_terms/);
+  assert.match(html, /모든 쿠팡 검색어/);
+  assert.match(html, /표준 미연결 포함/);
+  assert.match(html, /id="affiliate-terms-pagination"/);
+  assert.match(script, /operator_list_affiliate_search_terms/);
+  assert.match(script, /affiliateTermPage/);
+  assert.match(script, /pageControl\('affiliate-term'/);
   assert.match(script, /renderAffiliateManagement\(dailyRows, ingredientRows, termRows/);
+  assert.match(script, /표준 재료 연결/);
   assert.match(affiliateSearchTermsMigration, /affiliate_search_term_daily/);
   assert.match(affiliateSearchTermsMigration, /p_search_term/);
   assert.match(affiliateSearchTermsMigration, /date - 89/);
   assert.match(affiliateSearchTermsMigration, /length\(regexp_replace\(normalized_term, '\[\^0-9\]'/);
   assert.match(affiliateSearchTermsMigration, /operator_top_affiliate_search_terms/);
+  assert.match(affiliateTermDetailsMigration, /operator_list_affiliate_search_terms/);
+  assert.match(affiliateTermDetailsMigration, /left join lateral/i);
+  assert.match(affiliateTermDetailsMigration, /ingredient_id/);
+  assert.match(affiliateTermDetailsMigration, /p_page_size\s*>\s*100/);
   assert.match(affiliateSearchTermsMigration, /Current policy acceptance required/);
   assert.match(privacyPage, /2026-10-05-v8/);
   assert.match(privacyPage, /앱이 쿠팡 링크에 넣어 전달한 검색어/);
   assert.match(privacyPage, /전화번호처럼 보이는 값은 검색어 통계에서 제외/);
   assert.match(privacyPage, /90일/);
   assert.match(privacyPage, /쿠팡 화면이 열린 뒤 이용자가 그곳에서 직접 입력하거나 바꾼 검색어는 앱에서 읽거나 집계하지 않습니다/);
+});
+
+test('ingredient catalog expands from curated recipe ingredients and maps exact names only', () => {
+  assert.match(ingredientCatalogExpansionMigration, /insert into public\.ingredients/i);
+  assert.match(ingredientCatalogExpansionMigration, /돼지고기 삼겹살/);
+  assert.match(ingredientCatalogExpansionMigration, /삼겹살/);
+  assert.match(ingredientCatalogExpansionMigration, /source_ingredient_names/);
+  assert.match(ingredientCatalogExpansionMigration, /review_status\s*=\s*'linked'/);
+  assert.match(ingredientCatalogExpansionMigration, /s\.ingredient_id is null/);
+  assert.match(ingredientCatalogExpansionMigration, /having count\(distinct ingredient\.id\) = 1/i);
+  assert.doesNotMatch(ingredientCatalogExpansionMigration, /'\['/);
+  const inserts = ingredientCatalogExpansionMigration.match(/\('(?:[a-z0-9_-]+)',\s*'[^']+',\s*'[^']+'/g) ?? [];
+  assert.ok(inserts.length >= 100, `expected at least 100 curated catalog rows, got ${inserts.length}`);
+  assert.match(ingredientVariantExpansionMigration, /청고추/);
+  assert.match(ingredientVariantExpansionMigration, /맛간장/);
+  assert.match(ingredientVariantExpansionMigration, /발사믹소스/);
+  assert.match(ingredientVariantExpansionMigration, /review_status = 'candidate'/);
+  assert.match(ingredientVariantExpansionMigration, /having count\(distinct ingredient\.id\) = 1/i);
+  const variantRows = ingredientVariantExpansionMigration.match(/\('(?:[a-z0-9_-]+)',\s*'[^']+',\s*'[^']+'/g) ?? [];
+  assert.ok(variantRows.length >= 40, `expected at least 40 additional curated variants, got ${variantRows.length}`);
 });
 
 test('account withdrawals and invalid FCM tokens are shown only as anonymous lifecycle aggregates', () => {

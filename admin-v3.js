@@ -1213,6 +1213,8 @@ function renderAffiliateTable(target, rows, columns, empty, error, onCellDetail 
 
 let affiliateDailyRows = [];
 let affiliateDateRange = { from: '', to: '' };
+let affiliateTermPage = 1;
+const affiliateTermPageSize = 50;
 
 function renderAffiliateMetricDetails(title, rows, valueLabel = '외부 열기') {
   const dialog = byId('metric-dialog');
@@ -1291,6 +1293,48 @@ function setAffiliateRefreshState(state, message) {
   target.textContent = message;
 }
 
+function renderAffiliateSearchTerms(data, error) {
+  const rows = data?.items ?? [];
+  const total = Number(data?.total) || 0;
+  const page = Number(data?.page) || affiliateTermPage;
+  const target = byId('affiliate-terms');
+  renderAffiliateTable(
+    target,
+    rows,
+    [
+      ['검색어', (row) => row.search_term, 'term'],
+      ['표준 재료 연결', (row) => row.match_status === 'matched' ? `연결 · ${row.ingredient_name}` : row.match_status === 'ambiguous' ? '확인 필요 · 이름 중복' : '미연결'],
+      ['진입 화면', (row) => ({ shopping_list: '장보기', recipe_detail: '레시피 상세' }[row.source] || row.source)],
+      ['외부 열기', (row) => Number(row.click_count || 0).toLocaleString('ko-KR'), 'term'],
+    ],
+    '최근 30일 앱에서 쿠팡으로 전달한 검색어가 없습니다.',
+    error,
+    (row, kind) => openAffiliateMetricDetail(kind, row),
+  );
+  const pageCount = Math.max(1, Math.ceil(total / affiliateTermPageSize));
+  byId('affiliate-terms-total').textContent = error
+    ? '검색어 집계를 불러오지 못했습니다.'
+    : `${total.toLocaleString('ko-KR')}개 검색어·화면 조합 · ${page}/${pageCount} 페이지`;
+  byId('affiliate-terms-pagination').innerHTML = error
+    ? ''
+    : pageControl('affiliate-term', page, total, affiliateTermPageSize);
+  document.querySelectorAll('[data-affiliate-term-page]').forEach((button) => button.addEventListener('click', () => {
+    affiliateTermPage = Number(button.dataset.affiliateTermPage);
+    loadAffiliateSearchTerms();
+  }));
+}
+
+async function loadAffiliateSearchTerms() {
+  const { data, error } = await db.rpc('operator_list_affiliate_search_terms', {
+    p_from: affiliateDateRange.from,
+    p_to: affiliateDateRange.to,
+    p_page: affiliateTermPage,
+    p_page_size: affiliateTermPageSize,
+  });
+  renderAffiliateSearchTerms(data, error);
+  if (error) status(`쿠팡 검색어를 불러오지 못했어요: ${error.message}`);
+}
+
 function renderAffiliateManagement(dailyRows, ingredientRows, termRows, dailyError, ingredientError, termError) {
   affiliateDailyRows = dailyRows;
   const total = dailyRows.reduce((sum, row) => sum + Number(row.click_count || 0), 0);
@@ -1340,14 +1384,7 @@ function renderAffiliateManagement(dailyRows, ingredientRows, termRows, dailyErr
     ingredientError,
     (row, kind) => openAffiliateMetricDetail(kind, row),
   );
-  renderAffiliateTable(
-    byId('affiliate-terms'),
-    termRows,
-    [['검색어', (row) => row.search_term], ['진입 화면', (row) => sourceLabels[row.source] || row.source], ['외부 열기', (row) => format(row.click_count), 'term']],
-    '최근 30일 앱에서 쿠팡으로 전달한 검색어가 없습니다.',
-    termError,
-    (row, kind) => openAffiliateMetricDetail(kind, row),
-  );
+  renderAffiliateSearchTerms(termRows, termError);
 }
 
 document.addEventListener('click', (event) => {
@@ -1368,11 +1405,15 @@ async function loadAffiliateManagement() {
   from.setDate(from.getDate() - 29);
   const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   affiliateDateRange = { from: isoDate(from), to: isoDate(today) };
+  affiliateTermPage = 1;
   try {
     const [dailyResult, ingredientResult, termResult] = await Promise.all([
       db.rpc('operator_affiliate_search_daily', { p_from: affiliateDateRange.from, p_to: affiliateDateRange.to }),
       db.rpc('operator_top_affiliate_ingredients', { p_from: affiliateDateRange.from, p_to: affiliateDateRange.to, p_limit: 20 }),
-      db.rpc('operator_top_affiliate_search_terms', { p_from: affiliateDateRange.from, p_to: affiliateDateRange.to, p_limit: 30 }),
+      db.rpc('operator_list_affiliate_search_terms', {
+        p_from: affiliateDateRange.from, p_to: affiliateDateRange.to,
+        p_page: affiliateTermPage, p_page_size: affiliateTermPageSize,
+      }),
     ]);
     renderAffiliateManagement(
       dailyResult.data ?? [],
@@ -1400,7 +1441,7 @@ async function loadAffiliateManagement() {
     const message = error?.message || String(error);
     const lastSuccess = previousSuccess ? `마지막 성공 조회: ${previousSuccess}` : '성공 조회 기록 없음';
     setAffiliateRefreshState('error', `조회 실패 · ${lastSuccess}`);
-    renderAffiliateManagement([], [], [], { message }, { message }, { message });
+    renderAffiliateManagement([], [], { items: [], total: 0 }, { message }, { message }, { message });
     status(`쿠팡 제휴 집계를 불러오지 못했어요: ${message}`);
   }
 }
