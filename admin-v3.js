@@ -1209,7 +1209,7 @@ function setAffiliateRefreshState(state, message) {
   target.textContent = message;
 }
 
-function renderAffiliateManagement(dailyRows, ingredientRows, dailyError, ingredientError) {
+function renderAffiliateManagement(dailyRows, ingredientRows, termRows, dailyError, ingredientError, termError) {
   const total = dailyRows.reduce((sum, row) => sum + Number(row.click_count || 0), 0);
   const known = dailyRows.reduce((sum, row) => sum + Number(row.ingredient_click_count || 0), 0);
   const unmapped = dailyRows.reduce((sum, row) => sum + Number(row.unmapped_click_count || 0), 0);
@@ -1254,6 +1254,13 @@ function renderAffiliateManagement(dailyRows, ingredientRows, dailyError, ingred
     '재료 코드가 확인된 기록이 아직 없습니다.',
     ingredientError,
   );
+  renderAffiliateTable(
+    byId('affiliate-terms'),
+    termRows,
+    [['검색어', (row) => row.search_term], ['진입 화면', (row) => sourceLabels[row.source] || row.source], ['외부 열기', (row) => format(row.click_count)]],
+    '최근 30일 앱에서 쿠팡으로 전달한 검색어가 없습니다.',
+    termError,
+  );
 }
 
 async function loadAffiliateManagement() {
@@ -1269,19 +1276,22 @@ async function loadAffiliateManagement() {
   from.setDate(from.getDate() - 29);
   const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   try {
-    const [dailyResult, ingredientResult] = await Promise.all([
+    const [dailyResult, ingredientResult, termResult] = await Promise.all([
       db.rpc('operator_affiliate_search_daily', { p_from: isoDate(from), p_to: isoDate(today) }),
       db.rpc('operator_top_affiliate_ingredients', { p_from: isoDate(from), p_to: isoDate(today), p_limit: 20 }),
+      db.rpc('operator_top_affiliate_search_terms', { p_from: isoDate(from), p_to: isoDate(today), p_limit: 30 }),
     ]);
     renderAffiliateManagement(
       dailyResult.data ?? [],
       ingredientResult.data ?? [],
+      termResult.data ?? [],
       dailyResult.error,
       ingredientResult.error,
+      termResult.error,
     );
-    const errors = [dailyResult.error, ingredientResult.error].filter(Boolean);
+    const errors = [dailyResult.error, ingredientResult.error, termResult.error].filter(Boolean);
     if (errors.length) {
-      const failure = errors.length === 2 ? '조회 실패' : '일부 조회 실패';
+      const failure = errors.length === 3 ? '조회 실패' : '일부 조회 실패';
       const lastSuccess = previousSuccess ? `마지막 성공 조회: ${previousSuccess}` : '성공 조회 기록 없음';
       setAffiliateRefreshState('error', `${failure} · ${lastSuccess}`);
       status(`쿠팡 제휴 집계를 일부 불러오지 못했어요: ${errors.map((error) => error.message).join(' · ')}`);
@@ -1297,7 +1307,7 @@ async function loadAffiliateManagement() {
     const message = error?.message || String(error);
     const lastSuccess = previousSuccess ? `마지막 성공 조회: ${previousSuccess}` : '성공 조회 기록 없음';
     setAffiliateRefreshState('error', `조회 실패 · ${lastSuccess}`);
-    renderAffiliateManagement([], [], { message }, { message });
+    renderAffiliateManagement([], [], [], { message }, { message }, { message });
     status(`쿠팡 제휴 집계를 불러오지 못했어요: ${message}`);
   }
 }

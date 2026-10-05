@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>운영 대시보드 · 오늘한끼</title>
-  <link rel="stylesheet" href="styles.css?v=20261005-activity-affiliate-1">
+  <link rel="stylesheet" href="styles.css?v=20261005-activity-affiliate-2">
 </head>
 <body class="admin-body">
   <header class="admin-header">
@@ -108,12 +108,12 @@
               <div><p class="eyebrow">COUPANG PARTNERS</p><h1>쿠팡 제휴 관리</h1></div>
               <button class="secondary-button" id="affiliate-refresh" type="button">새로고침</button>
             </div>
-            <p class="affiliate-page-intro">앱에서 쿠팡 외부 브라우저를 연 흐름과 많이 찾은 표준 재료를 확인합니다. 구매와 수수료는 쿠팡 파트너스 실적 리포트에서 확인하세요.</p>
+            <p class="affiliate-page-intro">앱에서 쿠팡으로 전달한 검색어와 표준 재료별 외부 열기를 확인합니다. 검색어는 계정과 분리해 90일간 합산하며, 쿠팡 화면에서 직접 입력한 검색어는 확인할 수 없습니다. 구매와 수수료는 쿠팡 파트너스 실적 리포트에서 확인하세요.</p>
             <p id="affiliate-last-refresh" class="affiliate-last-refresh" data-state="idle" aria-live="polite">마지막 조회: 아직 없음</p>
             <div class="admin-stats affiliate-summary" aria-live="polite">
               <article><span>최근 30일 외부 열기</span><strong id="affiliate-total">–</strong><small>쿠팡 화면 로드·구매를 뜻하지 않음</small></article>
               <article><span>재료 코드 확인</span><strong id="affiliate-known">–</strong><small>인기 재료 표에 포함</small></article>
-              <article><span>재료 코드 미확인</span><strong id="affiliate-unmapped">–</strong><small>이름 원문은 저장하지 않음</small></article>
+              <article><span>재료 코드 미확인</span><strong id="affiliate-unmapped">–</strong><small>검색어 통계와 별도 집계</small></article>
             </div>
             <div class="ops-grid">
               <section class="admin-panel">
@@ -138,6 +138,10 @@
               <section class="admin-panel ops-wide">
                 <div class="panel-title"><div><p class="eyebrow">POPULAR INGREDIENTS</p><h2>쿠팡에서 많이 찾은 재료</h2></div><span>표준 재료로 확인된 항목</span></div>
                 <div id="affiliate-top" class="table-wrap" aria-live="polite"><p class="empty-admin">데이터를 불러오는 중입니다.</p></div>
+              </section>
+              <section class="admin-panel ops-wide">
+                <div class="panel-title"><div><p class="eyebrow">POPULAR SEARCH TERMS</p><h2>앱에서 쿠팡으로 전달한 검색어</h2></div><span>최근 30일 · 계정 식별 정보 없음</span></div>
+                <div id="affiliate-terms" class="table-wrap" aria-live="polite"><p class="empty-admin">데이터를 불러오는 중입니다.</p></div>
               </section>
             </div>
           </section>
@@ -232,6 +236,6 @@
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin-v3.js?v=20261005-activity-affiliate-1"></script>
+  <script defer src="admin-v3.js?v=20261005-activity-affiliate-2"></script>
 </body>
 </html>

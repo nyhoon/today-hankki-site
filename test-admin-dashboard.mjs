@@ -25,6 +25,7 @@ const userActivityConsentMigration = await readFile(new URL('../today-hankki/sup
 const affiliateAnalyticsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004120000_saved_recipes_and_affiliate_search_metrics.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliatePrivacyMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004130000_publish_affiliate_search_privacy.sql', import.meta.url), 'utf8').catch(() => '');
 const affiliateAggregationMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005100000_reliable_affiliate_handoff_aggregation.sql', import.meta.url), 'utf8').catch(() => '');
+const affiliateSearchTermsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005150000_affiliate_search_terms.sql', import.meta.url), 'utf8').catch(() => '');
 const lifecycleMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005120000_app_lifecycle_tracking.sql', import.meta.url), 'utf8').catch(() => '');
 const boundedActivityMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261005130000_privacy_bounded_activity_and_affiliate_counts.sql', import.meta.url), 'utf8').catch(() => '');
 const userInsightsMigration = await readFile(new URL('../today-hankki/supabase/migrations/20261004150000_user_search_insights.sql', import.meta.url), 'utf8').catch(() => '');
@@ -57,8 +58,8 @@ test('operator dashboard exposes ten unique destinations and guarded states', ()
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261005-activity-affiliate-1/);
-  assert.match(html, /admin-v3\.js\?v=20261005-activity-affiliate-1/);
+  assert.match(html, /styles\.css\?v=20261005-activity-affiliate-2/);
+  assert.match(html, /admin-v3\.js\?v=20261005-activity-affiliate-2/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -329,7 +330,7 @@ test('policy, operator, audit, and health screens use immutable or append-only s
 });
 
 test('public policy pages explain the new 90-day activity log and non-verified email signup', () => {
-  assert.match(privacyPage, /2026-10-05-v7/);
+  assert.match(privacyPage, /2026-10-05-v8/);
   assert.match(privacyPage, /가입·로그인/);
   assert.match(privacyPage, /최근 90일/);
   assert.match(privacyPage, /화면 열람 기록은 활동 상세에 복사하지 않습니다/);
@@ -346,10 +347,10 @@ test('privacy v7 activity detail is allowlisted, moderator-only, and retained fo
   assert.match(boundedActivityMigration, /interval '90 days'/);
   assert.match(boundedActivityMigration, /details',events\.details/);
   assert.match(boundedActivityMigration, /Moderator only/);
-  assert.match(privacyPage, /2026-10-05-v7/);
+  assert.match(privacyPage, /2026-10-05-v8/);
   assert.match(privacyPage, /바코드, 레시피·후기·신고 본문, 사진/);
   assert.match(privacyPage, /최신 이용약관·개인정보처리방침 동의를 확인한 뒤/);
-  assert.match(privacyPage, /이 익명 집계는 Firebase 분석 동의와 별개입니다/);
+  assert.match(privacyPage, /최신 개인정보처리방침에 동의한 경우에만 기록하고 Firebase 분석 동의와는 별개입니다/);
 });
 
 test('affiliate ingredient click totals are visible to operators and disclosed', () => {
@@ -361,7 +362,7 @@ test('affiliate ingredient click totals are visible to operators and disclosed',
   assert.match(affiliateAnalyticsMigration, /ingredient_id text/);
   assert.match(affiliateAnalyticsMigration, /not exists\s*\(\s*select 1 from public\.ingredients/i);
   assert.match(privacyPage, /한국 날짜·진입 경로별 횟수/);
-  assert.match(privacyPage, /검색어 원문, 재료명, 수량, 계정 ID와 이메일은 집계에 저장하지 않습니다/);
+  assert.match(privacyPage, /앱이 쿠팡 링크에 넣어 전달한 검색어는/);
   assert.match(affiliateAnalyticsMigration, /private\.has_current_policies/);
   assert.match(affiliateAnalyticsMigration, /Asia\/Seoul/);
   assert.match(affiliateAnalyticsMigration, /cleanup_affiliate_search_daily/);
@@ -369,6 +370,24 @@ test('affiliate ingredient click totals are visible to operators and disclosed',
   assert.match(affiliatePrivacyMigration, /매일 오전 1시\(한국 시간\)/);
   assert.match(affiliatePrivacyMigration, /2026-10-04-v3/);
   assert.match(affiliateAggregationMigration, /2026-10-05-v5/);
+});
+
+test('outbound Coupang search terms are anonymous, bounded, disclosed, and visible to operators', () => {
+  assert.match(html, /id="affiliate-terms"/);
+  assert.match(html, /앱에서 쿠팡으로 전달한 검색어/);
+  assert.match(script, /operator_top_affiliate_search_terms/);
+  assert.match(script, /renderAffiliateManagement\(dailyRows, ingredientRows, termRows/);
+  assert.match(affiliateSearchTermsMigration, /affiliate_search_term_daily/);
+  assert.match(affiliateSearchTermsMigration, /p_search_term/);
+  assert.match(affiliateSearchTermsMigration, /date - 89/);
+  assert.match(affiliateSearchTermsMigration, /length\(regexp_replace\(normalized_term, '\[\^0-9\]'/);
+  assert.match(affiliateSearchTermsMigration, /operator_top_affiliate_search_terms/);
+  assert.match(affiliateSearchTermsMigration, /Current policy acceptance required/);
+  assert.match(privacyPage, /2026-10-05-v8/);
+  assert.match(privacyPage, /앱이 쿠팡 링크에 넣어 전달한 검색어/);
+  assert.match(privacyPage, /전화번호처럼 보이는 값은 검색어 통계에서 제외/);
+  assert.match(privacyPage, /90일/);
+  assert.match(privacyPage, /쿠팡 화면이 열린 뒤 이용자가 그곳에서 직접 입력하거나 바꾼 검색어는 앱에서 읽거나 집계하지 않습니다/);
 });
 
 test('account withdrawals and invalid FCM tokens are shown only as anonymous lifecycle aggregates', () => {
@@ -495,7 +514,7 @@ test('account-linked ingredient searches are optional, canonical-only, and expir
   const detailRpc = userInsightsMigration.match(/create or replace function public\.operator_get_user_detail[\s\S]*?revoke all on function public\.operator_get_user_detail/)?.[0] ?? '';
   assert.match(detailRpc, /language plpgsql stable security definer/i);
   assert.doesNotMatch(detailRpc, /delete\s+from/i, 'read-only detail RPC does not delete expired rows');
-  assert.match(privacyPage, /2026-10-05-v7/);
+  assert.match(privacyPage, /2026-10-05-v8/);
   assert.match(privacyPage, /계정별 재료 검색 이력/);
   assert.match(privacyPage, /계정별 재료 검색 이력을 끄면 해당 계정 검색 이력을 바로 삭제/);
   assert.match(privacyPage, /자유 입력 원문, 일부 입력, 수량, 키 입력 과정은 저장하지 않습니다/);
