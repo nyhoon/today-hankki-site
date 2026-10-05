@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>운영 대시보드 · 오늘한끼</title>
-  <link rel="stylesheet" href="styles.css?v=20261005-lifecycle-1">
+  <link rel="stylesheet" href="styles.css?v=20261005-activity-affiliate-1">
 </head>
 <body class="admin-body">
   <header class="admin-header">
@@ -109,6 +109,7 @@
               <button class="secondary-button" id="affiliate-refresh" type="button">새로고침</button>
             </div>
             <p class="affiliate-page-intro">앱에서 쿠팡 외부 브라우저를 연 흐름과 많이 찾은 표준 재료를 확인합니다. 구매와 수수료는 쿠팡 파트너스 실적 리포트에서 확인하세요.</p>
+            <p id="affiliate-last-refresh" class="affiliate-last-refresh" data-state="idle" aria-live="polite">마지막 조회: 아직 없음</p>
             <div class="admin-stats affiliate-summary" aria-live="polite">
               <article><span>최근 30일 외부 열기</span><strong id="affiliate-total">–</strong><small>쿠팡 화면 로드·구매를 뜻하지 않음</small></article>
               <article><span>재료 코드 확인</span><strong id="affiliate-known">–</strong><small>인기 재료 표에 포함</small></article>
@@ -231,6 +232,6 @@
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin-v3.js?v=20261005-lifecycle-1"></script>
+  <script defer src="admin-v3.js?v=20261005-activity-affiliate-1"></script>
 </body>
 </html>

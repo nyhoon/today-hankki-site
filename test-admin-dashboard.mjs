@@ -34,6 +34,21 @@ const fcmShared = await readFile(new URL('../today-hankki/supabase/functions/_sh
 const authAdminFunction = await readFile(new URL('../today-hankki/supabase/functions/operator-auth-admin/index.ts', import.meta.url), 'utf8').catch(() => '');
 const destinations = ['home', 'community', 'users', 'kitchens', 'catalog', 'push', 'policies', 'operators', 'affiliate', 'lifecycle'];
 
+function activityRenderer() {
+  const startMarker = '/* USER_ACTIVITY_RENDERER_START */';
+  const endMarker = '/* USER_ACTIVITY_RENDERER_END */';
+  const start = script.indexOf(startMarker);
+  const end = script.indexOf(endMarker, start + startMarker.length);
+  assert.ok(start >= 0 && end > start, 'user activity renderer is isolated for safe testing');
+  const source = script.slice(start + startMarker.length, end);
+  return new Function('escapeHtml', 'dateText', `${source}; return renderUserActivityMarkup;`)(
+    (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    })[character]),
+    (value) => String(value ?? '—'),
+  );
+}
+
 test('operator dashboard exposes ten unique destinations and guarded states', () => {
   for (const id of destinations) {
     assert.match(html, new RegExp(`data-admin-page="${id}"`), `${id} navigation exists`);
@@ -42,8 +57,8 @@ test('operator dashboard exposes ten unique destinations and guarded states', ()
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261005-lifecycle-1/);
-  assert.match(html, /admin-v3\.js\?v=20261005-lifecycle-1/);
+  assert.match(html, /styles\.css\?v=20261005-activity-affiliate-1/);
+  assert.match(html, /admin-v3\.js\?v=20261005-activity-affiliate-1/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -283,7 +298,7 @@ test('dashboard headline metrics open their matching records and user details sh
   assert.ok(activityTable, 'activity table is defined');
   assert.doesNotMatch(activityTable[1], /detail|value|name|title|ingredient|quantity/i);
   assert.match(script, /RECENT ACTIVITY/);
-  assert.match(script, /화면 열람은 기록하지 않으며/);
+  assert.match(script, /바코드, 레시피·후기·신고 본문과 사진은 상세 로그에 넣지 않으며/);
   assert.match(script, /90일 후 정리합니다/);
 });
 
@@ -395,6 +410,17 @@ test('Coupang management separates browser handoffs from Coupang sales reports',
   assert.match(html, /TodayHankki/);
 });
 
+test('Coupang management shows last successful refresh and keeps empty, loading, and error states distinct', () => {
+  assert.match(html, /id="affiliate-last-refresh"/);
+  assert.match(html, /마지막 조회: 아직 없음/);
+  assert.match(script, /function setAffiliateRefreshState\(/);
+  assert.match(script, /dataset\.lastSuccess/);
+  assert.match(script, /일부 조회 실패/);
+  assert.match(script, /최근 30일 외부 브라우저 열기 기록이 없습니다\./);
+  assert.match(script, /집계를 불러오지 못했어요:/);
+  assert.match(script, /마지막 성공 조회/);
+});
+
 test('user detail is a single responsive workspace with consented ingredient history', () => {
   assert.match(html, /사용자 프로필 한 화면에서 이어서 볼 수 있습니다/);
   assert.match(script, /classList\.add\('user-profile-detail'\)/);
@@ -407,6 +433,46 @@ test('user detail is a single responsive workspace with consented ingredient his
   assert.match(script, /자유 입력 원문과 수량은 저장하지 않습니다/);
   assert.match(css, /\.user-profile-detail\s*\{/);
   assert.match(css, /\.user-profile-grid\s*\{/);
+});
+
+test('user activity shows create, update, and delete field diffs with legacy fallback', () => {
+  const renderer = activityRenderer();
+  const created = renderer({ action: '재료 등록', at: '2026-10-05T01:00:00Z', details: {
+    entity: 'inventory', operation: 'created', item_name: '달걀',
+    changes: [{ field: 'quantity', before: null, after: 5 }],
+  } });
+  const updated = renderer({ action: '재료 정보 변경', at: '2026-10-05T02:00:00Z', details: {
+    entity: 'inventory', operation: 'updated', item_name: '달걀',
+    changes: [{ field: 'quantity', before: 5, after: 3 }],
+  } });
+  const deleted = renderer({ action: '재료 삭제', at: '2026-10-05T03:00:00Z', details: {
+    entity: 'inventory', operation: 'deleted', item_name: '달걀',
+    changes: [{ field: 'quantity', before: 3, after: null }],
+  } });
+  assert.match(created, /추가/);
+  assert.match(created, /5/);
+  assert.match(updated, /수정/);
+  assert.match(updated, /5/);
+  assert.match(updated, /3/);
+  assert.match(deleted, /삭제/);
+  assert.match(deleted, /없음/);
+  const legacy = renderer({ action: '로그인', at: '2026-10-05T04:00:00Z', details: {} });
+  assert.match(legacy, /로그인/);
+  assert.doesNotMatch(legacy, /<details/);
+});
+
+test('user activity escapes server values and stays readable on narrow screens', () => {
+  const renderer = activityRenderer();
+  const markup = renderer({ action: '<img src=x onerror=alert(1)>', at: '2026-10-05T01:00:00Z', details: {
+    entity: 'shopping', operation: 'updated', item_name: '<script>재료</script>',
+    changes: [{ field: 'name', before: '<b>old</b>', after: '새 이름' }],
+  } });
+  assert.match(markup, /&lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.match(markup, /&lt;script&gt;재료&lt;\/script&gt;/);
+  assert.match(markup, /&lt;b&gt;old&lt;\/b&gt;/);
+  assert.doesNotMatch(markup, /<script>|<img|<b>/);
+  assert.match(css, /\.user-activity-details/);
+  assert.match(css, /@media\(max-width:420px\)[\s\S]*?user-activity/);
 });
 
 test('account-linked ingredient searches are optional, canonical-only, and expire after 90 days', () => {

@@ -390,6 +390,37 @@ async function loadUsers() {
   status('사용자 목록을 업데이트했습니다.');
 }
 
+/* USER_ACTIVITY_RENDERER_START */
+function renderUserActivityMarkup(item) {
+  const entities = { inventory: '재료', shopping: '장보기' };
+  const operations = { created: '추가', updated: '수정', deleted: '삭제' };
+  const fields = {
+    name: '이름', quantity: '수량', unit: '단위', location: '보관 위치',
+    date_kind: '표시 날짜 종류', label_date: '표시 날짜', opened_at: '개봉 날짜',
+    confirmed: '확인 상태', checked: '장보기 완료',
+  };
+  const valueText = (value) => {
+    if (value === null || value === undefined || value === '') return '없음';
+    if (typeof value === 'boolean') return value ? '예' : '아니요';
+    return typeof value === 'number' ? new Intl.NumberFormat('ko-KR').format(value) : String(value);
+  };
+  const details = item.details && typeof item.details === 'object' ? item.details : {};
+  let detailMarkup = '';
+  if (['inventory', 'shopping'].includes(details.entity) && ['created', 'updated', 'deleted'].includes(details.operation)) {
+    const changes = Array.isArray(details.changes)
+      ? details.changes.filter((change) => change && typeof change === 'object').slice(0, 8)
+      : [];
+    const changeRows = changes.map((change) => {
+      const field = fields[change.field] || String(change.field || '변경 항목');
+      return `<li><span class="user-activity-field">${escapeHtml(field)}</span><span class="user-activity-values"><del>${escapeHtml(valueText(change.before))}</del><span aria-hidden="true">→</span><ins>${escapeHtml(valueText(change.after))}</ins></span></li>`;
+    }).join('');
+    const itemName = escapeHtml(details.item_name || '항목');
+    detailMarkup = `<details class="user-activity-details"><summary><span>${entities[details.entity]} · ${operations[details.operation]}</span><strong>${itemName}</strong><small>${changes.length}개 변경</small></summary>${changeRows ? `<ul class="user-activity-changes">${changeRows}</ul>` : '<p class="user-activity-no-changes">변경 필드가 없습니다.</p>'}</details>`;
+  }
+  return `<li class="user-activity-event"><div class="user-activity-head"><strong>${escapeHtml(item.action)}</strong><time>${escapeHtml(dateText(item.at))}</time></div>${detailMarkup}</li>`;
+}
+/* USER_ACTIVITY_RENDERER_END */
+
 function userDetailMarkup(user, preview) {
   const number = (value) => new Intl.NumberFormat('ko-KR').format(Number(value) || 0);
   const providers = (user.providers ?? [user.provider]).map((provider) => ({ google: 'Google', kakao: '카카오', email: '이메일' }[provider] || provider)).join(' · ');
@@ -402,7 +433,7 @@ function userDetailMarkup(user, preview) {
     ['저장한 오늘한끼 레시피', community.saved_official_recipes], ['좋아요한 오늘한끼 레시피', community.liked_official_recipes],
     ['팔로잉', community.following], ['팔로워', community.followers],
   ].map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${number(value)}</strong></div>`).join('');
-  const activity = (user.activity ?? []).slice(0, 50).map((item) => `<li><strong>${escapeHtml(item.action)}</strong><time>${escapeHtml(dateText(item.at))}</time></li>`).join('') || '<li class="user-profile-empty-row">현재 기록된 활동이 없습니다.</li>';
+  const activity = (user.activity ?? []).slice(0, 50).map(renderUserActivityMarkup).join('') || '<li class="user-profile-empty-row">현재 기록된 활동이 없습니다.</li>';
   const consent = user.analytics_consent ?? {};
   const searchEvents = (user.search_events ?? []).slice(0, 100).map((item) => `<li><strong>${escapeHtml(item.ingredient_name)}</strong><span>${escapeHtml(({ inventory: '재료', recipe_catalog: '레시피 검색', recipe_suggestions: '재료 추천', shopping_list: '장보기', recipe_detail: '레시피 상세' })[item.surface] || item.surface)}</span><time>${escapeHtml(dateText(item.at))}</time></li>`).join('') || '<li class="user-profile-empty-row">동의하지 않았거나 최근 90일 검색 기록이 없습니다.</li>';
   const topIngredients = (user.search_counts?.top_ingredients ?? []).map((item) => `<span>${escapeHtml(item.ingredient_name)} <b>${number(item.count)}</b></span>`).join('') || '<span>집계할 검색이 없습니다.</span>';
@@ -424,7 +455,7 @@ function userDetailMarkup(user, preview) {
       <section id="user-profile-community" class="user-profile-card"><p class="eyebrow">COMMUNITY</p><h3>레시피와 참여</h3><div class="user-profile-community-metrics">${communityItems}</div><h4>최근 저장한 레시피</h4><ul class="user-profile-list">${savedRecipes}</ul></section>
       <section id="user-profile-privacy" class="user-profile-card"><p class="eyebrow">PREFERENCES</p><h3>동의와 알림</h3><div class="user-profile-consent"><strong>${consent.enabled ? '계정별 재료 검색 기록 동의' : '계정별 재료 검색 기록 미동의'}</strong><span>개인정보 버전 ${escapeHtml(consent.policy_version || '기록 없음')}</span><small>동의 ${escapeHtml(dateText(consent.consented_at))} · 철회 ${escapeHtml(dateText(consent.revoked_at))}</small></div><dl><div><dt>푸시 알림</dt><dd>${push.enabled ? '켜짐' : '꺼짐'}</dd></div><div><dt>활성 기기</dt><dd>${number(push.active_devices)}대 · ${escapeHtml(platforms)}</dd></div><div><dt>알림 종류</dt><dd>${[['expiry','기한'],['recipes','요리'],['kitchen','키친'],['shopping','장보기']].filter(([key])=>push[key]).map(([,label])=>label).join(' · ') || '선택 없음'}</dd></div></dl><h4>최근 약관 동의</h4><ul class="user-profile-list">${acceptedPolicies}</ul><p class="user-profile-note">기기 푸시 토큰과 원문 입력은 운영 화면에 노출하지 않습니다.</p></section>
       <section id="user-profile-searches" class="user-profile-card user-profile-search-card"><p class="eyebrow">INGREDIENT INTENT · LAST 90 DAYS</p><h3>검색한 재료</h3><p class="user-profile-note">사용자가 별도 동의한 경우에만 표준 재료와 검색 화면을 표시합니다. 자유 입력 원문과 수량은 저장하지 않습니다.</p><div class="user-profile-top-ingredients">${topIngredients}</div><ul class="user-profile-list user-profile-search-list">${searchEvents}</ul></section>
-      <section id="user-profile-activity" class="user-profile-card"><p class="eyebrow">RECENT ACTIVITY</p><h3>최근 90일 활동</h3><ul class="user-activity-list">${activity}</ul><p class="user-profile-note">핵심 기능의 종류와 시각만 표시합니다. 입력 내용과 화면 열람은 기록하지 않으며, 90일 후 정리합니다.</p></section>
+      <section id="user-profile-activity" class="user-profile-card"><p class="eyebrow">RECENT ACTIVITY</p><h3>최근 90일 활동</h3><ul class="user-activity-list">${activity}</ul><p class="user-profile-note">재료·장보기는 항목 이름과 허용된 필드의 변경 전·후를 표시합니다. 바코드, 레시피·후기·신고 본문과 사진은 상세 로그에 넣지 않으며 90일 후 정리합니다.</p></section>
       <section id="user-profile-actions" class="user-profile-card user-profile-actions"><p class="eyebrow">ACCOUNT ACTIONS</p><h3>계정 조치와 탈퇴 영향</h3><p>${escapeHtml(preview.instruction || '계정 탈퇴는 앱에서 진행해야 합니다.')}</p><p>소유 키친 ${number(preview.owned_kitchens)}개 · 레시피 ${number(preview.community_recipes)}개 · 사진 ${number(preview.community_photos)}개</p>${action}</section>
     </div>`;
 }
@@ -1172,6 +1203,12 @@ function renderAffiliateTable(target, rows, columns, empty, error) {
   target.innerHTML = `<table><thead><tr>${columns.map(([label]) => `<th scope="col">${escapeHtml(label)}</th>`).join('')}</tr></thead><tbody>${rows.map((row) => `<tr>${columns.map(([, value]) => `<td>${escapeHtml(value(row))}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
 
+function setAffiliateRefreshState(state, message) {
+  const target = byId('affiliate-last-refresh');
+  target.dataset.state = state;
+  target.textContent = message;
+}
+
 function renderAffiliateManagement(dailyRows, ingredientRows, dailyError, ingredientError) {
   const total = dailyRows.reduce((sum, row) => sum + Number(row.click_count || 0), 0);
   const known = dailyRows.reduce((sum, row) => sum + Number(row.ingredient_click_count || 0), 0);
@@ -1221,22 +1258,48 @@ function renderAffiliateManagement(dailyRows, ingredientRows, dailyError, ingred
 
 async function loadAffiliateManagement() {
   status('쿠팡 제휴 집계를 불러오는 중이에요…');
+  const refresh = byId('affiliate-last-refresh');
+  const previousSuccess = refresh.dataset.lastSuccess || '';
+  setAffiliateRefreshState(
+    'loading',
+    previousSuccess ? `조회 중 · 마지막 성공 조회: ${previousSuccess}` : '조회 중 · 성공 조회 기록 없음',
+  );
   const today = new Date();
   const from = new Date(today);
   from.setDate(from.getDate() - 29);
   const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  const [dailyResult, ingredientResult] = await Promise.all([
-    db.rpc('operator_affiliate_search_daily', { p_from: isoDate(from), p_to: isoDate(today) }),
-    db.rpc('operator_top_affiliate_ingredients', { p_from: isoDate(from), p_to: isoDate(today), p_limit: 20 }),
-  ]);
-  renderAffiliateManagement(
-    dailyResult.data ?? [],
-    ingredientResult.data ?? [],
-    dailyResult.error,
-    ingredientResult.error,
-  );
-  const errors = [dailyResult.error, ingredientResult.error].filter(Boolean);
-  status(errors.length ? `쿠팡 제휴 집계를 일부 불러오지 못했어요: ${errors.map((error) => error.message).join(' · ')}` : '최근 30일 쿠팡 제휴 집계를 업데이트했습니다.');
+  try {
+    const [dailyResult, ingredientResult] = await Promise.all([
+      db.rpc('operator_affiliate_search_daily', { p_from: isoDate(from), p_to: isoDate(today) }),
+      db.rpc('operator_top_affiliate_ingredients', { p_from: isoDate(from), p_to: isoDate(today), p_limit: 20 }),
+    ]);
+    renderAffiliateManagement(
+      dailyResult.data ?? [],
+      ingredientResult.data ?? [],
+      dailyResult.error,
+      ingredientResult.error,
+    );
+    const errors = [dailyResult.error, ingredientResult.error].filter(Boolean);
+    if (errors.length) {
+      const failure = errors.length === 2 ? '조회 실패' : '일부 조회 실패';
+      const lastSuccess = previousSuccess ? `마지막 성공 조회: ${previousSuccess}` : '성공 조회 기록 없음';
+      setAffiliateRefreshState('error', `${failure} · ${lastSuccess}`);
+      status(`쿠팡 제휴 집계를 일부 불러오지 못했어요: ${errors.map((error) => error.message).join(' · ')}`);
+      return;
+    }
+    const timestamp = new Intl.DateTimeFormat('ko-KR', {
+      dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Seoul',
+    }).format(new Date());
+    refresh.dataset.lastSuccess = timestamp;
+    setAffiliateRefreshState('success', `마지막 조회: ${timestamp}`);
+    status('최근 30일 쿠팡 제휴 집계를 업데이트했습니다.');
+  } catch (error) {
+    const message = error?.message || String(error);
+    const lastSuccess = previousSuccess ? `마지막 성공 조회: ${previousSuccess}` : '성공 조회 기록 없음';
+    setAffiliateRefreshState('error', `조회 실패 · ${lastSuccess}`);
+    renderAffiliateManagement([], [], { message }, { message });
+    status(`쿠팡 제휴 집계를 불러오지 못했어요: ${message}`);
+  }
 }
 
 byId('affiliate-refresh').addEventListener('click', loadAffiliateManagement);
