@@ -2,187 +2,1345 @@
   {
     "month": 1,
     "title": "겨울 밥상을 깨우는 뿌리와 바다",
-    "lead": "찬 계절에 잘 어울리는 뿌리채소와 겨울 수산물을 모았어요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2025.12.26", "title": "1월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234829"},
-      { "label": "해양수산부", "date": "2025.12.30", "title": "2026년 1월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=64314&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2025.12.26",
+        "title": "1월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234829"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2025.12.30",
+        "title": "2026년 1월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=64314&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "burdock", "name": "우엉", "category": "produce", "note": "향긋하고 아삭한 뿌리채소", "use": "조림 · 잡채 · 김밥", "sourceIndex": 0, "ingredientId": "burdock"},
-      {"id": "strawberry", "name": "딸기", "category": "produce", "note": "향과 단맛이 또렷한 겨울 과채", "use": "생과일 · 잼 · 샐러드", "sourceIndex": 0, "ingredientId": "strawberry"},
-      {"id": "maesaengi", "name": "매생이", "category": "seafood", "note": "부드러운 식감의 겨울 해조류", "use": "국 · 전 · 죽", "sourceIndex": 1, "ingredientId": "sea_moss"},
-      { "id": "eel", "name": "민물장어", "category": "seafood", "note": "구이와 덮밥에 잘 어울리는 장어류", "use": "구이 · 덮밥", "sourceIndex": 1, "ingredientId": "freshwater_eel" }
+      {
+        "id": "burdock",
+        "name": "우엉",
+        "category": "produce",
+        "note": "향긋하고 아삭한 뿌리채소",
+        "use": "조림 · 잡채 · 김밥",
+        "sourceIndex": 0,
+        "ingredientId": "burdock"
+      },
+      {
+        "id": "strawberry",
+        "name": "딸기",
+        "category": "produce",
+        "note": "겨울부터 봄까지 즐기는 향긋한 과채",
+        "use": "생과일 · 잼 · 샐러드",
+        "sourceIndex": 0,
+        "ingredientId": "strawberry"
+      },
+      {
+        "id": "spinach",
+        "name": "시금치",
+        "category": "produce",
+        "note": "찬 계절에 단맛이 드는 잎채소",
+        "use": "나물 · 국 · 솥밥",
+        "sourceIndex": 0,
+        "ingredientId": "spinach"
+      },
+      {
+        "id": "hallabong",
+        "name": "한라봉",
+        "category": "produce",
+        "note": "향과 과즙이 풍부한 만감류",
+        "use": "생과일 · 샐러드 · 주스",
+        "sourceIndex": 0,
+        "ingredientId": "hallabong"
+      },
+      {
+        "id": "sweet_persimmon",
+        "name": "단감",
+        "category": "produce",
+        "note": "아삭하고 은은하게 단 가을·겨울 과일",
+        "use": "생과일 · 샐러드 · 말랭이",
+        "sourceIndex": 0,
+        "ingredientId": "sweet_persimmon"
+      },
+      {
+        "id": "sea_moss",
+        "name": "매생이",
+        "category": "seafood",
+        "note": "부드러운 식감의 겨울 해조류",
+        "use": "국 · 전 · 죽",
+        "sourceIndex": 1,
+        "ingredientId": "sea_moss"
+      },
+      {
+        "id": "freshwater_eel",
+        "name": "민물장어",
+        "category": "seafood",
+        "note": "구이와 덮밥에 잘 어울리는 장어",
+        "use": "구이 · 덮밥",
+        "sourceIndex": 1,
+        "ingredientId": "freshwater_eel"
+      },
+      {
+        "id": "oyster",
+        "name": "굴",
+        "category": "seafood",
+        "note": "바다의 감칠맛이 진한 패류",
+        "use": "국 · 전 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "oyster"
+      },
+      {
+        "id": "cod",
+        "name": "대구",
+        "category": "seafood",
+        "note": "살이 희고 담백한 겨울 생선",
+        "use": "탕 · 찜 · 전",
+        "sourceIndex": 1,
+        "ingredientId": "cod"
+      },
+      {
+        "id": "mussel",
+        "name": "홍합",
+        "category": "seafood",
+        "note": "국물 맛이 깊은 겨울 패류",
+        "use": "탕 · 파스타 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "mussel"
+      }
     ]
   },
   {
     "month": 2,
     "title": "겨울 끝의 산뜻한 단맛",
-    "lead": "향긋한 과일과 익숙한 채소, 담백한 바다 재료를 골랐어요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2026.02.03", "title": "2월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?deleteCd=0&menuNo=300106&nttId=234864"},
-      { "label": "해양수산부", "date": "2026.01.30", "title": "2월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=64817&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2026.02.03",
+        "title": "2월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?deleteCd=0&menuNo=300106&nttId=234864"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2026.01.30",
+        "title": "2월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=64817&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "hallabong", "name": "한라봉", "category": "produce", "note": "향긋한 과즙이 풍부한 만감류", "use": "잼 · 샐러드 · 주스", "sourceIndex": 0, "ingredientId": "hallabong"},
-      {"id": "carrot", "name": "당근", "category": "produce", "note": "단단하고 색이 선명한 뿌리채소", "use": "볶음 · 라페 · 수프", "sourceIndex": 0, "ingredientId": "carrot"},
-      {"id": "red_seabream", "name": "참돔", "category": "seafood", "note": "탄력 있는 살이 특징인 흰살생선", "use": "회 · 탕 · 찜", "sourceIndex": 1, "ingredientId": "red_seabream"},
-      { "id": "laver", "name": "김", "category": "seafood", "note": "밥과 국물 요리에 두루 쓰이는 해조류", "use": "구이 · 무침 · 국", "sourceIndex": 1, "ingredientId": "seaweed" }
+      {
+        "id": "hallabong",
+        "name": "한라봉",
+        "category": "produce",
+        "note": "향과 과즙이 풍부한 만감류",
+        "use": "생과일 · 샐러드 · 주스",
+        "sourceIndex": 0,
+        "ingredientId": "hallabong"
+      },
+      {
+        "id": "carrot",
+        "name": "당근",
+        "category": "produce",
+        "note": "단단하고 색이 선명한 뿌리채소",
+        "use": "볶음 · 라페 · 수프",
+        "sourceIndex": 0,
+        "ingredientId": "carrot"
+      },
+      {
+        "id": "wild_chive",
+        "name": "달래",
+        "category": "produce",
+        "note": "알싸한 향을 더하는 봄나물",
+        "use": "달래장 · 전 · 무침",
+        "sourceIndex": 0,
+        "ingredientId": "wild_chive"
+      },
+      {
+        "id": "deodeok",
+        "name": "더덕",
+        "category": "produce",
+        "note": "향과 씹는 맛이 좋은 뿌리채소",
+        "use": "구이 · 무침 · 튀김",
+        "sourceIndex": 0,
+        "ingredientId": "deodeok"
+      },
+      {
+        "id": "green_cabbage",
+        "name": "배추",
+        "category": "produce",
+        "note": "겉절이부터 국물 요리까지 두루 쓰는 잎채소",
+        "use": "김치 · 겉절이 · 국",
+        "sourceIndex": 0,
+        "ingredientId": "green_cabbage"
+      },
+      {
+        "id": "red_seabream",
+        "name": "참돔",
+        "category": "seafood",
+        "note": "탄력 있는 살이 특징인 흰살생선",
+        "use": "회 · 탕 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "red_seabream"
+      },
+      {
+        "id": "seaweed",
+        "name": "김",
+        "category": "seafood",
+        "note": "밥과 국물 요리에 두루 쓰는 해조류",
+        "use": "구이 · 무침 · 국",
+        "sourceIndex": 1,
+        "ingredientId": "seaweed"
+      },
+      {
+        "id": "abalone",
+        "name": "전복",
+        "category": "seafood",
+        "note": "쫄깃한 식감이 돋보이는 패류",
+        "use": "죽 · 구이 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "abalone"
+      },
+      {
+        "id": "short_neck_clam",
+        "name": "바지락",
+        "category": "seafood",
+        "note": "시원한 국물 맛을 내는 조개",
+        "use": "칼국수 · 국 · 술찜",
+        "sourceIndex": 1,
+        "ingredientId": "short_neck_clam"
+      },
+      {
+        "id": "snow_crab",
+        "name": "대게",
+        "category": "seafood",
+        "note": "살이 부드럽고 단맛이 도는 겨울 갑각류",
+        "use": "찜 · 밥 · 국물",
+        "sourceIndex": 1,
+        "ingredientId": "snow_crab"
+      }
     ]
   },
   {
     "month": 3,
     "title": "봄 향이 먼저 도착하는 달",
-    "lead": "향이 살아 있는 봄 채소와 봄철 수산물을 살펴보세요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2026.03.10", "title": "3월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?deleteCd=0&menuNo=300106&nttId=234867"},
-      { "label": "해양수산부", "date": "2026.02.27", "title": "3월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=65442&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2026.03.10",
+        "title": "3월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?deleteCd=0&menuNo=300106&nttId=234867"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2026.02.27",
+        "title": "3월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=65442&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "green-onion", "name": "대파", "category": "produce", "note": "향긋하고 곧게 뻗은 줄기채소", "use": "국 · 볶음 · 김치", "sourceIndex": 0, "ingredientId": "green_onion"},
-      {"id": "chwinamul", "name": "취나물", "category": "produce", "note": "은은한 향이 좋은 봄나물", "use": "무침 · 밥 · 전", "sourceIndex": 0, "ingredientId": "chwinamul"},
-      {"id": "wild-chive", "name": "달래", "category": "produce", "note": "알싸한 향을 더하는 봄나물", "use": "달래장 · 전 · 무침", "sourceIndex": 0, "ingredientId": "wild_chive"},
-      {"id": "flounder", "name": "도다리", "category": "seafood", "note": "담백한 맛의 봄철 흰살생선", "use": "쑥국 · 구이 · 조림", "sourceIndex": 1, "ingredientId": "spring_flounder"},
-      { "id": "sea-squirt", "name": "멍게", "category": "seafood", "note": "바다 향과 산뜻한 식감이 특징", "use": "비빔밥 · 무침", "sourceIndex": 1, "ingredientId": "sea_squirt" }
+      {
+        "id": "green_onion",
+        "name": "대파",
+        "category": "produce",
+        "note": "향긋하고 곧게 뻗은 줄기채소",
+        "use": "국 · 볶음 · 김치",
+        "sourceIndex": 0,
+        "ingredientId": "green_onion"
+      },
+      {
+        "id": "chwinamul",
+        "name": "취나물",
+        "category": "produce",
+        "note": "은은한 향이 좋은 봄나물",
+        "use": "무침 · 밥 · 전",
+        "sourceIndex": 0,
+        "ingredientId": "chwinamul"
+      },
+      {
+        "id": "wild_chive",
+        "name": "달래",
+        "category": "produce",
+        "note": "알싸한 향을 더하는 봄나물",
+        "use": "달래장 · 전 · 무침",
+        "sourceIndex": 0,
+        "ingredientId": "wild_chive"
+      },
+      {
+        "id": "shepherds_purse",
+        "name": "냉이",
+        "category": "produce",
+        "note": "향긋한 향이 나는 대표 봄나물",
+        "use": "된장국 · 무침 · 전",
+        "sourceIndex": 0,
+        "ingredientId": "shepherds_purse"
+      },
+      {
+        "id": "strawberry",
+        "name": "딸기",
+        "category": "produce",
+        "note": "겨울부터 봄까지 즐기는 향긋한 과채",
+        "use": "생과일 · 잼 · 샐러드",
+        "sourceIndex": 0,
+        "ingredientId": "strawberry"
+      },
+      {
+        "id": "spring_flounder",
+        "name": "도다리",
+        "category": "seafood",
+        "note": "담백한 맛의 봄철 흰살생선",
+        "use": "쑥국 · 구이 · 조림",
+        "sourceIndex": 1,
+        "ingredientId": "spring_flounder"
+      },
+      {
+        "id": "sea_squirt",
+        "name": "멍게",
+        "category": "seafood",
+        "note": "바다 향과 산뜻한 식감이 특징",
+        "use": "비빔밥 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "sea_squirt"
+      },
+      {
+        "id": "octopus",
+        "name": "주꾸미",
+        "category": "seafood",
+        "note": "봄철에 많이 찾는 쫄깃한 연체류",
+        "use": "볶음 · 샤브샤브 · 숙회",
+        "sourceIndex": 1,
+        "ingredientId": "octopus"
+      },
+      {
+        "id": "short_neck_clam",
+        "name": "바지락",
+        "category": "seafood",
+        "note": "시원한 국물 맛을 내는 조개",
+        "use": "칼국수 · 국 · 술찜",
+        "sourceIndex": 1,
+        "ingredientId": "short_neck_clam"
+      },
+      {
+        "id": "pen_shell",
+        "name": "키조개",
+        "category": "seafood",
+        "note": "관자의 부드러운 식감이 특징",
+        "use": "구이 · 볶음 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "pen_shell"
+      }
     ]
   },
   {
     "month": 4,
     "title": "연둣빛 채소와 바다의 감칠맛",
-    "lead": "산뜻한 봄 채소와 식감이 다양한 수산물을 담았어요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2026.04.03", "title": "4월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234869"},
-      { "label": "해양수산부", "date": "2026.03.30", "title": "4월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=65928&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2026.04.03",
+        "title": "4월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234869"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2026.03.30",
+        "title": "4월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=65928&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "water-parsley", "name": "미나리", "category": "produce", "note": "아삭한 줄기와 향긋한 향이 매력", "use": "무침 · 전 · 소고기말이", "sourceIndex": 0, "ingredientId": "water_dropwort"},
-      {"id": "onion", "name": "양파", "category": "produce", "note": "익히면 단맛이 살아나는 기본 채소", "use": "볶음 · 전 · 수프", "sourceIndex": 0, "ingredientId": "onion"},
-      {"id": "flounder", "name": "가자미", "category": "seafood", "note": "담백하고 부드러운 살의 흰살생선", "use": "구이 · 조림 · 찜", "sourceIndex": 1, "ingredientId": "flounder"},
-      { "id": "skate", "name": "홍어", "category": "seafood", "note": "숙성 정도에 따라 풍미가 달라지는 생선", "use": "찜 · 무침", "sourceIndex": 1, "ingredientId": "skate" }
+      {
+        "id": "water_dropwort",
+        "name": "미나리",
+        "category": "produce",
+        "note": "아삭한 줄기와 향긋한 향이 매력",
+        "use": "무침 · 전 · 소고기말이",
+        "sourceIndex": 0,
+        "ingredientId": "water_dropwort"
+      },
+      {
+        "id": "onion",
+        "name": "양파",
+        "category": "produce",
+        "note": "익히면 단맛이 살아나는 기본 채소",
+        "use": "볶음 · 전 · 수프",
+        "sourceIndex": 0,
+        "ingredientId": "onion"
+      },
+      {
+        "id": "oriental_melon",
+        "name": "참외",
+        "category": "produce",
+        "note": "수분감과 산뜻한 단맛이 있는 과채",
+        "use": "생과일 · 샐러드 · 무침",
+        "sourceIndex": 0,
+        "ingredientId": "oriental_melon"
+      },
+      {
+        "id": "asparagus",
+        "name": "아스파라거스",
+        "category": "produce",
+        "note": "아삭한 줄기와 은은한 단맛",
+        "use": "구이 · 볶음 · 샐러드",
+        "sourceIndex": 0,
+        "ingredientId": "asparagus"
+      },
+      {
+        "id": "bracken",
+        "name": "고사리",
+        "category": "produce",
+        "note": "부드럽고 고소한 봄철 산나물",
+        "use": "나물 · 육개장 · 비빔밥",
+        "sourceIndex": 0,
+        "ingredientId": "bracken"
+      },
+      {
+        "id": "flounder",
+        "name": "가자미",
+        "category": "seafood",
+        "note": "담백하고 부드러운 살의 흰살생선",
+        "use": "구이 · 조림 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "flounder"
+      },
+      {
+        "id": "skate",
+        "name": "홍어",
+        "category": "seafood",
+        "note": "숙성 정도에 따라 풍미가 달라지는 생선",
+        "use": "찜 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "skate"
+      },
+      {
+        "id": "pen_shell",
+        "name": "키조개",
+        "category": "seafood",
+        "note": "관자의 부드러운 식감이 특징",
+        "use": "구이 · 볶음 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "pen_shell"
+      },
+      {
+        "id": "sea_squirt",
+        "name": "멍게",
+        "category": "seafood",
+        "note": "바다 향과 산뜻한 식감이 특징",
+        "use": "비빔밥 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "sea_squirt"
+      },
+      {
+        "id": "anchovy",
+        "name": "멸치",
+        "category": "seafood",
+        "note": "국물과 반찬에 감칠맛을 더하는 수산물",
+        "use": "육수 · 볶음 · 조림",
+        "sourceIndex": 1,
+        "ingredientId": "anchovy"
+      }
     ]
   },
   {
     "month": 5,
     "title": "초여름을 부르는 산뜻한 재료",
-    "lead": "수분감 있는 채소와 감칠맛을 더하는 해산물이 어울려요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2026.05.06", "title": "5월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234872"},
-      { "label": "해양수산부", "date": "2026.04.29", "title": "5월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=66378&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2026.05.06",
+        "title": "5월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234872"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2026.04.29",
+        "title": "5월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=66378&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "cucumber", "name": "오이", "category": "produce", "note": "아삭하고 시원한 수분감", "use": "무침 · 냉국 · 볶음", "sourceIndex": 0, "ingredientId": "cucumber"},
-      {"id": "tomato", "name": "토마토", "category": "produce", "note": "새콤한 과즙과 부드러운 산미", "use": "달걀볶음 · 샐러드 · 파스타", "sourceIndex": 0, "ingredientId": "tomato"},
-      {"id": "onion", "name": "양파", "category": "produce", "note": "익힐수록 은은한 단맛이 깊어져요", "use": "볶음 · 전 · 수프", "sourceIndex": 0, "ingredientId": "onion"},
-      {"id": "kelp", "name": "다시마", "category": "seafood", "note": "국물에 깊은 감칠맛을 더하는 해조류", "use": "육수 · 튀각 · 쌈", "sourceIndex": 1, "ingredientId": "kelp"},
-      { "id": "rockfish", "name": "조피볼락", "category": "seafood", "note": "우럭으로도 익숙한 흰살생선", "use": "회 · 매운탕 · 찜", "sourceIndex": 1, "ingredientId": "rockfish" }
+      {
+        "id": "cucumber",
+        "name": "오이",
+        "category": "produce",
+        "note": "아삭하고 시원한 수분감",
+        "use": "무침 · 냉국 · 볶음",
+        "sourceIndex": 0,
+        "ingredientId": "cucumber"
+      },
+      {
+        "id": "tomato",
+        "name": "토마토",
+        "category": "produce",
+        "note": "새콤한 과즙과 부드러운 산미",
+        "use": "달걀볶음 · 샐러드 · 파스타",
+        "sourceIndex": 0,
+        "ingredientId": "tomato"
+      },
+      {
+        "id": "onion",
+        "name": "양파",
+        "category": "produce",
+        "note": "익히면 단맛이 살아나는 기본 채소",
+        "use": "볶음 · 전 · 수프",
+        "sourceIndex": 0,
+        "ingredientId": "onion"
+      },
+      {
+        "id": "garlic_chives",
+        "name": "마늘쫑",
+        "category": "produce",
+        "note": "알싸한 향과 아삭한 식감의 줄기채소",
+        "use": "볶음 · 장아찌 · 무침",
+        "sourceIndex": 0,
+        "ingredientId": "garlic_chives"
+      },
+      {
+        "id": "green_peas",
+        "name": "완두콩",
+        "category": "produce",
+        "note": "은은한 단맛이 도는 초여름 콩",
+        "use": "밥 · 수프 · 볶음",
+        "sourceIndex": 0,
+        "ingredientId": "green_peas"
+      },
+      {
+        "id": "kelp",
+        "name": "다시마",
+        "category": "seafood",
+        "note": "국물에 깊은 감칠맛을 더하는 해조류",
+        "use": "육수 · 튀각 · 쌈",
+        "sourceIndex": 1,
+        "ingredientId": "kelp"
+      },
+      {
+        "id": "rockfish",
+        "name": "조피볼락",
+        "category": "seafood",
+        "note": "우럭으로도 익숙한 흰살생선",
+        "use": "회 · 매운탕 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "rockfish"
+      },
+      {
+        "id": "anchovy",
+        "name": "멸치",
+        "category": "seafood",
+        "note": "국물과 반찬에 감칠맛을 더하는 수산물",
+        "use": "육수 · 볶음 · 조림",
+        "sourceIndex": 1,
+        "ingredientId": "anchovy"
+      },
+      {
+        "id": "horse_mackerel",
+        "name": "전갱이",
+        "category": "seafood",
+        "note": "살이 부드러운 회유성 생선",
+        "use": "구이 · 조림 · 회",
+        "sourceIndex": 1,
+        "ingredientId": "horse_mackerel"
+      },
+      {
+        "id": "abalone",
+        "name": "전복",
+        "category": "seafood",
+        "note": "쫄깃한 식감이 돋보이는 패류",
+        "use": "죽 · 구이 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "abalone"
+      }
     ]
   },
   {
     "month": 6,
     "title": "여름 한 끼를 가볍고 산뜻하게",
-    "lead": "아삭한 채소와 새콤한 매실, 씹는 맛이 좋은 수산물을 골랐어요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2026.06.04", "title": "6월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234905"},
-      { "label": "해양수산부", "date": "2026.05.29", "title": "6월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=66817&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2026.06.04",
+        "title": "6월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234905"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2026.05.29",
+        "title": "6월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=66817&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "cabbage", "name": "양배추", "category": "produce", "note": "아삭하고 달큰한 잎채소", "use": "쌈밥 · 토스트 · 볶음", "sourceIndex": 0, "ingredientId": "cabbage"},
-      {"id": "zucchini", "name": "애호박", "category": "produce", "note": "촉촉하고 부드럽게 익는 채소", "use": "전 · 찌개 · 볶음", "sourceIndex": 0, "ingredientId": "zucchini"},
-      {"id": "plum", "name": "매실", "category": "produce", "note": "청량한 산미를 더하는 과실", "use": "청 · 장아찌 · 음료", "sourceIndex": 0, "ingredientId": "plum"},
-      {"id": "pen-shell", "name": "키조개", "category": "seafood", "note": "관자의 부드러운 식감이 특징", "use": "구이 · 볶음 · 무침", "sourceIndex": 1, "ingredientId": "pen_shell"},
-      { "id": "horse-mackerel", "name": "전갱이", "category": "seafood", "note": "살이 부드러운 회유성 생선", "use": "구이 · 조림 · 회", "sourceIndex": 1, "ingredientId": "horse_mackerel" }
+      {
+        "id": "green_cabbage",
+        "name": "배추",
+        "category": "produce",
+        "note": "겉절이부터 국물 요리까지 두루 쓰는 잎채소",
+        "use": "김치 · 겉절이 · 국",
+        "sourceIndex": 0,
+        "ingredientId": "green_cabbage"
+      },
+      {
+        "id": "zucchini",
+        "name": "애호박",
+        "category": "produce",
+        "note": "촉촉하고 부드럽게 익는 채소",
+        "use": "전 · 찌개 · 볶음",
+        "sourceIndex": 0,
+        "ingredientId": "zucchini"
+      },
+      {
+        "id": "plum",
+        "name": "매실",
+        "category": "produce",
+        "note": "청량한 산미를 더하는 초여름 과실",
+        "use": "청 · 장아찌 · 음료",
+        "sourceIndex": 0,
+        "ingredientId": "plum"
+      },
+      {
+        "id": "potato",
+        "name": "감자",
+        "category": "produce",
+        "note": "포슬하고 담백한 여름철 뿌리작물",
+        "use": "찜 · 전 · 조림",
+        "sourceIndex": 0,
+        "ingredientId": "potato"
+      },
+      {
+        "id": "corn",
+        "name": "옥수수",
+        "category": "produce",
+        "note": "톡톡 터지는 알과 고소한 맛",
+        "use": "찜 · 수프 · 버터구이",
+        "sourceIndex": 0,
+        "ingredientId": "corn"
+      },
+      {
+        "id": "pen_shell",
+        "name": "키조개",
+        "category": "seafood",
+        "note": "관자의 부드러운 식감이 특징",
+        "use": "구이 · 볶음 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "pen_shell"
+      },
+      {
+        "id": "horse_mackerel",
+        "name": "전갱이",
+        "category": "seafood",
+        "note": "살이 부드러운 회유성 생선",
+        "use": "구이 · 조림 · 회",
+        "sourceIndex": 1,
+        "ingredientId": "horse_mackerel"
+      },
+      {
+        "id": "squid",
+        "name": "오징어",
+        "category": "seafood",
+        "note": "쫄깃하고 감칠맛이 좋은 수산물",
+        "use": "볶음 · 숙회 · 국",
+        "sourceIndex": 1,
+        "ingredientId": "squid"
+      },
+      {
+        "id": "eel",
+        "name": "장어",
+        "category": "seafood",
+        "note": "구이와 덮밥으로 즐기는 장어류",
+        "use": "구이 · 덮밥",
+        "sourceIndex": 1,
+        "ingredientId": "eel"
+      },
+      {
+        "id": "abalone",
+        "name": "전복",
+        "category": "seafood",
+        "note": "쫄깃한 식감이 돋보이는 패류",
+        "use": "죽 · 구이 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "abalone"
+      }
     ]
   },
   {
     "month": 7,
     "title": "무더위에 입맛 돋우는 여름 재료",
-    "lead": "여름 채소와 과일, 살이 오른 수산물을 한데 모았어요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2026.07.01", "title": "7월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234924"},
-      { "label": "해양수산부", "date": "2026.07.01", "title": "7월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=67244&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2026.07.01",
+        "title": "7월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234924"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2026.07.01",
+        "title": "7월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=67244&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "paprika", "name": "파프리카", "category": "produce", "note": "아삭하고 은은한 단맛이 나는 채소", "use": "볶음밥 · 전 · 샐러드", "sourceIndex": 0, "ingredientId": "bell_pepper"},
-      {"id": "peach", "name": "복숭아", "category": "produce", "note": "향긋한 과즙이 가득한 여름 과일", "use": "생과일 · 잼 · 스무디", "sourceIndex": 0, "ingredientId": "peach"},
-      {"id": "croaker", "name": "민어", "category": "seafood", "note": "여름철에 즐기는 담백한 흰살생선", "use": "탕 · 전 · 찜", "sourceIndex": 1, "ingredientId": "croaker"},
-      { "id": "abalone", "name": "전복", "category": "seafood", "note": "쫄깃한 식감이 돋보이는 패류", "use": "죽 · 구이 · 찜", "sourceIndex": 1, "ingredientId": "abalone" }
+      {
+        "id": "bell_pepper",
+        "name": "파프리카",
+        "category": "produce",
+        "note": "아삭하고 은은한 단맛이 나는 채소",
+        "use": "볶음밥 · 전 · 샐러드",
+        "sourceIndex": 0,
+        "ingredientId": "bell_pepper"
+      },
+      {
+        "id": "peach",
+        "name": "복숭아",
+        "category": "produce",
+        "note": "향긋한 과즙이 가득한 여름 과일",
+        "use": "생과일 · 잼 · 스무디",
+        "sourceIndex": 0,
+        "ingredientId": "peach"
+      },
+      {
+        "id": "corn",
+        "name": "옥수수",
+        "category": "produce",
+        "note": "톡톡 터지는 알과 고소한 맛",
+        "use": "찜 · 수프 · 버터구이",
+        "sourceIndex": 0,
+        "ingredientId": "corn"
+      },
+      {
+        "id": "watermelon",
+        "name": "수박",
+        "category": "produce",
+        "note": "수분이 풍부하고 시원한 여름 과일",
+        "use": "생과일 · 화채 · 주스",
+        "sourceIndex": 0,
+        "ingredientId": "watermelon"
+      },
+      {
+        "id": "tomato",
+        "name": "토마토",
+        "category": "produce",
+        "note": "새콤한 과즙과 부드러운 산미",
+        "use": "달걀볶음 · 샐러드 · 파스타",
+        "sourceIndex": 0,
+        "ingredientId": "tomato"
+      },
+      {
+        "id": "croaker",
+        "name": "민어",
+        "category": "seafood",
+        "note": "여름철에 즐기는 담백한 흰살생선",
+        "use": "탕 · 전 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "croaker"
+      },
+      {
+        "id": "abalone",
+        "name": "전복",
+        "category": "seafood",
+        "note": "쫄깃한 식감이 돋보이는 패류",
+        "use": "죽 · 구이 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "abalone"
+      },
+      {
+        "id": "eel",
+        "name": "장어",
+        "category": "seafood",
+        "note": "구이와 덮밥으로 즐기는 장어류",
+        "use": "구이 · 덮밥",
+        "sourceIndex": 1,
+        "ingredientId": "eel"
+      },
+      {
+        "id": "squid",
+        "name": "오징어",
+        "category": "seafood",
+        "note": "쫄깃하고 감칠맛이 좋은 수산물",
+        "use": "볶음 · 숙회 · 국",
+        "sourceIndex": 1,
+        "ingredientId": "squid"
+      },
+      {
+        "id": "mackerel",
+        "name": "고등어",
+        "category": "seafood",
+        "note": "기름지고 풍미가 진한 등푸른생선",
+        "use": "구이 · 조림 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "mackerel"
+      }
     ]
   },
   {
     "month": 8,
     "title": "한여름의 달콤함과 바다의 풍미",
-    "lead": "제철 과일·채소와 여름 수산물로 식탁에 변화를 줘보세요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2026.08.04", "title": "8월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234944"},
-      { "label": "해양수산부", "date": "2026.07.31", "title": "8월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=67721&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2026.08.04",
+        "title": "8월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234944"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2026.07.31",
+        "title": "8월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=67721&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "grape", "name": "포도", "category": "produce", "note": "알이 탱탱하고 향기로운 여름 과일", "use": "생과일 · 샐러드 · 요거트", "sourceIndex": 0, "ingredientId": "grape"},
-      {"id": "corn", "name": "옥수수", "category": "produce", "note": "톡톡 터지는 알과 고소한 맛", "use": "찜 · 수프 · 버터구이", "sourceIndex": 0, "ingredientId": "corn"},
-      {"id": "eggplant", "name": "가지", "category": "produce", "note": "부드러운 과육이 양념을 잘 머금어요", "use": "덮밥 · 냉국 · 튀김", "sourceIndex": 0, "ingredientId": "eggplant"},
-      {"id": "shrimp", "name": "새우", "category": "seafood", "note": "탱글한 식감과 담백한 맛", "use": "구이 · 볶음 · 새우장", "sourceIndex": 1, "ingredientId": "shrimp"},
-      { "id": "eel", "name": "장어류", "category": "seafood", "note": "구이와 덮밥으로 즐기는 여름 수산물", "use": "구이 · 덮밥", "sourceIndex": 1, "ingredientId": "eel" }
+      {
+        "id": "grape",
+        "name": "포도",
+        "category": "produce",
+        "note": "알이 탱탱하고 향기로운 여름 과일",
+        "use": "생과일 · 샐러드 · 요거트",
+        "sourceIndex": 0,
+        "ingredientId": "grape"
+      },
+      {
+        "id": "corn",
+        "name": "옥수수",
+        "category": "produce",
+        "note": "톡톡 터지는 알과 고소한 맛",
+        "use": "찜 · 수프 · 버터구이",
+        "sourceIndex": 0,
+        "ingredientId": "corn"
+      },
+      {
+        "id": "eggplant",
+        "name": "가지",
+        "category": "produce",
+        "note": "부드러운 과육이 양념을 잘 머금는 채소",
+        "use": "덮밥 · 냉국 · 튀김",
+        "sourceIndex": 0,
+        "ingredientId": "eggplant"
+      },
+      {
+        "id": "peach",
+        "name": "복숭아",
+        "category": "produce",
+        "note": "향긋한 과즙이 가득한 여름 과일",
+        "use": "생과일 · 잼 · 스무디",
+        "sourceIndex": 0,
+        "ingredientId": "peach"
+      },
+      {
+        "id": "watermelon",
+        "name": "수박",
+        "category": "produce",
+        "note": "수분이 풍부하고 시원한 여름 과일",
+        "use": "생과일 · 화채 · 주스",
+        "sourceIndex": 0,
+        "ingredientId": "watermelon"
+      },
+      {
+        "id": "shrimp",
+        "name": "새우",
+        "category": "seafood",
+        "note": "탱글한 식감과 담백한 맛",
+        "use": "구이 · 볶음 · 새우장",
+        "sourceIndex": 1,
+        "ingredientId": "shrimp"
+      },
+      {
+        "id": "eel",
+        "name": "장어",
+        "category": "seafood",
+        "note": "구이와 덮밥으로 즐기는 장어류",
+        "use": "구이 · 덮밥",
+        "sourceIndex": 1,
+        "ingredientId": "eel"
+      },
+      {
+        "id": "squid",
+        "name": "오징어",
+        "category": "seafood",
+        "note": "쫄깃하고 감칠맛이 좋은 수산물",
+        "use": "볶음 · 숙회 · 국",
+        "sourceIndex": 1,
+        "ingredientId": "squid"
+      },
+      {
+        "id": "abalone",
+        "name": "전복",
+        "category": "seafood",
+        "note": "쫄깃한 식감이 돋보이는 패류",
+        "use": "죽 · 구이 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "abalone"
+      },
+      {
+        "id": "mackerel",
+        "name": "고등어",
+        "category": "seafood",
+        "note": "기름지고 풍미가 진한 등푸른생선",
+        "use": "구이 · 조림 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "mackerel"
+      }
     ]
   },
   {
     "month": 9,
     "title": "수확의 계절, 단단해지는 풍미",
-    "lead": "가을에 맛이 무르익는 농산물과 가을 바다의 재료예요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2026.09.01", "title": "9월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?deleteCd=0&menuNo=300106&nttId=234980"},
-      { "label": "해양수산부", "date": "2026.09.01", "title": "9월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=68455&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2026.09.01",
+        "title": "9월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?deleteCd=0&menuNo=300106&nttId=234980"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2026.09.01",
+        "title": "9월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=68455&menuSeq=971"
+      },
+      {
+        "label": "해양수산부 (2024)",
+        "date": "2024.08.30",
+        "title": "9월의 수산물: 대하·전어",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=58449&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "sweet-potato", "name": "고구마", "category": "produce", "note": "포슬하고 달콤한 가을 뿌리채소", "use": "찜 · 구이 · 전", "sourceIndex": 0, "ingredientId": "sweet_potato"},
-      {"id": "pear", "name": "배", "category": "produce", "note": "아삭하고 과즙이 풍부한 가을 과일", "use": "생과일 · 배숙 · 소스", "sourceIndex": 0, "ingredientId": "pear"},
-      {"id": "shiitake", "name": "표고버섯", "category": "produce", "note": "향과 감칠맛이 진한 버섯", "use": "전 · 볶음 · 솥밥", "sourceIndex": 0, "ingredientId": "shiitake_mushroom"},
-      {"id": "gizzard-shad", "name": "전어", "category": "seafood", "note": "고소한 맛이 진해지는 가을 생선", "use": "구이 · 회 · 무침", "sourceIndex": 1, "ingredientId": "gizzard_shad"},
-      { "id": "leather-carp", "name": "향어", "category": "seafood", "note": "담백하고 탄력 있는 민물고기", "use": "회 · 구이", "sourceIndex": 1, "ingredientId": "asian_carp" }
+      {
+        "id": "sweet_potato",
+        "name": "고구마",
+        "category": "produce",
+        "note": "포슬하고 달콤한 가을 뿌리채소",
+        "use": "찜 · 구이 · 전",
+        "sourceIndex": 0,
+        "ingredientId": "sweet_potato"
+      },
+      {
+        "id": "pear",
+        "name": "배",
+        "category": "produce",
+        "note": "아삭하고 과즙이 풍부한 가을 과일",
+        "use": "생과일 · 배숙 · 소스",
+        "sourceIndex": 0,
+        "ingredientId": "pear"
+      },
+      {
+        "id": "shiitake_mushroom",
+        "name": "표고버섯",
+        "category": "produce",
+        "note": "향과 감칠맛이 진한 버섯",
+        "use": "전 · 볶음 · 솥밥",
+        "sourceIndex": 0,
+        "ingredientId": "shiitake_mushroom"
+      },
+      {
+        "id": "chestnut",
+        "name": "밤",
+        "category": "produce",
+        "note": "포슬하고 고소한 가을 열매",
+        "use": "밥 · 조림 · 간식",
+        "sourceIndex": 0,
+        "ingredientId": "chestnut"
+      },
+      {
+        "id": "ginkgo_nut",
+        "name": "은행",
+        "category": "produce",
+        "note": "가을에 익는 고소한 종실",
+        "use": "밥 · 구이 · 찜",
+        "sourceIndex": 0,
+        "ingredientId": "ginkgo_nut"
+      },
+      {
+        "id": "giant_tiger_prawn",
+        "name": "대하",
+        "category": "seafood",
+        "note": "가을철 대표 새우류로 살이 통통하고 감칠맛이 좋아요",
+        "use": "소금구이 · 전 · 찜",
+        "sourceIndex": 2,
+        "ingredientId": "giant_tiger_prawn"
+      },
+      {
+        "id": "gizzard_shad",
+        "name": "전어",
+        "category": "seafood",
+        "note": "고소한 맛이 진해지는 가을 생선",
+        "use": "구이 · 회 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "gizzard_shad"
+      },
+      {
+        "id": "asian_carp",
+        "name": "향어",
+        "category": "seafood",
+        "note": "담백하고 탄력 있는 민물고기",
+        "use": "회 · 구이",
+        "sourceIndex": 1,
+        "ingredientId": "asian_carp"
+      },
+      {
+        "id": "squid",
+        "name": "오징어",
+        "category": "seafood",
+        "note": "쫄깃하고 감칠맛이 좋은 수산물",
+        "use": "볶음 · 숙회 · 국",
+        "sourceIndex": 1,
+        "ingredientId": "squid"
+      },
+      {
+        "id": "flower_crab",
+        "name": "꽃게",
+        "category": "seafood",
+        "note": "가을철 살이 차오르는 갑각류",
+        "use": "찜 · 탕 · 게장",
+        "sourceIndex": 1,
+        "ingredientId": "flower_crab"
+      }
     ]
   },
   {
     "month": 10,
     "title": "깊은 맛이 차오르는 가을",
-    "lead": "사과와 포도, 단호박의 가을 풍미에 제철 수산물을 더했어요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2026.10.02", "title": "10월 제철 농산물", "url": "https://m.foodnuri.go.kr/portal/bbs/B0000299/view.do?deleteCd=0&menuNo=300106&nttId=235030&pageIndex=1"},
-      { "label": "해양수산부", "date": "2026.10.01", "title": "10월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=68834&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2026.10.02",
+        "title": "10월 제철 농산물",
+        "url": "https://m.foodnuri.go.kr/portal/bbs/B0000299/view.do?deleteCd=0&menuNo=300106&nttId=235030&pageIndex=1"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2026.10.01",
+        "title": "10월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=68834&menuSeq=971"
+      },
+      {
+        "label": "해양수산부 (2023)",
+        "date": "2023.09.27",
+        "title": "10월의 수산물: 삼치·대하",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=53411&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "kabocha", "name": "단호박", "category": "produce", "note": "부드럽고 달콤한 가을 채소", "use": "찜 · 수프 · 샐러드", "sourceIndex": 0, "ingredientId": "sweet_pumpkin"},
-      {"id": "apple", "name": "사과", "category": "produce", "note": "사각사각한 식감과 산뜻한 단맛", "use": "생과일 · 샐러드 · 조림", "sourceIndex": 0, "ingredientId": "apple"},
-      {"id": "shine-muscat", "name": "샤인머스캣", "category": "produce", "note": "톡 터지는 과즙이 상큼한 포도", "use": "생과일 · 샐러드 · 요거트", "sourceIndex": 0, "ingredientId": "shine_muscat"},
-      {"id": "loach", "name": "미꾸라지", "category": "seafood", "note": "가을철에 찾는 민물고기", "use": "추어탕 · 튀김", "sourceIndex": 1, "ingredientId": "loach"},
-      { "id": "anchovy", "name": "멸치", "category": "seafood", "note": "국물과 반찬에 감칠맛을 더해요", "use": "육수 · 볶음 · 조림", "sourceIndex": 1, "ingredientId": "anchovy" }
+      {
+        "id": "sweet_pumpkin",
+        "name": "단호박",
+        "category": "produce",
+        "note": "부드럽고 달콤한 가을 채소",
+        "use": "찜 · 수프 · 샐러드",
+        "sourceIndex": 0,
+        "ingredientId": "sweet_pumpkin"
+      },
+      {
+        "id": "apple",
+        "name": "사과",
+        "category": "produce",
+        "note": "제철에 많이 찾는 사과",
+        "use": "생과일 · 반찬 · 요리",
+        "sourceIndex": 0,
+        "ingredientId": "apple"
+      },
+      {
+        "id": "shine_muscat",
+        "name": "샤인머스캣",
+        "category": "produce",
+        "note": "톡 터지는 과즙이 상큼한 포도",
+        "use": "생과일 · 샐러드 · 요거트",
+        "sourceIndex": 0,
+        "ingredientId": "shine_muscat"
+      },
+      {
+        "id": "sweet_potato",
+        "name": "고구마",
+        "category": "produce",
+        "note": "포슬하고 달콤한 가을 뿌리채소",
+        "use": "찜 · 구이 · 전",
+        "sourceIndex": 0,
+        "ingredientId": "sweet_potato"
+      },
+      {
+        "id": "chestnut",
+        "name": "밤",
+        "category": "produce",
+        "note": "포슬하고 고소한 가을 열매",
+        "use": "밥 · 조림 · 간식",
+        "sourceIndex": 0,
+        "ingredientId": "chestnut"
+      },
+      {
+        "id": "giant_tiger_prawn",
+        "name": "대하",
+        "category": "seafood",
+        "note": "가을철 대표 새우류로 살이 통통하고 감칠맛이 좋아요",
+        "use": "소금구이 · 전 · 찜",
+        "sourceIndex": 2,
+        "ingredientId": "giant_tiger_prawn"
+      },
+      {
+        "id": "loach",
+        "name": "미꾸라지",
+        "category": "seafood",
+        "note": "가을철에 찾는 민물고기",
+        "use": "추어탕 · 튀김",
+        "sourceIndex": 1,
+        "ingredientId": "loach"
+      },
+      {
+        "id": "anchovy",
+        "name": "멸치",
+        "category": "seafood",
+        "note": "국물과 반찬에 감칠맛을 더하는 수산물",
+        "use": "육수 · 볶음 · 조림",
+        "sourceIndex": 1,
+        "ingredientId": "anchovy"
+      },
+      {
+        "id": "spanish_mackerel",
+        "name": "삼치",
+        "category": "seafood",
+        "note": "담백하고 비린 맛이 적은 생선",
+        "use": "구이 · 조림 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "spanish_mackerel"
+      },
+      {
+        "id": "flower_crab",
+        "name": "꽃게",
+        "category": "seafood",
+        "note": "가을철 살이 차오르는 갑각류",
+        "use": "찜 · 탕 · 게장",
+        "sourceIndex": 1,
+        "ingredientId": "flower_crab"
+      }
     ]
   },
   {
     "month": 11,
     "title": "겨울을 준비하는 포근한 식탁",
-    "lead": "김장철 채소와 차가운 계절에 즐기기 좋은 수산물을 살펴보세요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2025.10.28", "title": "11월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234778"},
-      { "label": "해양수산부", "date": "2025.10.31", "title": "11월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=63636&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2025.10.28",
+        "title": "11월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234778"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2025.10.31",
+        "title": "11월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=63636&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "sweet-persimmon", "name": "단감", "category": "produce", "note": "아삭한 식감과 은은한 단맛", "use": "생과일 · 샐러드 · 말랭이", "sourceIndex": 0, "ingredientId": "sweet_persimmon"},
-      {"id": "napa-cabbage", "name": "배추", "category": "produce", "note": "김장부터 국물 요리까지 쓰임이 넓어요", "use": "김치 · 겉절이 · 국", "sourceIndex": 0, "ingredientId": "green_cabbage"},
-      {"id": "spanish-mackerel", "name": "삼치", "category": "seafood", "note": "담백하고 비린 맛이 적은 생선", "use": "구이 · 조림 · 찜", "sourceIndex": 1, "ingredientId": "spanish_mackerel"},
-      { "id": "red-scallop", "name": "홍가리비", "category": "seafood", "note": "작고 부드러운 단맛이 특징", "use": "찜 · 탕 · 치즈구이", "sourceIndex": 1, "ingredientId": "red_scallop" }
+      {
+        "id": "sweet_persimmon",
+        "name": "단감",
+        "category": "produce",
+        "note": "아삭하고 은은하게 단 가을·겨울 과일",
+        "use": "생과일 · 샐러드 · 말랭이",
+        "sourceIndex": 0,
+        "ingredientId": "sweet_persimmon"
+      },
+      {
+        "id": "green_cabbage",
+        "name": "배추",
+        "category": "produce",
+        "note": "겉절이부터 국물 요리까지 두루 쓰는 잎채소",
+        "use": "김치 · 겉절이 · 국",
+        "sourceIndex": 0,
+        "ingredientId": "green_cabbage"
+      },
+      {
+        "id": "radish",
+        "name": "무",
+        "category": "produce",
+        "note": "시원한 단맛이 나는 가을·겨울 뿌리채소",
+        "use": "국 · 조림 · 김치",
+        "sourceIndex": 0,
+        "ingredientId": "radish"
+      },
+      {
+        "id": "mandarin",
+        "name": "감귤",
+        "category": "produce",
+        "note": "겨울에 즐기는 상큼한 과일",
+        "use": "생과일 · 주스 · 샐러드",
+        "sourceIndex": 0,
+        "ingredientId": "mandarin"
+      },
+      {
+        "id": "spinach",
+        "name": "시금치",
+        "category": "produce",
+        "note": "찬 계절에 단맛이 드는 잎채소",
+        "use": "나물 · 국 · 솥밥",
+        "sourceIndex": 0,
+        "ingredientId": "spinach"
+      },
+      {
+        "id": "spanish_mackerel",
+        "name": "삼치",
+        "category": "seafood",
+        "note": "담백하고 비린 맛이 적은 생선",
+        "use": "구이 · 조림 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "spanish_mackerel"
+      },
+      {
+        "id": "red_scallop",
+        "name": "홍가리비",
+        "category": "seafood",
+        "note": "작고 부드러운 단맛이 특징",
+        "use": "찜 · 탕 · 치즈구이",
+        "sourceIndex": 1,
+        "ingredientId": "red_scallop"
+      },
+      {
+        "id": "oyster",
+        "name": "굴",
+        "category": "seafood",
+        "note": "바다의 감칠맛이 진한 패류",
+        "use": "국 · 전 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "oyster"
+      },
+      {
+        "id": "cockle",
+        "name": "꼬막",
+        "category": "seafood",
+        "note": "쫄깃하고 짭조름한 겨울 패류",
+        "use": "무침 · 비빔밥 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "cockle"
+      },
+      {
+        "id": "cod",
+        "name": "대구",
+        "category": "seafood",
+        "note": "살이 희고 담백한 겨울 생선",
+        "use": "탕 · 찜 · 전",
+        "sourceIndex": 1,
+        "ingredientId": "cod"
+      }
     ]
   },
   {
     "month": 12,
     "title": "겨울의 단맛과 따뜻한 국물",
-    "lead": "겨울 과일과 뿌리채소, 뜨끈한 요리에 어울리는 수산물을 골랐어요.",
+    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
     "sources": [
-      {"label": "농식품정보누리", "date": "2025.12.02", "title": "12월 제철 농산물", "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234826"},
-      { "label": "해양수산부", "date": "2025.12.01", "title": "12월 이달의 수산물", "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=63988&menuSeq=971" }
+      {
+        "label": "농식품정보누리",
+        "date": "2025.12.02",
+        "title": "12월 제철 농산물",
+        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234826"
+      },
+      {
+        "label": "해양수산부",
+        "date": "2025.12.01",
+        "title": "12월 이달의 수산물",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=63988&menuSeq=971"
+      }
     ],
     "items": [
-      {"id": "lotus-root", "name": "연근", "category": "produce", "note": "아삭하고 은은한 단맛이 나는 뿌리채소", "use": "조림 · 튀김 · 샐러드", "sourceIndex": 0, "ingredientId": "lotus_root"},
-      {"id": "citrus", "name": "감귤", "category": "produce", "note": "겨울에 즐기는 상큼한 과일", "use": "생과일 · 주스 · 샐러드", "sourceIndex": 0, "ingredientId": "mandarin"},
-      {"id": "snow-crab", "name": "대게", "category": "seafood", "note": "살이 부드럽고 단맛이 도는 겨울 갑각류", "use": "찜 · 밥 · 국물", "sourceIndex": 1, "ingredientId": "snow_crab"},
-      { "id": "cod", "name": "대구", "category": "seafood", "note": "살이 희고 담백한 겨울 생선", "use": "탕 · 찜 · 전", "sourceIndex": 1, "ingredientId": "cod" }
+      {
+        "id": "mandarin",
+        "name": "감귤",
+        "category": "produce",
+        "note": "겨울에 즐기는 상큼한 과일",
+        "use": "생과일 · 주스 · 샐러드",
+        "sourceIndex": 0,
+        "ingredientId": "mandarin"
+      },
+      {
+        "id": "strawberry",
+        "name": "딸기",
+        "category": "produce",
+        "note": "겨울부터 봄까지 즐기는 향긋한 과채",
+        "use": "생과일 · 잼 · 샐러드",
+        "sourceIndex": 0,
+        "ingredientId": "strawberry"
+      },
+      {
+        "id": "spinach",
+        "name": "시금치",
+        "category": "produce",
+        "note": "찬 계절에 단맛이 드는 잎채소",
+        "use": "나물 · 국 · 솥밥",
+        "sourceIndex": 0,
+        "ingredientId": "spinach"
+      },
+      {
+        "id": "broccoli",
+        "name": "브로콜리",
+        "category": "produce",
+        "note": "찬 계절에도 쓰임이 좋은 꽃채소",
+        "use": "데침 · 볶음 · 수프",
+        "sourceIndex": 0,
+        "ingredientId": "broccoli"
+      },
+      {
+        "id": "radish",
+        "name": "무",
+        "category": "produce",
+        "note": "시원한 단맛이 나는 가을·겨울 뿌리채소",
+        "use": "국 · 조림 · 김치",
+        "sourceIndex": 0,
+        "ingredientId": "radish"
+      },
+      {
+        "id": "snow_crab",
+        "name": "대게",
+        "category": "seafood",
+        "note": "살이 부드럽고 단맛이 도는 겨울 갑각류",
+        "use": "찜 · 밥 · 국물",
+        "sourceIndex": 1,
+        "ingredientId": "snow_crab"
+      },
+      {
+        "id": "cod",
+        "name": "대구",
+        "category": "seafood",
+        "note": "살이 희고 담백한 겨울 생선",
+        "use": "탕 · 찜 · 전",
+        "sourceIndex": 1,
+        "ingredientId": "cod"
+      },
+      {
+        "id": "oyster",
+        "name": "굴",
+        "category": "seafood",
+        "note": "바다의 감칠맛이 진한 패류",
+        "use": "국 · 전 · 무침",
+        "sourceIndex": 1,
+        "ingredientId": "oyster"
+      },
+      {
+        "id": "pollock",
+        "name": "명태",
+        "category": "seafood",
+        "note": "겨울철 국물과 찜에 잘 어울리는 생선",
+        "use": "탕 · 찜 · 전",
+        "sourceIndex": 1,
+        "ingredientId": "pollock"
+      },
+      {
+        "id": "mussel",
+        "name": "홍합",
+        "category": "seafood",
+        "note": "국물 맛이 깊은 겨울 패류",
+        "use": "탕 · 파스타 · 찜",
+        "sourceIndex": 1,
+        "ingredientId": "mussel"
+      }
     ]
   }
 ]

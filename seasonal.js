@@ -44,10 +44,6 @@ function renderCurrentMonth() {
   document.getElementById('seasonal-month-title').textContent = current.title;
   document.getElementById('seasonal-month-lead').textContent = current.lead;
   document.getElementById('seasonal-heading').textContent = `${selectedMonth}월 제철 재료`;
-  document.getElementById('seasonal-sources-list').innerHTML = current.sources.map((source) => `
-    <li><span>${escapeHtml(source.label)} · ${escapeHtml(source.date)}</span>
-      <a href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.title)} <span aria-hidden="true">↗</span></a>
-    </li>`).join('');
   renderMonthNavigation();
   renderCards();
   history.replaceState(null, '', `${location.pathname}?month=${selectedMonth}`);
@@ -65,14 +61,12 @@ function renderCards() {
   cards.setAttribute('aria-busy', 'false');
   cards.innerHTML = visibleItems.length
     ? visibleItems.map((item, index) => {
-      const source = current.sources[item.sourceIndex];
       const kind = item.category === 'produce' ? '농산물' : '수산물';
       return `<article class="seasonal-card seasonal-card-${item.category}">
         <div class="seasonal-card-top"><span>${kind}</span><span>${String(index + 1).padStart(2, '0')}</span></div>
         <h3>${escapeHtml(item.name)}</h3>
         <p>${escapeHtml(item.note)}</p>
         <div class="seasonal-use"><span>이렇게 활용해요</span><strong>${escapeHtml(item.use)}</strong></div>
-        <a class="seasonal-card-source" href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.label)} 자료 보기 <span aria-hidden="true">↗</span></a>
       </article>`;
     }).join('')
     : '<p class="seasonal-status seasonal-empty">검색한 재료가 없어요. 다른 이름으로 찾아보세요.</p>';
