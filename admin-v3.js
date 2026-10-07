@@ -395,13 +395,14 @@ function renderUserActivityMarkup(item) {
   const entities = { inventory: '재료', shopping: '장보기' };
   const operations = { created: '추가', updated: '수정', deleted: '삭제' };
   const fields = {
-    name: '이름', quantity: '수량', unit: '단위', location: '보관 위치',
+    name: '이름', quantity_state: '수량 기록 방식', quantity: '수량', unit: '단위', location: '보관 위치',
     date_kind: '표시 날짜 종류', label_date: '표시 날짜', opened_at: '개봉 날짜',
     confirmed: '확인 상태', checked: '장보기 완료',
   };
   const valueText = (value) => {
     if (value === null || value === undefined || value === '') return '없음';
     if (typeof value === 'boolean') return value ? '예' : '아니요';
+    if (['exact', 'present', 'low'].includes(value)) return { exact: '정확한 수량', present: '있음', low: '조금 남음' }[value];
     return typeof value === 'number' ? new Intl.NumberFormat('ko-KR').format(value) : String(value);
   };
   const details = item.details && typeof item.details === 'object' ? item.details : {};
