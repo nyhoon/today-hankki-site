@@ -399,10 +399,10 @@ function renderUserActivityMarkup(item) {
     date_kind: '표시 날짜 종류', label_date: '표시 날짜', opened_at: '개봉 날짜',
     confirmed: '확인 상태', checked: '장보기 완료',
   };
-  const valueText = (value) => {
+  const valueText = (value, field) => {
     if (value === null || value === undefined || value === '') return '없음';
     if (typeof value === 'boolean') return value ? '예' : '아니요';
-    if (['exact', 'present', 'low'].includes(value)) return { exact: '정확한 수량', present: '있음', low: '조금 남음' }[value];
+    if (field === 'quantity_state' && ['exact', 'present', 'low'].includes(value)) return { exact: '정확한 수량', present: '있음', low: '조금 남음' }[value];
     return typeof value === 'number' ? new Intl.NumberFormat('ko-KR').format(value) : String(value);
   };
   const details = item.details && typeof item.details === 'object' ? item.details : {};
@@ -413,7 +413,7 @@ function renderUserActivityMarkup(item) {
       : [];
     const changeRows = changes.map((change) => {
       const field = fields[change.field] || String(change.field || '변경 항목');
-      return `<li><span class="user-activity-field">${escapeHtml(field)}</span><span class="user-activity-values"><del>${escapeHtml(valueText(change.before))}</del><span aria-hidden="true">→</span><ins>${escapeHtml(valueText(change.after))}</ins></span></li>`;
+      return `<li><span class="user-activity-field">${escapeHtml(field)}</span><span class="user-activity-values"><del>${escapeHtml(valueText(change.before, change.field))}</del><span aria-hidden="true">→</span><ins>${escapeHtml(valueText(change.after, change.field))}</ins></span></li>`;
     }).join('');
     const itemName = escapeHtml(details.item_name || '항목');
     detailMarkup = `<details class="user-activity-details"><summary><span>${entities[details.entity]} · ${operations[details.operation]}</span><strong>${itemName}</strong><small>${changes.length}개 변경</small></summary>${changeRows ? `<ul class="user-activity-changes">${changeRows}</ul>` : '<p class="user-activity-no-changes">변경 필드가 없습니다.</p>'}</details>`;

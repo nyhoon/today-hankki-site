@@ -63,7 +63,7 @@ test('operator dashboard exposes ten unique destinations and guarded states', ()
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
   assert.match(html, /styles\.css\?v=20261005-affiliate-catalog-4/);
-  assert.match(html, /admin-v3\.js\?v=20261005-affiliate-catalog-4/);
+  assert.match(html, /admin-v3\.js\?v=20261007-quantity-state/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
@@ -567,4 +567,14 @@ test('account-linked ingredient searches are optional, canonical-only, and expir
   assert.match(privacyPage, /계정별 재료 검색 이력/);
   assert.match(privacyPage, /계정별 재료 검색 이력을 끄면 해당 계정 검색 이력을 바로 삭제/);
   assert.match(privacyPage, /자유 입력 원문, 일부 입력, 수량, 키 입력 과정은 저장하지 않습니다/);
+});
+
+test('qualitative inventory states are readable without translating ingredient names', () => {
+  const render = activityRenderer();
+  const markup = render({action:'재료 정보 변경', details:{entity:'inventory',operation:'updated',item_name:'low',changes:[{field:'quantity_state',before:'present',after:'low'},{field:'name',before:'low',after:'exact'}]}});
+  assert.match(markup, /수량 기록 방식/);
+  assert.match(markup, /있음/);
+  assert.match(markup, /조금 남음/);
+  assert.match(markup, /<del>low<\/del>/);
+  assert.match(markup, /<ins>exact<\/ins>/);
 });
