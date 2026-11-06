@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="오늘한끼 알림 안내">
-  <title>오늘한끼 알림</title>
+  <meta name="description" content="알뜰한끼 알림 안내">
+  <title>알뜰한끼 알림</title>
   <link rel="stylesheet" href="styles.css?v=20261002-push-category-1">
 </head>
 <body>
-  <header><a class="brand" href="./">오늘한끼<span>●</span></a><nav><a href="./">서비스</a><a href="privacy.html">개인정보 안내</a><a href="terms.html">이용 안내</a></nav></header>
-  <main class="push-page" id="push"><p class="eyebrow" id="push-eyebrow">알림 안내</p><h1 id="push-title">새로운 안내가 도착했어요.</h1><p id="push-body">오늘한끼에서 확인하고 필요한 내용을 살펴보세요.</p><a class="button" id="push-app-link" href="todayhankki://notice?category=operator">오늘한끼 앱 열기</a></main>
+  <header><a class="brand" href="./">알뜰한끼<span>●</span></a><nav><a href="./">서비스</a><a href="privacy.html">개인정보 안내</a><a href="terms.html">이용 안내</a></nav></header>
+  <main class="push-page" id="push"><p class="eyebrow" id="push-eyebrow">알림 안내</p><h1 id="push-title">새로운 안내가 도착했어요.</h1><p id="push-body">알뜰한끼에서 확인하고 필요한 내용을 살펴보세요.</p><a class="button" id="push-app-link" href="todayhankki://notice?category=operator">알뜰한끼 앱 열기</a></main>
   <footer><p>운영: 뉴럴에이전트 · 문의: <a href="mailto:neuralagent.dev@gmail.com">neuralagent.dev@gmail.com</a></p></footer>
   <script>
     const copy = {
@@ -17,7 +17,7 @@
       recipes: ['보유 재료 요리 추천', '오늘 만들 수 있는 요리가 있어요.', '지금 보관 중인 재료로 만들 수 있는 요리를 살펴보세요.'],
       shopping: ['장보기 목록 알림', '장볼 재료를 확인해볼까요?', '남아 있는 장보기 목록을 확인하고 필요한 것부터 챙겨보세요.'],
       kitchen: ['오늘의 키친 소식', '키친에 새 소식이 있어요.', '함께 쓰는 키친의 변경 내용을 확인해보세요.'],
-      operator: ['오늘의 알림', '새로운 안내가 도착했어요.', '오늘한끼에서 확인하고 필요한 내용을 살펴보세요.'],
+      operator: ['오늘의 알림', '새로운 안내가 도착했어요.', '알뜰한끼에서 확인하고 필요한 내용을 살펴보세요.'],
     };
     const requestedCategory = new URLSearchParams(location.search).get('category');
     const key = Object.prototype.hasOwnProperty.call(copy, requestedCategory) ? requestedCategory : 'operator';
@@ -27,7 +27,7 @@
     document.getElementById('push-title').textContent = title;
     document.getElementById('push-body').textContent = body;
     document.getElementById('push-app-link').href = `todayhankki://notice?category=${encodeURIComponent(key)}`;
-    document.title = `${eyebrow} · 오늘한끼`;
+    document.title = `${eyebrow} · 알뜰한끼`;
   </script>
 </body>
 </html>

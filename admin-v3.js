@@ -431,7 +431,7 @@ function userDetailMarkup(user, preview) {
     ['유저 레시피', community.recipes], ['공개 레시피', community.published_recipes], ['작성 후기', community.reviews],
     ['받은 후기', community.reviews_received], ['받은 좋아요', community.likes_received], ['받은 신고', community.reports_received],
     ['작성한 신고', community.reports_filed], ['저장한 한끼유저 레시피', community.saved_community_recipes],
-    ['저장한 오늘한끼 레시피', community.saved_official_recipes], ['좋아요한 오늘한끼 레시피', community.liked_official_recipes],
+    ['저장한 알뜰한끼 레시피', community.saved_official_recipes], ['좋아요한 알뜰한끼 레시피', community.liked_official_recipes],
     ['팔로잉', community.following], ['팔로워', community.followers],
   ].map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${number(value)}</strong></div>`).join('');
   const activity = (user.activity ?? []).slice(0, 50).map(renderUserActivityMarkup).join('') || '<li class="user-profile-empty-row">현재 기록된 활동이 없습니다.</li>';
@@ -780,7 +780,7 @@ const pushCampaignCategories = {
   recipes: { label: '보유 재료 요리 추천', destination: '레시피 탭', title: '오늘 만들 수 있는 요리가 있어요', body: '지금 보관 중인 재료로 만들 수 있는 요리를 확인해보세요.' },
   shopping: { label: '장보기 목록 알림', destination: '장보기 탭', title: '장볼 재료를 확인해볼까요?', body: '남아 있는 장보기 목록을 확인하고 필요한 것부터 챙겨보세요.' },
   kitchen: { label: '오늘의 키친 소식', destination: '마이페이지의 키친', title: '키친에 새 소식이 있어요', body: '함께 쓰는 키친의 변경 내용을 확인해보세요.' },
-  operator: { label: '직접 알림', destination: '오늘 탭', title: '새로운 안내가 도착했어요', body: '오늘한끼에서 확인하고 필요한 내용을 살펴보세요.' },
+  operator: { label: '직접 알림', destination: '오늘 탭', title: '새로운 안내가 도착했어요', body: '알뜰한끼에서 확인하고 필요한 내용을 살펴보세요.' },
 };
 const pushVariableDefinitions = {
   digest: [
