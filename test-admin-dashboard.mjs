@@ -62,8 +62,8 @@ test('operator dashboard exposes ten unique destinations and guarded states', ()
   assert.match(html, /id="login"/);
   assert.match(html, /id="denied"/);
   assert.match(html, /id="dashboard"/);
-  assert.match(html, /styles\.css\?v=20261005-affiliate-catalog-4/);
-  assert.match(html, /admin-v3\.js\?v=20261007-quantity-state/);
+  assert.match(html, /styles\.css\?v=20261106-inventory/);
+  assert.match(html, /admin-v3\.js\?v=20261106-inventory/);
   assert.match(script, /function navigateAdminPage\(pageId\)/);
 });
 
