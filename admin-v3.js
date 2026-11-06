@@ -425,7 +425,7 @@ function renderUserActivityMarkup(item) {
 function userDetailMarkup(user, preview) {
   const number = (value) => new Intl.NumberFormat('ko-KR').format(Number(value) || 0);
   const providers = (user.providers ?? [user.provider]).map((provider) => ({ google: 'Google', kakao: '카카오', email: '이메일' }[provider] || provider)).join(' · ');
-  const kitchens = (user.kitchens ?? []).map((kitchen) => `<article class="user-profile-kitchen"><div><strong>${escapeHtml(kitchen.name)}</strong><span>${escapeHtml(kitchen.role)}${kitchen.archived_at ? ' · 보관됨' : ' · 사용 중'}</span></div><p>멤버 ${number(kitchen.member_count)}명 · 재료 ${number(kitchen.inventory_count)}개 · 장보기 미완료 ${number(kitchen.shopping_open)}개</p></article>`).join('') || '<p class="empty-admin">연결된 키친이 없습니다.</p>';
+  const kitchens = (user.kitchens ?? []).map((kitchen) => `<article class="user-profile-kitchen"><div><strong>${escapeHtml(kitchen.name)}</strong><span>${escapeHtml(kitchen.role)}${kitchen.archived_at ? ' · 보관됨' : ' · 사용 중'}</span></div><p>멤버 ${number(kitchen.member_count)}명 · 재료 ${number(kitchen.inventory_count)}개 · 장보기 미완료 ${number(kitchen.shopping_open)}개</p><button class="secondary-button" data-user-inventory="${escapeHtml(kitchen.id)}" type="button">보관 재료 보기</button><div data-inventory-content hidden></div></article>`).join('') || '<p class="empty-admin">연결된 키친이 없습니다.</p>';
   const community = user.community ?? {};
   const communityItems = [
     ['유저 레시피', community.recipes], ['공개 레시피', community.published_recipes], ['작성 후기', community.reviews],
@@ -477,6 +477,7 @@ async function openUserDetail(id) {
     panel.innerHTML = `<p class="empty-admin">계정 상세를 불러오지 못했어요: ${escapeHtml((error || previewError).message)}</p><button class="secondary-button" data-user-close type="button">닫기</button>`;
   } else panel.innerHTML = userDetailMarkup(user, preview);
   panel.querySelector('[data-user-close]')?.addEventListener('click', () => { panel.hidden = true; panel.removeAttribute('aria-modal'); });
+  bindInventoryButtons(panel);
   panel.querySelector('h2')?.focus();
   panel.onkeydown = (event) => {
     if (event.key === 'Escape') { panel.hidden = true; panel.removeAttribute('aria-modal'); }
@@ -516,11 +517,45 @@ async function loadKitchens() {
   status('키친 목록을 업데이트했습니다.');
 }
 
+function bindInventoryButtons(panel) {
+  panel.querySelectorAll('[data-user-inventory]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const content = button.nextElementSibling;
+      content.hidden = !content.hidden;
+      button.setAttribute('aria-expanded', String(!content.hidden));
+      if (!content.hidden) loadKitchenInventory(content, button.dataset.userInventory);
+    });
+  });
+}
+
+/* KITCHEN_INVENTORY_RENDERER_START */
+function kitchenInventoryMarkup(data) {
+  const quantity = (item) => item.quantity_state === 'present' ? '있어요' : item.quantity_state === 'low' ? '조금 남음' : `${item.quantity} ${item.unit}`;
+  const kinds = { consume_by: '소비기한', sell_by: '유통기한', best_before: '품질유지기한', manufactured: '제조일', unknown: '날짜 미확인' };
+  const items = (data.items ?? []).map((item) => `<tr><th scope="row">${escapeHtml(item.name)}</th><td>${escapeHtml(item.location)}</td><td>${escapeHtml(quantity(item))}</td><td>${escapeHtml(kinds[item.date_kind] || item.date_kind)}${item.label_date ? ` ${escapeHtml(item.label_date)}` : ''}${item.label_date && !item.date_verified ? ' · 확인 필요' : ''}</td><td>${escapeHtml(dateText(item.updated_at))}</td></tr>`).join('');
+  return `<p>현재 보관 재료 ${escapeHtml(data.total ?? 0)}개 · 읽기 전용 · 조회 기록이 남습니다.</p>${items ? `<div class="inventory-readonly-table"><table><thead><tr><th>재료</th><th>보관</th><th>수량·상태</th><th>표시 날짜</th><th>최근 수정</th></tr></thead><tbody>${items}</tbody></table></div>` : '<p class="empty-admin">현재 보관 중인 재료가 없습니다.</p>'}`;
+}
+/* KITCHEN_INVENTORY_RENDERER_END */
+
+async function loadKitchenInventory(content, id, page = 1) {
+  content.innerHTML = '<p role="status">보관 재료를 불러오는 중이에요…</p>';
+  const { data, error } = await db.rpc('operator_list_kitchen_inventory', { p_kitchen_id: id, p_page: page, p_page_size: 50 });
+  if (!content.isConnected) return;
+  if (error) { content.innerHTML = '<p role="alert">보관 재료를 불러오지 못했어요. 다시 열어주세요.</p>'; return; }
+  content.innerHTML = kitchenInventoryMarkup(data);
+  const pages = Math.max(1, Math.ceil(data.total / data.page_size));
+  if (pages > 1) {
+    content.insertAdjacentHTML('beforeend', `<div class="admin-pagination"><button class="secondary-button" data-inventory-prev ${page <= 1 ? 'disabled' : ''}>이전</button><span>${page} / ${pages}</span><button class="secondary-button" data-inventory-next ${page >= pages ? 'disabled' : ''}>다음</button></div>`);
+    content.querySelector('[data-inventory-prev]').onclick = () => loadKitchenInventory(content, id, page - 1);
+    content.querySelector('[data-inventory-next]').onclick = () => loadKitchenInventory(content, id, page + 1);
+  }
+}
+
 function kitchenDetailMarkup(kitchen) {
   const members = (kitchen.members ?? []).map((member) => `<li><strong>${escapeHtml(member.display_name || '닉네임 없음')}</strong> · ${escapeHtml(member.role)} · 가입 ${escapeHtml(dateText(member.joined_at))}${member.role !== 'owner' ? `<label class="inline-control">권한 <select data-member-role="${escapeHtml(member.user_id)}"><option value="editor" ${member.role === 'editor' ? 'selected' : ''}>편집자</option><option value="viewer" ${member.role === 'viewer' ? 'selected' : ''}>조회자</option></select></label><button class="secondary-button" data-role-save="${escapeHtml(member.user_id)}" type="button">권한 저장</button>` : ' · 소유자 보호'}</li>`).join('');
   const invites = (kitchen.invites ?? []).map((invite) => `<li>${escapeHtml(invite.role)} · ${invite.accepted_at ? '수락됨' : invite.revoked_at ? '취소됨' : new Date(invite.expires_at) < new Date() ? '만료됨' : '대기 중'} · 만료 ${escapeHtml(dateText(invite.expires_at))}${!invite.accepted_at && !invite.revoked_at && new Date(invite.expires_at) > new Date() ? `<button class="secondary-button" data-invite-revoke="${escapeHtml(invite.id)}" type="button">초대 취소</button>` : ''}</li>`).join('') || '<li>초대 기록이 없습니다.</li>';
   const archive = kitchen.archived_at ? `<button class="button" data-kitchen-restore="${escapeHtml(kitchen.id)}" type="button">키친 복구</button>` : `<button class="danger-button" data-kitchen-archive="${escapeHtml(kitchen.id)}" data-kitchen-name="${escapeHtml(kitchen.name)}" type="button">키친 보관</button>`;
-  return `<button class="detail-close secondary-button" data-kitchen-close type="button">닫기</button><p class="eyebrow">${kitchen.archived_at ? '보관된 키친' : '키친 상세'}</p><h2>${escapeHtml(kitchen.name)}</h2><p>생성 ${escapeHtml(dateText(kitchen.created_at))} · 재고 ${escapeHtml(kitchen.inventory_count)}건 · 미완료 장보기 ${escapeHtml(kitchen.shopping_open)}건</p>${kitchen.archive_reason ? `<p>보관 사유: ${escapeHtml(kitchen.archive_reason)}</p>` : ''}<h3>멤버</h3><ul class="ops-member-list">${members || '<li>멤버가 없습니다.</li>'}</ul><h3>초대 기록</h3><ul>${invites}</ul>${archive}`;
+  return `<button class="detail-close secondary-button" data-kitchen-close type="button">닫기</button><p class="eyebrow">${kitchen.archived_at ? '보관된 키친' : '키친 상세'}</p><h2>${escapeHtml(kitchen.name)}</h2><p>생성 ${escapeHtml(dateText(kitchen.created_at))} · 재고 ${escapeHtml(kitchen.inventory_count)}건 · 미완료 장보기 ${escapeHtml(kitchen.shopping_open)}건</p>${kitchen.archive_reason ? `<p>보관 사유: ${escapeHtml(kitchen.archive_reason)}</p>` : ''}<button class="secondary-button" data-user-inventory="${escapeHtml(kitchen.id)}" type="button">보관 재료 보기</button><div data-inventory-content hidden></div><h3>멤버</h3><ul class="ops-member-list">${members || '<li>멤버가 없습니다.</li>'}</ul><h3>초대 기록</h3><ul>${invites}</ul>${archive}`;
 }
 
 async function openKitchenDetail(id) {
@@ -530,6 +565,7 @@ async function openKitchenDetail(id) {
   const { data, error } = await db.rpc('operator_get_kitchen_detail', { p_kitchen_id: id });
   if (error) panel.innerHTML = `<p class="empty-admin">키친 상세를 불러오지 못했어요: ${escapeHtml(error.message)}</p><button class="secondary-button" data-kitchen-close type="button">닫기</button>`;
   else panel.innerHTML = kitchenDetailMarkup(data);
+  bindInventoryButtons(panel);
   panel.querySelector('[data-kitchen-close]').addEventListener('click', () => { panel.hidden = true; });
   panel.querySelectorAll('[data-invite-revoke]').forEach((button) => button.addEventListener('click', async () => {
     const request = await requestReason('초대 취소', '아직 수락되지 않은 키친 초대 링크를 취소합니다.');

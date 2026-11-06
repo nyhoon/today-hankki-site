@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>운영 대시보드 · 오늘한끼</title>
-  <link rel="stylesheet" href="styles.css?v=20261005-affiliate-catalog-4">
+  <link rel="stylesheet" href="styles.css?v=20261106-inventory">
 </head>
 <body class="admin-body">
   <header class="admin-header">
@@ -227,7 +227,7 @@
           <section class="admin-page" id="page-operators" data-page-panel="operators" hidden>
             <div class="admin-title"><div><p class="eyebrow">ACCESS & AUDIT</p><h1>운영자·감사 기록</h1></div><button class="secondary-button" id="audit-refresh" type="button">새로고침</button></div>
             <div class="admin-panel"><div class="panel-title"><h2>운영자</h2><span>Google 로그인 계정만 권한을 받을 수 있어요</span></div><div class="module-toolbar"><label class="search-field">Google 계정 검색 <input id="operator-search" type="search" placeholder="이메일 또는 프로필 이름"></label><button class="secondary-button" id="operator-search-button" type="button">계정 찾기</button><label>검색 결과 <select id="operator-candidate"><option value="">먼저 Google 계정을 찾으세요</option></select></label><button class="button" id="operator-add" type="button" disabled>운영자 추가</button></div><div id="moderator-list" class="admin-record-list"></div></div>
-            <div class="admin-panel"><div class="panel-title"><h2>감사 로그</h2><span>수정·삭제할 수 없습니다</span></div><div class="module-toolbar"><label class="search-field">행위·대상·사유 <input id="audit-search" type="search"></label><label>행위 <select id="audit-action"><option value="">전체</option><option value="community_recipe_published">레시피 승인</option><option value="community_recipe_rejected">레시피 반려</option><option value="community_recipe_hidden">레시피 숨김</option><option value="community_review_hide">후기 숨김</option><option value="community_review_restore">후기 복구</option><option value="community_report_content_hidden">신고 콘텐츠 숨김</option><option value="community_report_dismissed">신고 기각</option><option value="auth_user_banned">사용자 제한</option><option value="auth_user_unbanned">제한 해제</option><option value="kitchen_archived">키친 보관</option><option value="push_campaign_scheduled">푸시 예약</option><option value="moderator_added">운영자 추가</option><option value="moderator_removed">운영자 해제</option><option value="moderator_bootstrapped">운영자 초기 등록</option><option value="policy_published">정책 게시</option></select></label><button class="secondary-button" id="audit-search-button" type="button">검색</button></div><div id="moderation-log" class="admin-record-list"></div><div class="admin-pagination" id="audit-pagination"></div></div>
+            <div class="admin-panel"><div class="panel-title"><h2>감사 로그</h2><span>수정·삭제할 수 없습니다</span></div><div class="module-toolbar"><label class="search-field">행위·대상·사유 <input id="audit-search" type="search"></label><label>행위 <select id="audit-action"><option value="">전체</option><option value="community_recipe_published">레시피 승인</option><option value="community_recipe_rejected">레시피 반려</option><option value="community_recipe_hidden">레시피 숨김</option><option value="community_review_hide">후기 숨김</option><option value="community_review_restore">후기 복구</option><option value="community_report_content_hidden">신고 콘텐츠 숨김</option><option value="community_report_dismissed">신고 기각</option><option value="auth_user_banned">사용자 제한</option><option value="auth_user_unbanned">제한 해제</option><option value="kitchen_archived">키친 보관</option><option value="kitchen_inventory_viewed">보관 재료 조회</option><option value="push_campaign_scheduled">푸시 예약</option><option value="moderator_added">운영자 추가</option><option value="moderator_removed">운영자 해제</option><option value="moderator_bootstrapped">운영자 초기 등록</option><option value="policy_published">정책 게시</option></select></label><button class="secondary-button" id="audit-search-button" type="button">검색</button></div><div id="moderation-log" class="admin-record-list"></div><div class="admin-pagination" id="audit-pagination"></div></div>
             <div class="admin-panel"><div class="panel-title"><h2>서비스 상태</h2></div><div id="health-status" class="metric-list"><p class="empty-admin">상태를 확인하려면 새로고침하세요.</p></div></div>
           </section>
         </div>
@@ -240,6 +240,6 @@
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin-v3.js?v=20261007-quantity-state"></script>
+  <script defer src="admin-v3.js?v=20261106-inventory"></script>
 </body>
 </html>
