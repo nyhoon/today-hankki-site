@@ -168,6 +168,7 @@
           <section class="admin-page" id="page-kitchens" data-page-panel="kitchens" hidden>
             <div class="admin-title"><div><p class="eyebrow">HOUSEHOLDS</p><h1>키친·초대</h1></div></div>
             <div class="module-toolbar"><label class="search-field">키친 이름·멤버 <input id="kitchens-search" type="search"></label><button class="secondary-button" id="kitchens-search-button" type="button">검색</button></div>
+            <div class="admin-panel"><div class="panel-title"><h2>전체 절약 기록</h2></div><p id="kitchens-savings" aria-live="polite">불러오는 중이에요…</p></div>
             <div class="admin-panel"><div class="panel-title"><h2>키친 목록</h2><span id="kitchens-total">-</span></div><div id="kitchens-list" class="admin-record-list"></div><div class="admin-pagination" id="kitchens-pagination"></div></div>
             <aside class="admin-detail" id="kitchens-detail" aria-label="선택한 키친 상세" hidden></aside>
           </section>
@@ -213,7 +214,7 @@
               <summary>자동 알림 문구 관리</summary>
               <p>매일 자동으로 보내는 ‘오늘의 키친 소식’과 키친 알림 문구를 바꿉니다.</p>
               <div class="admin-grid"><div class="admin-panel"><div class="panel-title"><h2>저장된 알림 문구</h2></div><div id="push-templates" class="admin-record-list"></div></div>
-                <div class="admin-panel"><div class="panel-title"><h2>문구 편집</h2><span>변수는 내용에 넣을 수 있어요</span></div><form id="push-template-form" class="catalog-edit-form"><label>종류 <select id="push-template-category"><option value="digest">오늘의 키친 소식</option><option value="kitchen">키친 소식</option></select></label><label>제목 <input id="push-template-title" maxlength="80" required><small>변수는 제목에서 치환되지 않습니다.</small></label><label>내용 <textarea id="push-template-body" rows="4" maxlength="180" required></textarea></label><div id="push-variable-buttons" class="push-variable-buttons" aria-label="알림 변수 삽입"></div><p id="push-template-guide" class="push-template-guide"></p><p class="push-template-count" id="push-template-count" aria-live="polite"></p><div class="push-template-preview"><strong>치환 예시</strong><p id="push-template-preview" aria-live="polite"></p></div><label class="catalog-check"><input id="push-template-enabled" type="checkbox">발송 사용</label><button class="button" type="submit">문구 저장</button></form></div></div>
+                <div class="admin-panel"><div class="panel-title"><h2>문구 편집</h2><span>변수는 내용에 넣을 수 있어요</span></div><form id="push-template-form" class="catalog-edit-form"><label>종류 <select id="push-template-category"><option value="digest">오늘의 키친 소식</option><option value="kitchen">키친 소식</option><option value="savings">주간 알뜰 기록</option></select></label><label>제목 <input id="push-template-title" maxlength="80" required><small>변수는 제목에서 치환되지 않습니다.</small></label><label>내용 <textarea id="push-template-body" rows="4" maxlength="180" required></textarea></label><div id="push-variable-buttons" class="push-variable-buttons" aria-label="알림 변수 삽입"></div><p id="push-template-guide" class="push-template-guide"></p><p class="push-template-count" id="push-template-count" aria-live="polite"></p><div class="push-template-preview"><strong>치환 예시</strong><p id="push-template-preview" aria-live="polite"></p></div><label class="catalog-check"><input id="push-template-enabled" type="checkbox">발송 사용</label><button class="button" type="submit">문구 저장</button></form></div></div>
             </details>
             <section class="admin-panel"><div class="panel-title"><h2>예약·발송 이력</h2><span id="push-total">-</span></div><div class="module-toolbar"><label class="search-field">이력 검색 <input id="push-history-search" type="search"></label><button class="secondary-button" id="push-history-search-button" type="button">검색</button></div><div id="push-operations" class="admin-record-list"></div><div class="admin-pagination" id="push-pagination"></div></section>
           </section>
@@ -240,6 +241,6 @@
     <p class="admin-status" id="status" role="status" aria-live="polite"></p>
   </main>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.min.js"></script>
-  <script defer src="admin-v3.js?v=20261106-inventory"></script>
+  <script defer src="admin-v3.js?v=20261113-weekly-savings"></script>
 </body>
 </html>
