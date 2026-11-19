@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nyhoon.github.io/today-hankki-site/sitemap.xml
