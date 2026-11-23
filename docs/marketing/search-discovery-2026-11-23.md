@@ -42,3 +42,12 @@
 - Google 사이트맵: https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap
 - 네이버 RSS/사이트맵: https://searchadvisor.naver.com/guide/request-feed — 본문 전체 RSS 및 소유 확인 도메인.
 - FAQ 마크업은 실제 보이는 Q&A와 일치하도록 사용. Google/네이버 FAQ 검색 확장 표시를 보장하지 않는다.
+
+## 배포·제출 후속 결과
+
+- 사이트 커밋 `c01c021`, GitHub Pages 배포 실행 `45089267008` 성공. FAQ/공식 정보/RSS/사이트맵 공개 HTTP 200 확인, XML 파싱 통과.
+- 공개 FAQ에서 실제 렌더링된 질문/답변과 FAQPage JSON-LD를 확인. 홈페이지 Organization/WebSite/SoftwareApplication 렌더링 확인. 390px 모바일 가로 넘침 없음, 스크린샷 원본 비율 유지.
+- Google 사이트맵 재제출: '사이트맵이 제출됨' 접수 확인. 직후 보고서에는 여전히 '가져올 수 없음', 발견 0. 수집 성공으로 기록하지 않음.
+- Google FAQ: '색인 생성 요청됨', 우선순위 크롤링 대기열 추가 확인. 실제 색인 완료와 별개.
+- 네이버 RSS 제출은 사람 확인 보안문자 단계에서 사용자 입력 대기. CAPTCHA를 자동 해결하지 않음.
+- 공식 정보 URL의 Google 색인 요청은 진행 중이며 최종 결과를 아래에 추가한다.
