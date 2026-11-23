@@ -46,6 +46,7 @@ function renderCurrentMonth() {
   document.getElementById('seasonal-heading').textContent = `${selectedMonth}월 제철 재료`;
   renderMonthNavigation();
   renderCards();
+  renderSources();
   history.replaceState(null, '', `${location.pathname}?month=${selectedMonth}`);
 }
 
@@ -67,9 +68,21 @@ function renderCards() {
         <h3>${escapeHtml(item.name)}</h3>
         <p>${escapeHtml(item.note)}</p>
         <div class="seasonal-use"><span>이렇게 활용해요</span><strong>${escapeHtml(item.use)}</strong></div>
+        ${current.sources?.[item.sourceIndex] ? `<a class="seasonal-card-source" href="${escapeHtml(current.sources[item.sourceIndex].url)}" target="_blank" rel="noopener noreferrer">출처: ${escapeHtml(current.sources[item.sourceIndex].label.split(' · ')[0])} ↗</a>` : ''}
       </article>`;
     }).join('')
     : '<p class="seasonal-status seasonal-empty">검색한 재료가 없어요. 다른 이름으로 찾아보세요.</p>';
+}
+
+function renderSources() {
+  const list = document.getElementById('seasonal-source-list');
+  const current = seasonalData[selectedMonth - 1];
+  const section = document.querySelector('.seasonal-sources');
+  if (!list || !section) return;
+  const sources = current.sources || [];
+  section.querySelector('h2').textContent = `${selectedMonth}월 자료 출처`;
+  section.querySelector('div > p:last-child').textContent = `${selectedMonth}월 품목은 아래 기관의 자료를 바탕으로 정리했습니다. 제철 시기는 산지와 품종에 따라 달라질 수 있습니다.`;
+  list.innerHTML = sources.map((source) => `<li><span>${escapeHtml(source.label)}</span><a href="${escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title)} ↗</a></li>`).join('');
 }
 
 function selectMonth(month) {

@@ -1123,38 +1123,29 @@
   },
   {
     "month": 11,
-    "title": "겨울을 준비하는 포근한 식탁",
-    "lead": "농식품정보누리·KAMIS와 해양수산부 자료를 바탕으로 고른 제철 농산물·수산물 각 5가지예요. 산지와 재배·어획 방식에 따라 제철은 여러 달 이어질 수 있어요.",
+    "title": "11월 제철 재료: 배추·무·포도와 삼치·가리비",
+    "lead": "2026년 11월 농식품정보누리의 제철 농산물 안내와 해양수산부의 이달의 수산물 안내에서 확인한 5가지예요. 기관이 선정한 월별 품목이며, 산지·품종·출하 시기에 따라 실제 제철은 달라질 수 있습니다.",
     "sources": [
       {
-        "label": "농식품정보누리",
-        "date": "2025.10.28",
-        "title": "11월 제철 농산물",
-        "url": "https://www.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=234778"
+        "label": "농식품정보누리 · 2026.11.04",
+        "date": "2026-11-04",
+        "title": "11월 제철 농산물: 배추·무·포도",
+        "url": "https://m.foodnuri.go.kr/portal/bbs/B0000299/view.do?menuNo=300106&nttId=235074"
       },
       {
-        "label": "해양수산부",
-        "date": "2025.10.31",
-        "title": "11월 이달의 수산물",
-        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=63636&menuSeq=971"
+        "label": "해양수산부 · 2026.10.30",
+        "date": "2026-10-30",
+        "title": "11월 이달의 수산물: 삼치·가리비류",
+        "url": "https://www.mof.go.kr/doc/ko/selectDoc.do?bbsSeq=10&docSeq=69193&menuSeq=971"
       }
     ],
     "items": [
       {
-        "id": "sweet_persimmon",
-        "name": "단감",
-        "category": "produce",
-        "note": "아삭하고 은은하게 단 가을·겨울 과일",
-        "use": "생과일 · 샐러드 · 말랭이",
-        "sourceIndex": 0,
-        "ingredientId": "sweet_persimmon"
-      },
-      {
         "id": "green_cabbage",
         "name": "배추",
         "category": "produce",
-        "note": "겉절이부터 국물 요리까지 두루 쓰는 잎채소",
-        "use": "김치 · 겉절이 · 국",
+        "note": "아삭하고 시원한 맛이 살아나는 11월 농산물",
+        "use": "겉절이 · 된장국 · 김장김치",
         "sourceIndex": 0,
         "ingredientId": "green_cabbage"
       },
@@ -1162,73 +1153,37 @@
         "id": "radish",
         "name": "무",
         "category": "produce",
-        "note": "시원한 단맛이 나는 가을·겨울 뿌리채소",
-        "use": "국 · 조림 · 김치",
+        "note": "씹을수록 시원하고 달큰한 뿌리채소",
+        "use": "무국 · 조림 · 나박김치",
         "sourceIndex": 0,
         "ingredientId": "radish"
       },
       {
-        "id": "mandarin",
-        "name": "감귤",
+        "id": "grape",
+        "name": "포도",
         "category": "produce",
-        "note": "겨울에 즐기는 상큼한 과일",
-        "use": "생과일 · 주스 · 샐러드",
+        "note": "알이 탱글하고 달콤새콤한 과일",
+        "use": "생과일 · 요거트볼 · 과일샐러드",
         "sourceIndex": 0,
-        "ingredientId": "mandarin"
-      },
-      {
-        "id": "spinach",
-        "name": "시금치",
-        "category": "produce",
-        "note": "찬 계절에 단맛이 드는 잎채소",
-        "use": "나물 · 국 · 솥밥",
-        "sourceIndex": 0,
-        "ingredientId": "spinach"
+        "ingredientId": "grape"
       },
       {
         "id": "spanish_mackerel",
         "name": "삼치",
         "category": "seafood",
-        "note": "담백하고 비린 맛이 적은 생선",
-        "use": "구이 · 조림 · 찜",
+        "note": "가을부터 살에 지방이 차오르는 담백한 생선",
+        "use": "소금구이 · 조림 · 찜",
         "sourceIndex": 1,
         "ingredientId": "spanish_mackerel"
       },
       {
-        "id": "red_scallop",
-        "name": "홍가리비",
+        "id": "scallop",
+        "name": "가리비",
         "category": "seafood",
-        "note": "작고 부드러운 단맛이 특징",
+        "note": "해양수산부가 11월 품목으로 선정한 패류",
         "use": "찜 · 탕 · 치즈구이",
         "sourceIndex": 1,
-        "ingredientId": "red_scallop"
-      },
-      {
-        "id": "oyster",
-        "name": "굴",
-        "category": "seafood",
-        "note": "바다의 감칠맛이 진한 패류",
-        "use": "국 · 전 · 무침",
-        "sourceIndex": 1,
-        "ingredientId": "oyster"
-      },
-      {
-        "id": "cockle",
-        "name": "꼬막",
-        "category": "seafood",
-        "note": "쫄깃하고 짭조름한 겨울 패류",
-        "use": "무침 · 비빔밥 · 찜",
-        "sourceIndex": 1,
-        "ingredientId": "cockle"
-      },
-      {
-        "id": "cod",
-        "name": "대구",
-        "category": "seafood",
-        "note": "살이 희고 담백한 겨울 생선",
-        "use": "탕 · 찜 · 전",
-        "sourceIndex": 1,
-        "ingredientId": "cod"
+        "ingredientId": "scallop"
       }
     ]
   },

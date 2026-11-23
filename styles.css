@@ -344,3 +344,5 @@
 
 /* Official product answers: preserve screenshot aspect ratio. */
 .search-answers{max-width:1100px;margin:48px auto;padding:32px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,240px);gap:40px;align-items:center;background:#e8efe4;border-radius:28px}.search-answers img{display:block;width:100%;height:auto;border-radius:20px;box-shadow:0 12px 30px #163b2920}.search-answers h2{font-size:clamp(26px,4vw,38px);line-height:1.3}.search-answers p{line-height:1.8}.store-links{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0}.guide-page dt{font-weight:700;margin-top:18px}.guide-page dd{margin:6px 0;overflow-wrap:anywhere}.guide-page section p{line-height:1.85}@media(max-width:640px){.search-answers{margin:24px 16px;padding:24px;grid-template-columns:1fr;gap:24px}.search-answers img{max-width:220px;margin:auto}.store-links .pill{width:100%;text-align:center}}
+
+.article-meta{margin:10px 0 26px;color:#68766d;font-size:13px;line-height:1.6}.article-meta time{font-weight:700}
