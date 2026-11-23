@@ -1,15 +1,49 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://nyhoon.github.io/today-hankki-site/</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/guides/</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/guides/fridge-inventory.html</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/guides/fridge-leftovers-recipes.html</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/guides/shopping-before-buying.html</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/guides/home-screen-widgets.html</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/seasonal.html</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/privacy.html</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/terms.html</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/guides/receipt-ingredients.html</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/guides/estimated-savings.html</loc></url>
-<url><loc>https://nyhoon.github.io/today-hankki-site/guides/easy-ingredient-registration.html</loc></url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/</loc>
+    <lastmod>2026-11-23</lastmod>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/guides/</loc>
+    <lastmod>2026-11-23</lastmod>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/guides/fridge-inventory.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/guides/fridge-leftovers-recipes.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/guides/shopping-before-buying.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/guides/home-screen-widgets.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/seasonal.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/privacy.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/terms.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/guides/receipt-ingredients.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/guides/estimated-savings.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/guides/easy-ingredient-registration.html</loc>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/faq.html</loc>
+    <lastmod>2026-11-23</lastmod>
+  </url>
+  <url>
+    <loc>https://nyhoon.github.io/today-hankki-site/about.html</loc>
+    <lastmod>2026-11-23</lastmod>
+  </url>
 </urlset>

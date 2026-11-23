@@ -10,3 +10,5 @@ https://nyhoon.github.io/today-hankki-site/terms.html
 https://nyhoon.github.io/today-hankki-site/guides/receipt-ingredients.html
 https://nyhoon.github.io/today-hankki-site/guides/estimated-savings.html
 https://nyhoon.github.io/today-hankki-site/guides/easy-ingredient-registration.html
+https://nyhoon.github.io/today-hankki-site/faq.html
+https://nyhoon.github.io/today-hankki-site/about.html
