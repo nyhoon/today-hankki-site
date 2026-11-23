@@ -71,3 +71,14 @@
 Google 공식 디버깅 안내에 따라 상세 상태, 실제 URL 검사, robots, 직접 조치, 호스트 크롤링을 확인했다: https://support.google.com/webmasters/answer/7451001?hl=ko
 
 증빙: `/tmp/hankki-seo-2026-11-23/naver-rss-registered.jpg` 및 `google-home-indexed.jpg`.
+
+## 2026-11-23 post-deploy GEO check
+
+- Website changes published in commit `2fdcbc1` (`Improve search content and seasonal discoverability`). GitHub Pages workflow `45139522485` completed successfully.
+- Post-deploy GEO run `01M83RMTMWPQQP86VA4F26F5Z2`: `65/100 Fair`, evidence `CURRENT`, 11 pages scored, 0 failed. Prior recorded score was `58/100 Fair` over 14 pages, so the raw score rose by 7 points but the crawl sample differs; treat this as a positive diagnostic signal, not a strict apples-to-apples comparison or search-ranking evidence.
+- Post-deploy categories: citability 86, technical 99, schema 75, content 62, platform 52, brand 18. Key updated signals: attribution 6.71, schema Article 11.43, organization 8.27. The tool still flags author expertise descriptions; do not invent credentials. Build expertise with verifiable authorship and cited sources.
+- The crawler fetched 11 pages with 0 failures; seasonal.html was not in this sampled crawl. A score change for the new server-rendered seasonal content is therefore not yet demonstrated by this run.
+- Tool-identified next evidence gaps: independent brand/entity references and stronger cited facts. Do not create Wikipedia/Wikidata records for self-promotion, fabricate expert credentials, or add llms.txt just to chase a score; Google's published guidance says it does not affect ranking.
+- Full machine-readable audit JSON: `/Users/nam-younghoon/StudioProjects/today-hankki/output/seo-2026-11-23/geo-site-audit-post.json`.
+
+The Google Search Console sitemap report remains separately unresolved; a successful website deployment does not imply Google has accepted or processed the sitemap.
