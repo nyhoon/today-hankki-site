@@ -55,3 +55,12 @@ Slotbound은 “마케팅을 전혀 안 했는데 운 좋게 떴다”로만 설
 - 2012년 음식물쓰레기 감량 목표 원문: https://www.korea.kr/briefing/policyBriefingView.do?newsId=148753376
 - Slotbound 개발자 Reddit 게시물/답글: https://www.reddit.com/r/IndieDev/comments/1utoziq/i_expected_maybe_10_concurrent_players_my_first/
 - Slotbound 판매·데모 관련 보도: https://labs.invenglobal.com/articles/29038/slotbound-sells-200000-copies-created-solo-by-first-time-developer
+
+## 2026-11-29 실제 배포 기록
+
+- 네이버 블로그에 갤럭시 위젯 사용 가이드를 전체 공개·검색 허용으로 발행: [갤럭시 냉장고 위젯 설정｜홈 화면에서 식재료·장보기 확인하기](https://blog.naver.com/feelsogxxd/224496411190). Android 실제 위젯 화면과 단계별 설정, 비어 있을 때 점검법을 포함하고 공식 삼성전자서비스 안내와 자사 위젯 가이드로 연결함. 태그: 알뜰한끼, 갤럭시위젯, 냉장고위젯, 식재료관리, 장보기.
+- Threads 표시 이름을 `알뜰한끼 | 식재료·레시피`, 소개를 냉장고 재료·레시피·장보기 중심으로 변경. 프로필 링크는 Google Play 단독 링크에서 Android·iPhone 스토어 버튼이 있는 자사 사이트로 교체하고 UTM을 적용함. 게임 개발 관련 커뮤니티/관심사는 정리하고 Food 주제만 남김.
+- 계산기 링크를 포함한 Threads 게시물을 공개 발행: https://www.threads.com/@today_hankki_official/post/DgSlOIYgbFs. 20%가 가정별 폐기율 통계가 아닌 앱 계산 가정이라는 점과 입력값 미저장 사실을 명시.
+- 게시 직전 Threads 인사이트 30일 값은 조회수 115, 도달 76명, 반응 0, 순 팔로워 -2로 표시됨. 초기 기준점일 뿐이며 게시물 효과를 뜻하지 않음.
+- 관련 저녁 메뉴 고민 게시물에는 이미 공식 계정의 답글과 좋아요가 있어 중복 반응을 추가하지 않음.
+- 아직 하지 않은 일: 크리에이터/커뮤니티 운영자에게 직접 협업 연락, YouTube Shorts 재편집·배포, 새 GSC 상세 오류 확인. 공개 Search Console 화면을 읽지 못해 sitemap 원인은 여전히 미확정.
