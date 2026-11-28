@@ -64,3 +64,6 @@ Slotbound은 “마케팅을 전혀 안 했는데 운 좋게 떴다”로만 설
 - 게시 직전 Threads 인사이트 30일 값은 조회수 115, 도달 76명, 반응 0, 순 팔로워 -2로 표시됨. 초기 기준점일 뿐이며 게시물 효과를 뜻하지 않음.
 - 관련 저녁 메뉴 고민 게시물에는 이미 공식 계정의 답글과 좋아요가 있어 중복 반응을 추가하지 않음.
 - 아직 하지 않은 일: 크리에이터/커뮤니티 운영자에게 직접 협업 연락, YouTube Shorts 재편집·배포, 새 GSC 상세 오류 확인. 공개 Search Console 화면을 읽지 못해 sitemap 원인은 여전히 미확정.
+- 11/29 Search Console 재확인: Sitemaps 상세는 여전히 `사이트맵을 읽을 수 없음`, 발견 페이지 0으로 표시됨. sitemap XML URL 검사에서는 과거 색인 기준 `Google에는 아직 알려지지 않은 URL`이었으나, `실제 URL 테스트` 결과 `URL을 Google에 등록할 수 있음`으로 통과함. 따라서 현재 공개 endpoint의 실시간 접근은 가능하다는 증거가 추가됐지만, Sitemaps 보고서의 과거 읽기 실패 원인은 여전히 확정되지 않음. sitemap 파일의 인덱싱은 목적이 아니므로 sitemap 자체의 색인 요청은 하지 않음.
+- 홈페이지 `https://nyhoon.github.io/today-hankki-site/`는 Search Console에서 `URL이 Google에 등록되어 있음`, `페이지 색인이 생성됨`으로 확인됨. 최소한 홈페이지는 검색 색인에 들어가 있으며, 브랜드 검색 결과가 약한 문제를 사이트맵 수집 실패와 동일시하지 않음.
+- Instagram 프로필 편집 화면 확인: 표시 이름/소개는 이미 알뜰한끼 중심으로 정리되어 있으나, 웹사이트 필드가 구 Google Play URL `play.google.com/store/apps/details?id=com.neuralagent.neofall`로 남아 있음. Instagram 웹 편집기는 해당 필드가 비활성이고 “링크 수정은 모바일에서만 가능”이라고 표시함. 모바일 앱에서 공식 사이트(두 스토어 버튼 포함) 링크로 교체할 필요가 있음. 프로필 사진은 브랜드 아이콘으로 표시됨.
