@@ -1,4 +1,10 @@
-# 알뜰한끼 웹사이트
+# 알뜰한끼
+
+냉장고에 뭐가 남았더라? 장 본 영수증으로 재료를 등록하고, 먼저 쓸 재료와 오늘 만들 메뉴를 확인해 보세요.
+
+[Android에서 받기](https://play.google.com/store/apps/details?id=dev.neuralagent.todayhankki&referrer=utm_source%3Dgithub%26utm_medium%3Dreferral) · [iPhone에서 받기](https://apps.apple.com/kr/app/id6828321515) · [보관 재료로 메뉴 찾는 법](https://nyhoon.github.io/today-hankki-site/guides/fridge-leftovers-recipes.html?utm_source=github&utm_medium=referral)
+
+## 사이트 운영 안내
 
 정적 서비스 소개 사이트입니다. Android와 iPhone 앱은 Google Play와 App Store에서 공개 중이며, 검색 메타데이터는 공개 앱 기능과 일치시킵니다. `privacy.html`과 `terms.html`은 **가입 동의용 최종 법률 문서가 아닙니다.**
 
