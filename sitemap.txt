@@ -12,3 +12,5 @@ https://nyhoon.github.io/today-hankki-site/guides/estimated-savings.html
 https://nyhoon.github.io/today-hankki-site/guides/easy-ingredient-registration.html
 https://nyhoon.github.io/today-hankki-site/faq.html
 https://nyhoon.github.io/today-hankki-site/about.html
+https://nyhoon.github.io/today-hankki-site/tools/savings-calculator.html
+https://nyhoon.github.io/today-hankki-site/tools/savings-calculator.html

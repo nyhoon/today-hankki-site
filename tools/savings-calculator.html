@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>식재료 절약 추정액 계산기 | 알뜰한끼</title>
+  <meta name="description" content="다 쓴 식재료의 구매가를 입력해 알뜰한끼의 20% 계산 가정으로 절약 추정액을 미리 계산해보세요. 입력값은 저장되지 않습니다.">
+  <link rel="canonical" href="https://nyhoon.github.io/today-hankki-site/tools/savings-calculator.html">
+  <meta property="og:type" content="website"><meta property="og:locale" content="ko_KR"><meta property="og:site_name" content="알뜰한끼"><meta property="og:title" content="식재료 절약 추정액 계산기 | 알뜰한끼"><meta property="og:description" content="다 쓴 재료의 구매가를 넣어 앱의 절약 추정액 계산을 미리 확인해보세요."><meta property="og:url" content="https://nyhoon.github.io/today-hankki-site/tools/savings-calculator.html"><meta property="og:image" content="https://nyhoon.github.io/today-hankki-site/assets/og-today-hankki.png">
+  <link rel="stylesheet" href="../styles.css"><link rel="icon" type="image/png" href="../assets/today-hankki-icon.png">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://nyhoon.github.io/today-hankki-site/#publisher","name":"뉴럴에이전트","alternateName":"NeuralAgent","url":"https://nyhoon.github.io/today-hankki-site/","description":"알뜰한끼 식재료 관리 앱의 개발·운영 주체입니다. 공식 앱과 사용 안내, 문의 정보를 제공합니다.","email":"neuralagent.dev@gmail.com","logo":"https://nyhoon.github.io/today-hankki-site/assets/today-hankki-icon.png","sameAs":["https://blog.naver.com/feelsogxxd","https://www.youtube.com/@TodayHankkiTube","https://www.instagram.com/today_hankki_official/","https://www.threads.com/@today_hankki_official"]},{"@type":"WebPage","@id":"https://nyhoon.github.io/today-hankki-site/tools/savings-calculator.html#page","url":"https://nyhoon.github.io/today-hankki-site/tools/savings-calculator.html","name":"식재료 절약 추정액 계산기","description":"다 쓴 재료의 구매가에 20% 계산 가정을 적용하는 브라우저 내 계산기입니다.","inLanguage":"ko-KR","dateModified":"2026-11-28","publisher":{"@id":"https://nyhoon.github.io/today-hankki-site/#publisher"}}]}</script>
+</head>
+<body>
+  <header><a class="brand" href="../">알뜰한끼<span>●</span></a><nav aria-label="주 메뉴"><a href="../#about">서비스</a><a href="../guides/">사용 가이드</a><a href="../faq.html">자주 묻는 질문</a></nav></header>
+  <main class="document guide-page savings-tool">
+    <nav class="breadcrumbs" aria-label="현재 위치"><a href="../">알뜰한끼</a> / <a href="../guides/">사용 가이드</a> / 절약 추정액 계산기</nav>
+    <p class="eyebrow">알뜰한끼 계산 미리보기</p>
+    <h1>다 쓴 재료, 추정액은 얼마일까요?</h1>
+    <p>재료를 다 쓴 것으로 기록했을 때의 계산을 미리 해보세요. 구매가를 입력하고, 다 쓴 재료에 체크하면 됩니다.</p>
+    <section class="savings-calculator" aria-labelledby="calc-title">
+      <h2 id="calc-title">다 쓴 재료의 구매가</h2>
+      <p class="calc-hint">아직 남아 있는 재료는 체크하지 마세요.</p>
+      <div id="ingredient-rows">
+        <div class="calc-row"><label>재료 이름 <input type="text" maxlength="30" autocomplete="off" aria-label="재료 이름 1"></label><label>구매가 <span class="calc-price"><input type="number" min="0" step="1" inputmode="numeric" aria-label="구매가 1원"> 원</span></label><label class="calc-used"><input type="checkbox" aria-label="재료 1 다 썼어요"> 다 썼어요</label><button type="button" class="calc-remove" aria-label="재료 1 삭제">삭제</button></div>
+      </div>
+      <div class="calc-actions"><button type="button" id="add-ingredient" class="secondary-button">+ 재료 추가</button><button type="button" id="clear-ingredients" class="text-button">초기화</button></div>
+      <div class="calc-result" aria-live="polite" aria-atomic="true"><span>현재 추정액</span><strong id="estimated-total">0원</strong><small id="calc-basis">다 쓴 재료의 구매가 합계 0원 × 20%</small></div>
+    </section>
+    <p class="notice">이 값은 실제로 아낀 돈을 측정한 결과가 아닙니다. 앱이 사용하는 20% 계산 가정으로 만든 참고용 추정액이며, 개인의 실제 식재료 폐기율을 의미하지 않습니다. 입력값은 이 브라우저에서만 계산하고 저장·전송하지 않습니다.</p>
+    <section><h2>알뜰한끼에서는 이렇게 계산해요</h2><p>구매가를 기록한 재료를 다 쓴 것으로 완료하면 구매가의 20%를 추정액으로 더합니다. 예를 들어 3,000원에 산 재료를 다 쓴 기록은 약 600원으로 표시됩니다. 이 기준의 자세한 설명과 한계는 <a href="../guides/estimated-savings.html">알뜰 기록 계산 안내</a>에서 확인할 수 있습니다.</p><p>앱에서는 냉장고 재료 등록, 먼저 쓸 재료 확인, 보유 재료 레시피와 장보기 목록을 이어서 관리합니다.</p><div class="store-links"><a class="pill" href="https://play.google.com/store/apps/details?id=dev.neuralagent.todayhankki" rel="noopener noreferrer">Google Play에서 알뜰한끼 보기</a><a class="pill" href="https://apps.apple.com/kr/app/id6828321515" rel="noopener noreferrer">App Store에서 알뜰한끼 보기</a></div></section>
+  </main>
+  <footer><p>운영: 뉴럴에이전트 · 문의: <a href="mailto:neuralagent.dev@gmail.com">neuralagent.dev@gmail.com</a></p><p><a href="../privacy.html">개인정보 안내</a> · <a href="../terms.html">이용 안내</a></p></footer>
+  <script>
+    (() => {
+      const rows = document.getElementById('ingredient-rows');
+      const total = document.getElementById('estimated-total');
+      const basis = document.getElementById('calc-basis');
+      const won = new Intl.NumberFormat('ko-KR');
+      let nextId = 2;
+      function update() {
+        const prices = [...rows.querySelectorAll('.calc-row')].filter(row => row.querySelector('input[type="checkbox"]').checked).map(row => Math.max(0, Math.floor(Number(row.querySelector('input[type="number"]').value) || 0)));
+        const spent = prices.reduce((sum, price) => sum + price, 0);
+        total.textContent = `${won.format(Math.floor(spent * 0.2))}원`;
+        basis.textContent = `다 쓴 재료의 구매가 합계 ${won.format(spent)}원 × 20%`;
+      }
+      function addRow() {
+        const id = nextId++;
+        const row = document.createElement('div'); row.className = 'calc-row';
+        row.innerHTML = `<label>재료 이름 <input type="text" maxlength="30" autocomplete="off" aria-label="재료 이름 ${id}"></label><label>구매가 <span class="calc-price"><input type="number" min="0" step="1" inputmode="numeric" aria-label="구매가 ${id}원"> 원</span></label><label class="calc-used"><input type="checkbox" aria-label="재료 ${id} 다 썼어요"> 다 썼어요</label><button type="button" class="calc-remove" aria-label="재료 ${id} 삭제">삭제</button>`;
+        rows.append(row); row.querySelector('input').focus();
+      }
+      rows.addEventListener('input', update);
+      rows.addEventListener('change', update);
+      rows.addEventListener('click', event => { if (event.target.closest('.calc-remove')) { const row = event.target.closest('.calc-row'); if (rows.querySelectorAll('.calc-row').length > 1) row.remove(); else row.querySelectorAll('input').forEach(input => input.type === 'checkbox' ? input.checked = false : input.value = ''); update(); } });
+      document.getElementById('add-ingredient').addEventListener('click', addRow);
+      document.getElementById('clear-ingredients').addEventListener('click', () => { rows.querySelectorAll('input').forEach(input => input.type === 'checkbox' ? input.checked = false : input.value = ''); update(); });
+      update();
+    })();
+  </script>
+</body>
+</html>

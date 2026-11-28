@@ -140,6 +140,20 @@
 @media(max-width:520px){.seasonal-page{padding-right:18px;padding-left:18px}.seasonal-back{min-height:44px}.seasonal-hero{grid-template-columns:minmax(0,1fr) 78px;gap:12px;min-height:265px;margin-top:4px;padding:25px 20px}.seasonal-hero-copy h1{margin:16px 0 12px;font-size:clamp(27px,8vw,36px)}.seasonal-intro{font-size:13px;line-height:1.65}.seasonal-hero-month{min-height:120px;padding-left:12px}.seasonal-hero-month strong{font-size:58px}.seasonal-hero-month span:first-child{font-size:12px}.seasonal-hero-month span:last-child{font-size:8px}.seasonal-section-heading{align-items:flex-start;flex-direction:column;gap:5px}.seasonal-month-control{gap:6px}.seasonal-arrow{flex-basis:38px;width:38px;height:44px}.seasonal-months button{flex-basis:46px}.seasonal-month-summary{padding:25px 0 18px}.seasonal-tools{align-items:stretch;flex-direction:column;gap:10px}.seasonal-filters{gap:22px}.seasonal-search{width:100%}.seasonal-card-grid{grid-template-columns:1fr;gap:10px}.seasonal-card{min-height:220px;padding:20px}.seasonal-card h3{margin-top:16px}.seasonal-use{margin-top:16px}.seasonal-sources ul{grid-template-columns:1fr}.seasonal-disclaimer{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.seasonal-body *{scroll-behavior:auto!important;transition:none!important}}
 
+/* Public, no-sign-in savings estimate preview */
+.savings-calculator{display:grid;gap:18px;margin:28px 0 14px!important;padding:clamp(20px,4vw,32px)!important;border:1px solid #d9dfd3!important;border-radius:20px!important;background:#fff!important;box-shadow:0 10px 30px #173d330c}
+.savings-calculator h2{margin:0}.savings-calculator .calc-hint{margin:0;color:#52645d;font-size:14px}
+.calc-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(120px,1fr) auto auto;align-items:end;gap:12px;padding:15px 0;border-bottom:1px solid #e7eae2}
+.calc-row>label{display:grid;gap:7px;color:#344b40;font-size:13px;font-weight:700}
+.calc-row input[type=text],.calc-row input[type=number]{width:100%;min-width:0;min-height:44px;padding:8px 11px;border:1px solid #cbd4c8;border-radius:8px;background:#fff;color:#173d33;font:inherit;font-size:16px}
+.calc-price{display:flex;align-items:center;gap:8px}.calc-price input{flex:1}.calc-used{display:flex!important;min-height:44px;grid-template-columns:auto 1fr;align-items:center;white-space:nowrap}.calc-used input{width:18px;height:18px;accent-color:#173d33}
+.calc-remove{min-height:44px;padding:0 8px;border:0;background:transparent;color:#52645d;font:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.calc-row :is(input,button):focus-visible,.calc-actions button:focus-visible{outline:3px solid #82934e;outline-offset:2px}
+.calc-actions{display:flex;align-items:center;gap:10px}.calc-actions button{min-height:44px;padding:0 14px;border-radius:8px;font:inherit;font-weight:700;cursor:pointer}.calc-actions .secondary-button{border:1px solid #173d33;background:#fff;color:#173d33}.calc-actions .text-button{border:0}
+.calc-result{display:grid;gap:7px;padding:22px;border-radius:14px;background:#173d33;color:#fffdf8}.calc-result span,.calc-result small{color:#e1e9e0}.calc-result strong{font-size:clamp(32px,6vw,46px);line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.05em}.calc-result small{font-size:13px}
+.savings-tool>.notice{padding:16px 18px!important;border-left:3px solid #d5a38b;border-radius:0 12px 12px 0;background:#f1e9df;color:#574d43!important;line-height:1.75}
+@media(max-width:640px){.calc-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.calc-row .calc-used{grid-column:1}.calc-remove{grid-column:2;justify-self:end}.calc-actions{flex-wrap:wrap}}
+
 
 /* Operator console refinements: dense, legible, and consistent with Today Hankki. */
 .admin-body{--ops-forest:#173d33;--ops-olive:#657b39;--ops-beige:#f4f1e8;--ops-surface:#fffdf8;--ops-line:#d8d9ca;--ops-text:#173d33;background:var(--ops-beige);color:var(--ops-text)}

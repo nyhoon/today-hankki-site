@@ -2,31 +2,31 @@
 <ns0:urlset xmlns:ns0="http://www.sitemaps.org/schemas/sitemap/0.9">
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/guides/</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/guides/fridge-inventory.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/guides/fridge-leftovers-recipes.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/guides/shopping-before-buying.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/guides/home-screen-widgets.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/seasonal.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/privacy.html</ns0:loc>
@@ -36,22 +36,26 @@
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/guides/receipt-ingredients.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/guides/estimated-savings.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/guides/easy-ingredient-registration.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/faq.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
   <ns0:url>
     <ns0:loc>https://nyhoon.github.io/today-hankki-site/about.html</ns0:loc>
-    <ns0:lastmod>2026-11-23</ns0:lastmod>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
+  </ns0:url>
+  <ns0:url>
+    <ns0:loc>https://nyhoon.github.io/today-hankki-site/tools/savings-calculator.html</ns0:loc>
+    <ns0:lastmod>2026-11-28</ns0:lastmod>
   </ns0:url>
 </ns0:urlset>

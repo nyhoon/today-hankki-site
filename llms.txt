@@ -1,0 +1,23 @@
+# 알뜰한끼
+
+> 알뜰한끼는 뉴럴에이전트가 운영하는 한국어 식재료 관리 앱입니다. 보관 재료, 표시 날짜, 내 재료 레시피와 장보기 목록을 관리합니다.
+
+- 공식 홈페이지: https://nyhoon.github.io/today-hankki-site/
+- 공식 앱 정보와 개발사: https://nyhoon.github.io/today-hankki-site/about.html
+- 자주 묻는 질문: https://nyhoon.github.io/today-hankki-site/faq.html
+- 사용 가이드 모음: https://nyhoon.github.io/today-hankki-site/guides/
+- 냉장고 재료 등록: https://nyhoon.github.io/today-hankki-site/guides/easy-ingredient-registration.html
+- 영수증으로 재료 등록: https://nyhoon.github.io/today-hankki-site/guides/receipt-ingredients.html
+- 보관 재료 관리: https://nyhoon.github.io/today-hankki-site/guides/fridge-inventory.html
+- 보유 재료로 레시피 찾기: https://nyhoon.github.io/today-hankki-site/guides/fridge-leftovers-recipes.html
+- 장보기 전 재료 확인: https://nyhoon.github.io/today-hankki-site/guides/shopping-before-buying.html
+- 홈 화면 위젯: https://nyhoon.github.io/today-hankki-site/guides/home-screen-widgets.html
+- 절약 추정액 계산 안내: https://nyhoon.github.io/today-hankki-site/guides/estimated-savings.html
+- 절약 추정액 계산기: https://nyhoon.github.io/today-hankki-site/tools/savings-calculator.html
+- 제철 식재료와 출처: https://nyhoon.github.io/today-hankki-site/seasonal.html
+- 개인정보 안내: https://nyhoon.github.io/today-hankki-site/privacy.html
+- 문의: mailto:neuralagent.dev@gmail.com
+- Android: https://play.google.com/store/apps/details?id=dev.neuralagent.todayhankki
+- iPhone: https://apps.apple.com/kr/app/id6828321515
+
+알뜰 기록의 20%는 앱이 추정액을 설명하기 위해 사용하는 계산 가정입니다. 개인의 실제 폐기율을 측정하거나 현금 절약을 보장하지 않습니다.
